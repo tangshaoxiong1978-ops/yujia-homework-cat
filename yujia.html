@@ -770,6 +770,9 @@
             <button class="report-btn" onclick="sendReport()">
                 📊 发送今日报告给爸爸妈妈
             </button>
+            <button class="report-btn" style="background: linear-gradient(135deg, #FF8FB3 0%, #FF6B9D 100%); margin-top:8px;" onclick="sendHomeworkListCard()">
+                📋 发送作业清单给孩子
+            </button>
         </div>
         <br><br>
     </div>
@@ -1307,6 +1310,67 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(card)
         }).then(r => r.ok ? showToast('作业通知已发送 📨') : showToast('发送失败 ❌')).catch(() => showToast('发送失败 ❌'));
+    }
+
+    // 发送完整作业清单卡片到飞书群
+    function sendHomeworkListCard() {
+        const hw = JSON.parse(localStorage.getItem(`hw_${CHILD}`)) || homework;
+        if (!hw || hw.length === 0) { showToast('暂无作业 ❌'); return; }
+        const now = new Date();
+        const dateStr = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日`;
+        const totalMin = hw.reduce((s, t) => s + (t.time || 0), 0);
+        const hwList = hw.map(t => `• ${t.icon} ${t.name} ${t.time > 0 ? `(${t.time}分钟)` : '(待定)'}`).join('\n');
+        const card = {
+            msg_type: 'interactive',
+            card: {
+                config: { wide_screen_mode: true },
+                header: {
+                    title: { tag: 'plain_text', content: `📋 今日作业清单 — ${CHILD_NAME}` },
+                    template: 'orange'
+                },
+                elements: [
+                    {
+                        tag: 'div',
+                        text: { tag: 'lark_md', content: `<at user_id="${CHILD_OPEN_ID}">${CHILD_NAME}</at>，爸爸妈妈查了一下，今天有以下作业哦！认真完成吧 🐱\n\n收到请回复：「好的！」` }
+                    },
+                    { tag: 'hr' },
+                    {
+                        tag: 'div',
+                        fields: [
+                            { is_short: true, text: { tag: 'lark_md', content: `**📝 作业数量**\n${hw.length} 项` } },
+                            { is_short: true, text: { tag: 'lark_md', content: `**📅 日期**\n${dateStr}` } },
+                            { is_short: true, text: { tag: 'lark_md', content: `**⏱ 建议时长**\n${totalMin} 分钟` } }
+                        ]
+                    },
+                    { tag: 'hr' },
+                    {
+                        tag: 'div',
+                        text: { tag: 'lark_md', content: `**📋 作业清单**\n${hwList}` }
+                    },
+                    { tag: 'hr' },
+                    {
+                        tag: 'action',
+                        actions: [
+                            {
+                                tag: 'button',
+                                text: { tag: 'plain_text', content: '🐱 前往计时器' },
+                                type: 'primary',
+                                url: `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/yujia.html`
+                            }
+                        ]
+                    },
+                    {
+                        tag: 'note',
+                        elements: [{ tag: 'plain_text', content: '💡 打开计时器，开始一项项完成吧！' }]
+                    }
+                ]
+            }
+        };
+        fetch(FEISHU_WEBHOOK, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(card)
+        }).then(r => r.ok ? showToast('作业清单已发送 📨') : showToast('发送失败 ❌')).catch(() => showToast('发送失败 ❌'));
     }
 
     function sendReport() {

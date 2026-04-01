@@ -716,6 +716,7 @@
     const encouragements = [
         '虽然超时了，但坚持完成就是胜利！💪', '做完就是好样的！继续加油！🌈', '没关系，尽力就好！💖'
     ];
+    const FEISHU_WEBHOOK = 'https://open.feishu.cn/open-apis/bot/v2/hook/eff6ff06-c0cb-4c63-b032-a2b8776085d2';
 
     function init() {
         updateDate();
@@ -921,9 +922,11 @@
         const data = JSON.parse(localStorage.getItem(key) || '{}');
         data.studyMinutes = (data.studyMinutes || 0) + study;
         data.restMinutes = (data.restMinutes || 0);
-        data.efficiency = efficiency;
-        data.tasks = data.tasks || [];
-        data.tasks.push({ name: task.name, time: task.time, actual: total, study, efficiency });
+        const prevTasks = data.tasks || [];
+        const prevEffs = prevTasks.map(t => t.efficiency).filter(Boolean);
+        const allEffs = [...prevEffs, efficiency];
+        data.efficiency = Math.round(allEffs.reduce((a, b) => a + b, 0) / allEffs.length);
+        data.tasks = prevTasks.concat({ name: task.name, time: task.time, actual: total, study, efficiency });
         localStorage.setItem(key, JSON.stringify(data));
     }
 
@@ -1007,21 +1010,48 @@
         const data = JSON.parse(localStorage.getItem(key) || '{}');
         const done = homework.filter(t => t.status === 'done').length;
         const total = homework.length;
+        const m = new Date().getMonth()+1, d = new Date().getDate();
+        const tasksMd = data.tasks && data.tasks.length > 0 ? data.tasks.map(t => {
+            const effLabel = t.efficiency >= 90 ? '🟢' : t.efficiency >= 70 ? '🟡' : '🔴';
+            return { tag: 'div', text: { tag: 'lark_md', content: `${effLabel} ${t.name}：${t.actual}分钟（效率${t.efficiency}%）` } };
+        }) : [{ tag: 'div', text: { tag: 'lark_md', content: '暂无计时记录' } }];
 
-        const report = `${ICON} ${new Date().getMonth()+1}月${new Date().getDate()}日 羽佳作业报告\n` +
-            `━━━━━━━━━━━━━━━━━━\n` +
-            `📊 完成进度：${done}/${total} 项\n` +
-            `⏱ 学习时长：${data.studyMinutes || 0} 分钟\n` +
-            `📈 学习效率：${data.efficiency || 0}%\n` +
-            (data.tasks && data.tasks.length > 0 ? `━━━━━━━━━━━━━━━━━━\n` + data.tasks.map(t => `✅ ${t.name}：${t.actual}分钟`).join('\n') + '\n' : '') +
-            `━━━━━━━━━━━━━━━━━━\n` +
-            `@学习辅导员小龙虾`;
-
-        navigator.clipboard.writeText(report).then(() => {
-            showToast('报告已复制，请在飞书群粘贴发送 📋');
-        }).catch(() => {
-            alert('请手动复制：\n\n' + report);
-        });
+        const card = {
+            msg_type: 'interactive',
+            card: {
+                schema: '2023-08-01',
+                header: {
+                    title: { tag: 'plain_text', content: `🐱 羽佳作业日报 · ${m}月${d}日` },
+                    template: 'orange'
+                },
+                elements: [
+                    { tag: 'hr' },
+                    {
+                        tag: 'column_set',
+                        flex_mode: 'none',
+                        horizontal_spacing: 'large',
+                        columns: [
+                            { tag: 'column', width: 'auto', elements: [{ tag: 'div', text: { tag: 'lark_md', content: '**📊 完成进度**\n`' + done + '/' + total + '` 项' } }] },
+                            { tag: 'column', width: 'auto', elements: [{ tag: 'div', text: { tag: 'lark_md', content: '**⏱ 学习时长**\n`' + (data.studyMinutes || 0) + '` 分钟' } }] },
+                            { tag: 'column', width: 'auto', elements: [{ tag: 'div', text: { tag: 'lark_md', content: '**📈 效率**\n`' + (data.efficiency || 0) + '`%' } }] }
+                        ]
+                    },
+                    { tag: 'hr' },
+                    { tag: 'div', text: { tag: 'lark_md', content: '**✅ 完成详情**' } },
+                    ...tasksMd,
+                    { tag: 'hr' },
+                    {
+                        tag: 'note',
+                        elements: [
+                            { tag: 'plain_text', content: '🐱 由作业计时器自动生成 · @学习辅导员小龙虾' }
+                        ]
+                    }
+                ]
+            }
+        };
+        fetch(FEISHU_WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(card) })
+            .then(r => r.ok ? showToast('报告已发送飞书 📬') : showToast('发送失败，请重试'))
+            .catch(() => { navigator.clipboard.writeText(JSON.stringify(card, null, 2)); showToast('飞书发送失败，已复制JSON'); });
     }
 
     function showToast(msg) {

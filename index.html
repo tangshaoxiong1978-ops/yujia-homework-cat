@@ -498,6 +498,98 @@
             border: 2px solid #DDA0DD;
         }
         
+        .settings-panel.parent-mode {
+            display: block;
+        }
+        
+        .settings-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #8B4513;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .settings-toggle {
+            font-size: 13px;
+            color: #9370DB;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        
+        .settings-content {
+            display: none;
+        }
+        
+        .settings-content.show {
+            display: block;
+        }
+        
+        .setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #FFE4E1;
+        }
+        
+        .setting-row:last-child {
+            border-bottom: none;
+        }
+        
+        .setting-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            color: #8B4513;
+            font-weight: 600;
+        }
+        
+        .setting-time-input {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .setting-time-input input {
+            width: 55px;
+            padding: 6px 8px;
+            border: 2px solid #FFB6C1;
+            border-radius: 10px;
+            font-size: 15px;
+            text-align: center;
+            font-weight: bold;
+            color: #8B4513;
+        }
+        
+        .setting-time-input input:focus {
+            outline: none;
+            border-color: #FF69B4;
+        }
+        
+        .setting-time-input span {
+            font-size: 13px;
+            color: #8B4513;
+            opacity: 0.7;
+        }
+        
+        .btn-save-settings {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #DDA0DD 0%, #9370DB 100%);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 12px;
+            font-family: 'Comic Sans MS', cursive;
+        }
+        
         .settings-title {
             font-size: 16px;
             font-weight: bold;
@@ -770,7 +862,7 @@
         </div>
         
         <!-- 数据管理 -->
-        <div class="data-management">
+        <div class="data-management" id="dataManagement" style="display:none;">
             <div class="data-title">💾 数据管理</div>
             <div class="data-buttons">
                 <button class="btn btn-export" onclick="exportData()">📤 导出数据</button>
@@ -782,7 +874,7 @@
         </div>
         
         <!-- 家长设置面板 -->
-        <div class="settings-panel">
+        <div class="settings-panel" id="settingsPanel" style="display:none;">
             <div class="settings-title" onclick="toggleSettings()">
                 <span>⚙️ 家长设置（修改作业时间）</span>
                 <span class="settings-toggle" id="settingsToggle">展开 ▼</span>
@@ -815,6 +907,9 @@
         
         // 家长接收通知的飞书open_id (可选，用于@家长)
         const PARENT_OPEN_ID = '';
+        
+        // 检查是否家长模式
+        const isParentMode = new URLSearchParams(window.location.search).get('mode') === 'parent';
         
         // ==================== 作业配置 ====================
         // 羽佳固定作业清单
@@ -857,6 +952,13 @@
         // 初始化
         function init() {
             loadCustomTimes();
+            
+            // 根据模式显示/隐藏家长元素
+            if (isParentMode) {
+                document.getElementById('dataManagement').style.display = 'block';
+                document.getElementById('settingsPanel').classList.add('parent-mode');
+            }
+            
             updateDate();
             renderTasks();
             updateProgress();

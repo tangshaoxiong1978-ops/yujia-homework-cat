@@ -375,7 +375,7 @@
             transform: none;
         }
         
-        /* 添加任务区域 */
+        // 添加任务区域
         .add-task {
             background: white;
             border-radius: 20px;
@@ -416,6 +416,61 @@
             background: linear-gradient(135deg, #FFB6C1 0%, #FF69B4 100%);
             color: white;
             font-family: 'Comic Sans MS', cursive;
+        }
+        
+        /* 数据管理区域 */
+        .data-management {
+            background: white;
+            border-radius: 20px;
+            padding: 15px;
+            margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(255, 182, 193, 0.4);
+            border: 2px dashed #87CEEB;
+        }
+        
+        .data-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #8B4513;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .data-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-data {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'Comic Sans MS', cursive;
+        }
+        
+        .btn-export {
+            background: linear-gradient(135deg, #87CEEB 0%, #6495ED 100%);
+            color: white;
+        }
+        
+        .btn-import {
+            background: linear-gradient(135deg, #98FB98 0%, #90EE90 100%);
+            color: #228B22;
+        }
+        
+        .btn-reset {
+            background: linear-gradient(135deg, #FFB6C1 0%, #FF6B6B 100%);
+            color: white;
+        }
+        
+        #importFile {
+            display: none;
         }
         
         /* 历史记录 */
@@ -599,6 +654,17 @@
         <div class="history-section" id="historySection" style="display: none;">
             <div class="history-title">🏆 今日成就</div>
             <div id="historyList"></div>
+        </div>
+        
+        <!-- 数据管理 -->
+        <div class="data-management">
+            <div class="data-title">💾 数据管理</div>
+            <div class="data-buttons">
+                <button class="btn btn-export" onclick="exportData()">📤 导出数据</button>
+                <button class="btn btn-import" onclick="document.getElementById('importFile').click()">📥 导入数据</button>
+                <button class="btn btn-reset" onclick="resetData()">🗑️ 重置</button>
+            </div>
+            <input type="file" id="importFile" accept=".json" onchange="importData(this)">
         </div>
     </div>
     
@@ -1059,6 +1125,82 @@
         // 启动
         checkAndResetDaily();
         init();
+        
+        // ==================== 数据管理功能 ====================
+        
+        // 导出数据
+        function exportData() {
+            const data = {
+                tasks: tasks,
+                completedTasks: completedTasks,
+                exportDate: new Date().toISOString(),
+                childName: '羽佳'
+            };
+            
+            const jsonStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `羽佳作业数据_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert('📤 数据导出成功！文件已保存到下载文件夹。');
+        }
+        
+        // 导入数据
+        function importData(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (data.tasks) {
+                        tasks = data.tasks;
+                        localStorage.setItem('yujia_tasks_cat', JSON.stringify(tasks));
+                    }
+                    
+                    if (data.completedTasks) {
+                        completedTasks = data.completedTasks;
+                        localStorage.setItem('yujia_completed_cat', JSON.stringify(completedTasks));
+                    }
+                    
+                    renderTasks();
+                    updateProgress();
+                    renderHistory();
+                    
+                    alert('📥 数据导入成功！');
+                } catch (err) {
+                    alert('❌ 导入失败，文件格式不正确！');
+                }
+            };
+            reader.readAsText(file);
+            input.value = ''; // 重置input
+        }
+        
+        // 重置数据
+        function resetData() {
+            if (confirm('🗑️ 确定要重置所有数据吗？\n\n这将清除所有作业记录和历史数据，恢复到初始状态。')) {
+                tasks = [...defaultTasks];
+                completedTasks = [];
+                localStorage.setItem('yujia_tasks_cat', JSON.stringify(tasks));
+                localStorage.setItem('yujia_completed_cat', JSON.stringify(completedTasks));
+                localStorage.setItem('yujia_lastDate_cat', new Date().toDateString());
+                
+                renderTasks();
+                updateProgress();
+                renderHistory();
+                
+                alert('✅ 数据已重置！');
+            }
+        }
     </script>
 </body>
 </html>

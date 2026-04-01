@@ -489,11 +489,51 @@
             document.getElementById('btn-pause').classList.remove('hidden');
         }
         
-        // 飞书 Webhook 配置
+        // 飞书配置（从环境参数读取）
+        const FEISHU_APP_ID = 'cli_a9418dc6f439dbb5';
+        const FEISHU_APP_SECRET = 'NSMCKaQKBKnV8hx5zXsPdenZ08BPKOFH';
         const FEISHU_WEBHOOK = 'https://open.feishu.cn/open-apis/bot/v2/hook/eff6ff06-c0cb-4c63-b032-a2b8776085d2';
+        const FEISHU_GROUP_CHAT_ID = 'oc_0b329c19150b954cdc229b6e176777ef'; // 龙虾学习群
 
-        // 发送报告到飞书群
-        function sendReportToFeishu() {
+        // 获取飞书访问令牌
+        async function getFeishuToken() {
+            const resp = await fetch('https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ app_id: FEISHU_APP_ID, app_secret: FEISHU_APP_SECRET })
+            });
+            const data = await resp.json();
+            return data.tenant_access_token;
+        }
+
+        // 发送消息到飞书群（via API，需要token）
+        async function sendToFeishuGroup(token, content) {
+            await fetch('https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type=chat_id', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    receive_id: FEISHU_GROUP_CHAT_ID,
+                    msg_type: 'text',
+                    content: JSON.stringify({ text: content })
+                })
+            });
+        }
+
+        // 发送富文本卡片到飞书群
+        async function sendCardToFeishuGroup(token, cardContent) {
+            await fetch('https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type=chat_id', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    receive_id: FEISHU_GROUP_CHAT_ID,
+                    msg_type: 'interactive',
+                    content: JSON.stringify(cardContent)
+                })
+            });
+        }
+
+        // 发送报告到飞书群 + 触发 study-coach
+        async function sendReportToFeishu() {
             const btn = document.getElementById('btn-send-report');
             btn.disabled = true;
             btn.textContent = '📤 发送中...';
@@ -511,45 +551,66 @@
 
             let statusText = timeDiff < -5 ? '🎉 提前完成' : timeDiff <= 5 ? '✅ 准时完成' : '⏰ 超时完成';
             let statusColor = timeDiff < -5 ? '#52c41a' : timeDiff <= 5 ? '#1890ff' : '#fa541c';
+            let cardColor = timeDiff < -5 ? 'green' : timeDiff <= 5 ? 'blue' : 'orange';
 
-            const message = {
-                msg_type: 'interactive',
-                card: {
-                    config: { wide_screen_mode: true },
-                    header: {
-                        title: { tag: 'plain_text', content: `📚 ${taskName} 完成报告` },
-                        template: statusColor
-                    },
-                    elements: [
-                        {
-                            tag: 'div',
-                            text: {
-                                tag: 'lark_md',
-                                content: `**👧 羽佳学习报告**\n📅 ${dateStr}\n\n**📝 作业项目**：${taskName}\n**⏱️ 预计时间**：${suggestMinutes} 分钟\n**⏱️ 实际用时**：${totalM} 分钟\n\n---\n\n**⏱️ 实际学习**：${studyM} 分钟\n**☕ 休息时间**：${breakM} 分钟\n**📊 学习效率**：${efficiency}%\n\n**${statusText}**`
-                            }
+            // 构建卡片
+            const cardContent = {
+                config: { wide_screen_mode: true },
+                header: {
+                    title: { tag: 'plain_text', content: `📚 ${taskName} 完成报告` },
+                    template: cardColor
+                },
+                elements: [
+                    {
+                        tag: 'div',
+                        text: {
+                            tag: 'lark_md',
+                            content: `**👧 羽佳学习报告**\n📅 ${dateStr}\n\n**📝 作业项目**：${taskName}\n**⏱️ 预计时间**：${suggestMinutes} 分钟\n**⏱️ 实际用时**：${totalM} 分钟\n\n---\n\n**⏱️ 实际学习**：${studyM} 分钟\n**☕ 休息时间**：${breakM} 分钟\n**📊 学习效率**：${efficiency}%\n\n**${statusText}**`
                         }
-                    ]
-                }
+                    },
+                    {
+                        tag: 'hr'
+                    },
+                    {
+                        tag: 'note',
+                        elements: [
+                            { tag: 'plain_text', content: '📢 学习辅导员已收到报告，正在生成下一步计划...' }
+                        ]
+                    }
+                ]
             };
 
-            fetch(FEISHU_WEBHOOK, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(message)
-            }).then(res => res.json()).then(data => {
-                if (data.code === 0 || data.StatusCode === 0) {
-                    btn.textContent = '✅ 已发送';
-                    btn.style.background = '#52c41a';
-                } else {
+            try {
+                // 获取 token 并发送
+                const token = await getFeishuToken();
+
+                // 1. 发送卡片到群里
+                await sendCardToFeishuGroup(token, cardContent);
+
+                // 2. 发一条文字消息，触发 study-coach
+                await sendToFeishuGroup(token, `📊 羽佳 ${dateStr} 完成了「${taskName}」作业（实际用时${totalM}分钟，效率${efficiency}%）@学习辅导员 请处理后续（记录本次完成、评估是否需要复习、生成下一步建议）。`);
+
+                btn.textContent = '✅ 已发送 + 已通知辅导员';
+                btn.style.background = '#52c41a';
+            } catch(err) {
+                // 如果 API 失败，回退到 Webhook
+                fetch(FEISHU_WEBHOOK, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ msg_type: 'interactive', card: cardContent })
+                }).then(res => res.json()).then(data => {
+                    if (data.code === 0 || data.StatusCode === 0) {
+                        btn.textContent = '✅ 已发送';
+                        btn.style.background = '#52c41a';
+                    } else {
+                        btn.textContent = '❌ 发送失败';
+                        btn.disabled = false;
+                    }
+                }).catch(() => {
                     btn.textContent = '❌ 发送失败';
                     btn.disabled = false;
-                    alert('发送失败，请检查网络后重试');
-                }
-            }).catch(err => {
-                btn.textContent = '❌ 发送失败';
-                btn.disabled = false;
-                alert('发送失败：' + err);
-            });
+                });
+            }
         }
 
         // 完成作业

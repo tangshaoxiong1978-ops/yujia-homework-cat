@@ -488,6 +488,104 @@
             display: none;
         }
         
+        /* 家长设置面板 */
+        .settings-panel {
+            background: white;
+            border-radius: 20px;
+            padding: 15px;
+            margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(255, 182, 193, 0.4);
+            border: 2px solid #DDA0DD;
+        }
+        
+        .settings-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #8B4513;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .settings-toggle {
+            font-size: 13px;
+            color: #9370DB;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        
+        .settings-content {
+            display: none;
+        }
+        
+        .settings-content.show {
+            display: block;
+        }
+        
+        .setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #FFE4E1;
+        }
+        
+        .setting-row:last-child {
+            border-bottom: none;
+        }
+        
+        .setting-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            color: #8B4513;
+            font-weight: 600;
+        }
+        
+        .setting-time-input {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .setting-time-input input {
+            width: 55px;
+            padding: 6px 8px;
+            border: 2px solid #FFB6C1;
+            border-radius: 10px;
+            font-size: 15px;
+            text-align: center;
+            font-weight: bold;
+            color: #8B4513;
+        }
+        
+        .setting-time-input input:focus {
+            outline: none;
+            border-color: #FF69B4;
+        }
+        
+        .setting-time-input span {
+            font-size: 13px;
+            color: #8B4513;
+            opacity: 0.7;
+        }
+        
+        .btn-save-settings {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #DDA0DD 0%, #9370DB 100%);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 12px;
+            font-family: 'Comic Sans MS', cursive;
+        }
+        
         /* 历史记录 */
         .history-section {
             background: white;
@@ -682,6 +780,20 @@
             <input type="file" id="importFile" accept=".json" onchange="importData(this)">
             <button class="notify-btn" onclick="sendDailyReport()">📊 发送今日报告给爸爸妈妈</button>
         </div>
+        
+        <!-- 家长设置面板 -->
+        <div class="settings-panel">
+            <div class="settings-title" onclick="toggleSettings()">
+                <span>⚙️ 家长设置（修改作业时间）</span>
+                <span class="settings-toggle" id="settingsToggle">展开 ▼</span>
+            </div>
+            <div class="settings-content" id="settingsContent">
+                <div id="settingsRows">
+                    <!-- 动态生成 -->
+                </div>
+                <button class="btn-save-settings" onclick="saveSettings()">💾 保存设置</button>
+            </div>
+        </div>
     </div>
     
     <!-- 完成弹窗 -->
@@ -744,6 +856,7 @@
         
         // 初始化
         function init() {
+            loadCustomTimes();
             updateDate();
             renderTasks();
             updateProgress();
@@ -1160,6 +1273,84 @@
         // 启动
         checkAndResetDaily();
         init();
+        renderSettings();
+        
+        // ==================== 家长设置功能 ====================
+        
+        // 展开/收起设置面板
+        function toggleSettings() {
+            const content = document.getElementById('settingsContent');
+            const toggle = document.getElementById('settingsToggle');
+            content.classList.toggle('show');
+            toggle.textContent = content.classList.contains('show') ? '收起 ▲' : '展开 ▼';
+        }
+        
+        // 渲染设置面板
+        function renderSettings() {
+            const container = document.getElementById('settingsRows');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            tasks.forEach(task => {
+                const row = document.createElement('div');
+                row.className = 'setting-row';
+                row.innerHTML = `
+                    <div class="setting-name">
+                        <span>${task.icon || '📝'}</span>
+                        <span>${task.name}</span>
+                    </div>
+                    <div class="setting-time-input">
+                        <input type="number" id="setting-time-${task.id}" 
+                               value="${task.suggestTime}" min="0" max="120"
+                               placeholder="0">
+                        <span>分钟</span>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+        
+        // 保存设置
+        function saveSettings() {
+            tasks.forEach(task => {
+                const input = document.getElementById(`setting-time-${task.id}`);
+                if (input) {
+                    const newTime = parseInt(input.value) || 0;
+                    task.suggestTime = newTime;
+                    // 同步更新 defaultTasks（下次重置时也用新时间）
+                    const defaultTask = defaultTasks.find(t => t.id === task.id);
+                    if (defaultTask) defaultTask.suggestTime = newTime;
+                }
+            });
+            
+            saveTasks();
+            // 保存自定义时间到 localStorage
+            localStorage.setItem('yujia_custom_times', JSON.stringify(
+                tasks.map(t => ({ id: t.id, suggestTime: t.suggestTime }))
+            ));
+            
+            renderTasks();
+            
+            // 关闭设置面板
+            document.getElementById('settingsContent').classList.remove('show');
+            document.getElementById('settingsToggle').textContent = '展开 ▼';
+            
+            alert('✅ 设置已保存！');
+        }
+        
+        // 加载自定义时间设置
+        function loadCustomTimes() {
+            const saved = localStorage.getItem('yujia_custom_times');
+            if (saved) {
+                const customTimes = JSON.parse(saved);
+                customTimes.forEach(ct => {
+                    const task = tasks.find(t => t.id === ct.id);
+                    if (task) task.suggestTime = ct.suggestTime;
+                    const defaultTask = defaultTasks.find(t => t.id === ct.id);
+                    if (defaultTask) defaultTask.suggestTime = ct.suggestTime;
+                });
+            }
+        }
         
         // ==================== 数据管理功能 ====================
         

@@ -469,6 +469,21 @@
             color: white;
         }
         
+        /* 通知家长按钮 */
+        .notify-btn {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #8B4513;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+            font-family: 'Comic Sans MS', cursive;
+        }
+        
         #importFile {
             display: none;
         }
@@ -665,6 +680,7 @@
                 <button class="btn btn-reset" onclick="resetData()">🗑️ 重置</button>
             </div>
             <input type="file" id="importFile" accept=".json" onchange="importData(this)">
+            <button class="notify-btn" onclick="sendDailyReport()">📊 发送今日报告给爸爸妈妈</button>
         </div>
     </div>
     
@@ -679,6 +695,16 @@
     </div>
     
     <script>
+        // ==================== 配置区域 ====================
+        // 请在这里设置家长的通知 webhook 地址
+        // 可以使用飞书机器人、钉钉机器人、企业微信机器人等
+        // 示例: const WEBHOOK_URL = 'https://open.feishu.cn/open-apis/bot/v2/hook/xxx';
+        const WEBHOOK_URL = '';
+        
+        // 家长接收通知的飞书open_id (可选，用于@家长)
+        const PARENT_OPEN_ID = '';
+        
+        // ==================== 作业配置 ====================
         // 羽佳固定作业清单
         const defaultTasks = [
             { id: 1, name: '橙果APP打卡', icon: '📱', suggestTime: 15, completed: false },
@@ -968,6 +994,9 @@
                     completedAt: new Date().toISOString()
                 });
                 localStorage.setItem('yujia_completed_cat', JSON.stringify(completedTasks));
+                
+                // 自动通知家长
+                notifyParent(task, totalMinutes, feedback);
             }
             
             currentTaskId = null;
@@ -980,6 +1009,12 @@
             renderTasks();
             updateProgress();
             renderHistory();
+            
+            // 检查是否全部完成
+            const allDone = tasks.every(t => t.completed);
+            if (allDone) {
+                setTimeout(() => sendDailyReport(), 1500);
+            }
         }
         
         // 显示完成弹窗
@@ -1199,6 +1234,115 @@
                 renderHistory();
                 
                 alert('✅ 数据已重置！');
+            }
+        }
+        
+        // ==================== 通知家长功能 ====================
+        
+        // 完成一项作业时通知家长
+        async function notifyParent(task, actualTime, feedback) {
+            if (!WEBHOOK_URL) {
+                console.log('未配置通知webhook，跳过通知');
+                return;
+            }
+            
+            const message = {
+                msg_type: 'text',
+                content: {
+                    text: `🐱 羽佳完成了作业！\n\n` +
+                          `📝 ${task.icon || '✏️'} ${task.name}\n` +
+                          `⏱️ 用时：${actualTime}分钟\n` +
+                          `💡 ${feedback}\n\n` +
+                          `时间：${new Date().toLocaleTimeString('zh-CN')}`
+                }
+            };
+            
+            try {
+                await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(message)
+                });
+                console.log('已通知家长');
+            } catch (err) {
+                console.error('通知失败:', err);
+            }
+        }
+        
+        // 发送每日学习报告
+        async function sendDailyReport() {
+            const completed = tasks.filter(t => t.completed).length;
+            const total = tasks.length;
+            
+            if (completed === 0) {
+                alert('🐱 还没有完成作业呢，先做作业再来发报告吧！');
+                return;
+            }
+            
+            let totalStudy = 0;
+            let totalRest = 0;
+            completedTasks.forEach(t => {
+                totalStudy += t.studyTime || 0;
+                totalRest += t.restTime || 0;
+            });
+            
+            const efficiency = (totalStudy + totalRest) > 0 ? Math.round((totalStudy / (totalStudy + totalRest)) * 100) : 0;
+            
+            const today = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+            
+            // 构建完成列表
+            const completedList = completedTasks.map(t => `${t.icon || '✏️'} ${t.name} (${t.actualTime}分钟)`).join('\n');
+            
+            if (!WEBHOOK_URL) {
+                // 没有配置webhook，显示报告内容让用户手动发送
+                const report = `📊 羽佳今日学习报告\n\n` +
+                              `📅 ${today}\n\n` +
+                              `✅ 完成进度：${completed}/${total}\n\n` +
+                              `📚 已完成作业：\n${completedList}\n\n` +
+                              `⏱️ 总学习时间：${totalStudy}分钟\n` +
+                              `☕ 休息时间：${totalRest}分钟\n` +
+                              `📈 学习效率：${efficiency}%\n\n` +
+                              `🐱 加油！继续保持！`;
+                
+                alert(report);
+                return;
+            }
+            
+            const message = {
+                msg_type: 'interactive',
+                card: {
+                    config: { wide_screen_mode: true },
+                    header: {
+                        title: { tag: 'plain_text', content: '📊 羽佳今日学习报告' },
+                        template: 'blue'
+                    },
+                    elements: [
+                        { tag: 'div', text: { tag: 'lark_md', content: `**📅 ${today}**` } },
+                        { tag: 'hr' },
+                        { tag: 'div', fields: [
+                            { is_short: true, text: { tag: 'lark_md', content: `**完成进度**\n${completed}/${total} ✅` } },
+                            { is_short: true, text: { tag: 'lark_md', content: `**学习效率**\n${efficiency}% 📈` } }
+                        ]},
+                        { tag: 'div', fields: [
+                            { is_short: true, text: { tag: 'lark_md', content: `**学习时长**\n${totalStudy}分钟 ⏱️` } },
+                            { is_short: true, text: { tag: 'lark_md', content: `**休息时长**\n${totalRest}分钟 ☕` } }
+                        ]},
+                        { tag: 'hr' },
+                        { tag: 'div', text: { tag: 'lark_md', content: `**📚 已完成作业：**\n${completedList}` } }
+                    ]
+                }
+            };
+            
+            try {
+                await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(message)
+                });
+                alert('✅ 已发送学习报告给爸爸妈妈！');
+            } catch (err) {
+                alert('❌ 发送失败，请稍后再试');
+                console.error('发送失败:', err);
             }
         }
     </script>

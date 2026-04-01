@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐱 羽佳的作业小窝</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(180deg, #FFF5F5 0%, #FFE4E1 50%, #FFDAB9 100%);
+            min-height: 100vh;
+            padding: 15px;
+            position: relative;
+        }
+        
+        /* 猫咪装饰 */
+        body::before {
+            content: '🐱';
+            position: fixed;
+            top: 10px;
+            right: 20px;
+            font-size: 40px;
+            opacity: 0.3;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        body::after {
+            content: '🐾';
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            font-size: 30px;
+            opacity: 0.3;
+            animation: float 3s ease-in-out infinite 0.5s;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        /* 顶部猫咪头像 */
+        .cat-header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .cat-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #FFB6C1 0%, #FF69B4 100%);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.4);
+            animation: bounce 2s ease-in-out infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .header {
+            text-align: center;
+            color: #8B4513;
+            margin-bottom: 15px;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+            color: #FF69B4;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .header .date {
+            font-size: 14px;
+            color: #8B4513;
+            opacity: 0.8;
+        }
+        
+        /* 截止时间卡片 */
+        .deadline-card {
+            background: white;
+            border-radius: 20px;
+            padding: 15px;
+            margin-bottom: 15px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(255, 182, 193, 0.5);
+            border: 3px solid #FFB6C1;
+        }
+        
+        .deadline-card .title {
+            font-size: 16px;
+            color: #8B4513;
+            margin-bottom: 5px;
+        }
+        
+        .deadline-card .time-left {
+            font-size: 28px;
+            font-weight: bold;
+            color: #FF69B4;
+            font-family: 'Comic Sans MS', cursive;
+        }
+        
+        /* 进度卡片 */
+        .progress-section {
+            background: white;
+            border-radius: 20px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(255, 182, 193, 0.5);
+            border: 3px solid #FFB6C1;
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .progress-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #8B4513;
+        }
+        
+        .progress-count {
+            font-size: 14px;
+            color: #FF69B4;
+            font-weight: bold;
+        }
+        
+        .progress-bar {
+            height: 16px;
+            background: #FFE4E1;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FFB6C1 0%, #FF69B4 100%);
+            transition: width 0.5s ease;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #FF69B4;
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            color: #8B4513;
+            opacity: 0.7;
+        }
+        
+        /* 任务卡片 */
+        .task-card {
+            background: white;
+            border-radius: 20px;
+            padding: 15px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 15px rgba(255, 182, 193, 0.4);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .task-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .task-card.active {
+            border-color: #FF69B4;
+            box-shadow: 0 8px 25px rgba(255, 105, 180, 0.5);
+        }
+        
+        .task-card.completed {
+            opacity: 0.6;
+            background: #FFF5F5;
+            border-color: #FFD700;
+        }
+        
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .task-info {
+            flex: 1;
+        }
+        
+        .task-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #8B4513;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .task-title .icon {
+            font-size: 20px;
+        }
+        
+        .task-time {
+            font-size: 13px;
+            color: #8B4513;
+            opacity: 0.7;
+            margin-top: 3px;
+        }
+        
+        .task-status {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status-pending {
+            background: #FFE4E1;
+            color: #8B4513;
+        }
+        
+        .status-running {
+            background: #98FB98;
+            color: #228B22;
+            animation: pulse 1s infinite;
+        }
+        
+        .status-paused {
+            background: #FFD700;
+            color: #8B4513;
+        }
+        
+        .status-completed {
+            background: #FFD700;
+            color: #8B4513;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* 计时器显示 */
+        .timer-display {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #FFB6C1 0%, #FF69B4 100%);
+            border-radius: 15px;
+            margin: 12px 0;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .timer-display::before {
+            content: '🐱';
+            position: absolute;
+            top: 5px;
+            left: 10px;
+            font-size: 20px;
+            opacity: 0.5;
+        }
+        
+        .timer-display .time {
+            font-size: 42px;
+            font-weight: bold;
+            font-family: 'Comic Sans MS', cursive;
+        }
+        
+        .timer-display .time-remaining {
+            font-size: 14px;
+            margin-top: 5px;
+            opacity: 0.9;
+        }
+        
+        .timer-display.early {
+            background: linear-gradient(135deg, #98FB98 0%, #90EE90 100%);
+        }
+        
+        .timer-display.on-time {
+            background: linear-gradient(135deg, #87CEEB 0%, #6495ED 100%);
+        }
+        
+        .timer-display.overtime {
+            background: linear-gradient(135deg, #FFB6C1 0%, #FF6B6B 100%);
+        }
+        
+        .timer-display.paused {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+        }
+        
+        /* 按钮组 */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 14px 15px;
+            border: none;
+            border-radius: 25px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Comic Sans MS', cursive;
+        }
+        
+        .btn-start {
+            background: linear-gradient(135deg, #98FB98 0%, #90EE90 100%);
+            color: #228B22;
+            box-shadow: 0 4px 10px rgba(144, 238, 144, 0.5);
+        }
+        
+        .btn-pause {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #8B4513;
+            box-shadow: 0 4px 10px rgba(255, 215, 0, 0.5);
+        }
+        
+        .btn-complete {
+            background: linear-gradient(135deg, #FFB6C1 0%, #FF69B4 100%);
+            color: white;
+            box-shadow: 0 4px 10px rgba(255, 105, 180, 0.5);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* 添加任务区域 */
+        .add-task {
+            background: white;
+            border-radius: 20px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(255, 182, 193, 0.4);
+            border: 2px dashed #FFB6C1;
+        }
+        
+        .add-task input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #FFB6C1;
+            border-radius: 12px;
+            font-size: 14px;
+            margin-bottom: 10px;
+            font-family: 'Comic Sans MS', cursive;
+        }
+        
+        .add-task input:focus {
+            outline: none;
+            border-color: #FF69B4;
+        }
+        
+        .add-task .row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .add-task input[type="number"] {
+            width: 70px;
+            flex-shrink: 0;
+        }
+        
+        .btn-add {
+            flex: 1;
+            background: linear-gradient(135deg, #FFB6C1 0%, #FF69B4 100%);
+            color: white;
+            font-family: 'Comic Sans MS', cursive;
+        }
+        
+        /* 历史记录 */
+        .history-section {
+            background: white;
+            border-radius: 20px;
+            padding: 15px;
+            margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(255, 182, 193, 0.4);
+            border: 2px solid #FFD700;
+        }
+        
+        .history-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #8B4513;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .history-item {
+            padding: 10px;
+            background: #FFF5F5;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            border-left: 4px solid #FF69B4;
+        }
+        
+        .history-item .task-name {
+            font-weight: bold;
+            color: #8B4513;
+        }
+        
+        .history-item .task-stats {
+            color: #8B4513;
+            opacity: 0.7;
+            margin-top: 4px;
+            font-size: 12px;
+        }
+        
+        .history-item .feedback {
+            margin-top: 5px;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        
+        /* 完成动画 */
+        @keyframes star-burst {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .star-animation {
+            position: fixed;
+            font-size: 60px;
+            animation: star-burst 0.5s ease-out;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        /* 完成弹窗 */
+        .complete-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .complete-modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 25px;
+            padding: 30px;
+            text-align: center;
+            max-width: 300px;
+            box-shadow: 0 10px 40px rgba(255, 105, 180, 0.5);
+            animation: bounce 0.5s ease;
+        }
+        
+        .modal-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            color: #FF69B4;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-family: 'Comic Sans MS', cursive;
+        }
+        
+        .modal-message {
+            font-size: 16px;
+            color: #8B4513;
+            margin-bottom: 20px;
+        }
+        
+        .modal-btn {
+            background: linear-gradient(135deg, #FFB6C1 0%, #FF69B4 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'Comic Sans MS', cursive;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 猫咪头像 -->
+        <div class="cat-header">
+            <div class="cat-avatar">🐱</div>
+        </div>
+        
+        <div class="header">
+            <h1>✨ 羽佳的作业小窝 ✨</h1>
+            <div class="date" id="currentDate"></div>
+        </div>
+        
+        <!-- 截止时间 -->
+        <div class="deadline-card">
+            <div class="title">⏰ 小猫咪的截止时间</div>
+            <div class="time-left" id="deadlineCountdown">--</div>
+        </div>
+        
+        <!-- 进度 -->
+        <div class="progress-section">
+            <div class="progress-header">
+                <span class="progress-title">📚 今日进度</span>
+                <span class="progress-count" id="progressText">0/5 🌟</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+            </div>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalStudyTime">0</div>
+                    <div class="stat-label">学习分钟</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="totalRestTime">0</div>
+                    <div class="stat-label">休息分钟</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="efficiency">0%</div>
+                    <div class="stat-label">学习效率</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 添加任务 -->
+        <div class="add-task">
+            <input type="text" id="newTaskName" placeholder="✨ 添加新作业...">
+            <div class="row">
+                <input type="number" id="newTaskTime" placeholder="分钟" min="5" max="120">
+                <button class="btn btn-add" onclick="addTask()">➕ 添加</button>
+            </div>
+        </div>
+        
+        <!-- 任务列表 -->
+        <div id="taskList"></div>
+        
+        <!-- 历史记录 -->
+        <div class="history-section" id="historySection" style="display: none;">
+            <div class="history-title">🏆 今日成就</div>
+            <div id="historyList"></div>
+        </div>
+    </div>
+    
+    <!-- 完成弹窗 -->
+    <div class="complete-modal" id="completeModal">
+        <div class="modal-content">
+            <div class="modal-icon" id="modalIcon">🎉</div>
+            <div class="modal-title" id="modalTitle">太棒了！</div>
+            <div class="modal-message" id="modalMessage">完成啦！</div>
+            <button class="modal-btn" onclick="closeModal()">继续加油 💪</button>
+        </div>
+    </div>
+    
+    <script>
+        // 羽佳固定作业清单
+        const defaultTasks = [
+            { id: 1, name: '橙果APP打卡', icon: '📱', suggestTime: 15, completed: false },
+            { id: 2, name: '英语一起作业', icon: '📖', suggestTime: 20, completed: false },
+            { id: 3, name: '阅读半小时', icon: '📚', suggestTime: 30, completed: false },
+            { id: 4, name: '口算题一页', icon: '🔢', suggestTime: 20, completed: false },
+            { id: 5, name: '老师其他作业', icon: '📝', suggestTime: 0, completed: false }
+        ];
+        
+        // 状态管理
+        let tasks = JSON.parse(localStorage.getItem('yujia_tasks_cat')) || [...defaultTasks];
+        let currentTaskId = null;
+        let timerInterval = null;
+        let startTime = null;
+        let elapsedTime = 0;
+        let isPaused = false;
+        let pauseStartTime = null;
+        let totalPauseTime = 0;
+        let completedTasks = JSON.parse(localStorage.getItem('yujia_completed_cat')) || [];
+        
+        // 表扬语
+        const praises = [
+            '🌟 太棒了！提前完成！',
+            '💚 效率超高！继续加油！',
+            '🎉 哇！今天状态超棒！',
+            '✨ 出色完成！给你点赞！',
+            '☕ 提前搞定！休息一下吧！'
+        ];
+        
+        // 鼓励语
+        const encourages = [
+            '💪 虽然超时了，但已完成，下次加油！',
+            '🌈 坚持完成就是胜利！继续努力！',
+            '🚀 完成了就很棒！明天争取更快！',
+            '💪 重要的是坚持！你可以的！'
+        ];
+        
+        // 初始化
+        function init() {
+            updateDate();
+            renderTasks();
+            updateProgress();
+            updateDeadlineCountdown();
+            setInterval(updateDeadlineCountdown, 1000);
+            renderHistory();
+        }
+        
+        // 更新日期显示
+        function updateDate() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('zh-CN', options);
+        }
+        
+        // 更新截止时间倒计时
+        function updateDeadlineCountdown() {
+            const now = new Date();
+            const deadline = new Date(now);
+            deadline.setHours(22, 30, 0, 0);
+            
+            const diff = deadline - now;
+            
+            if (diff < 0) {
+                document.getElementById('deadlineCountdown').textContent = '⏰ 已过截止时间';
+            } else {
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                document.getElementById('deadlineCountdown').textContent = `还有 ${hours}小时${minutes}分钟`;
+            }
+        }
+        
+        // 渲染任务列表
+        function renderTasks() {
+            const container = document.getElementById('taskList');
+            container.innerHTML = '';
+            
+            tasks.forEach(task => {
+                const isActive = currentTaskId === task.id && !task.completed;
+                const card = document.createElement('div');
+                card.className = `task-card ${isActive ? 'active' : ''} ${task.completed ? 'completed' : ''}`;
+                card.id = `task-${task.id}`;
+                
+                let timerHTML = '';
+                if (isActive) {
+                    timerHTML = `
+                        <div class="timer-display ${getTimerClass()}" id="timerDisplay">
+                            <div class="time" id="timerTime">${formatTime(elapsedTime)}</div>
+                            <div class="time-remaining" id="timeRemaining">${getTimeRemainingText(task.suggestTime, elapsedTime)}</div>
+                        </div>
+                    `;
+                }
+                
+                card.innerHTML = `
+                    <div class="task-header">
+                        <div class="task-info">
+                            <div class="task-title">
+                                <span class="icon">${task.icon || '📝'}</span>
+                                ${task.completed ? '✅ ' : ''}${task.name}
+                            </div>
+                            <div class="task-time">
+                                ⏱️ 建议 ${task.suggestTime > 0 ? task.suggestTime + ' 分钟' : '待定'}
+                            </div>
+                        </div>
+                        <div class="task-status">
+                            <span class="${getStatusClass(task)}">${getStatusText(task)}</span>
+                        </div>
+                    </div>
+                    ${timerHTML}
+                    <div class="btn-group">
+                        ${getTaskButtons(task)}
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+            
+            saveTasks();
+        }
+        
+        // 获取状态类名
+        function getStatusClass(task) {
+            if (task.completed) return 'task-status status-completed';
+            if (currentTaskId === task.id) {
+                return isPaused ? 'task-status status-paused' : 'task-status status-running';
+            }
+            return 'task-status status-pending';
+        }
+        
+        // 获取状态文字
+        function getStatusText(task) {
+            if (task.completed) return '✅ 完成';
+            if (currentTaskId === task.id) {
+                return isPaused ? '⏸ 暂停中' : '🔄 进行中';
+            }
+            return '⏳ 等待中';
+        }
+        
+        // 获取计时器样式类
+        function getTimerClass() {
+            if (isPaused) return 'paused';
+            const task = tasks.find(t => t.id === currentTaskId);
+            if (!task || task.suggestTime === 0) return '';
+            
+            const diff = (task.suggestTime * 60) - elapsedTime;
+            if (diff > 300) return 'early';
+            if (diff >= -300) return 'on-time';
+            return 'overtime';
+        }
+        
+        // 获取剩余时间文字
+        function getTimeRemainingText(suggestTime, elapsed) {
+            if (suggestTime === 0) return '🐱 自由计时中...';
+            
+            const diff = (suggestTime * 60) - elapsed;
+            const minutes = Math.floor(Math.abs(diff) / 60);
+            const seconds = Math.abs(diff) % 60;
+            
+            if (diff > 0) {
+                return `🐱 还剩 ${minutes}分${seconds}秒`;
+            } else if (diff < 0) {
+                return `😿 已超时 ${minutes}分${seconds}秒`;
+            }
+            return '🐱 刚好准时！';
+        }
+        
+        // 获取任务按钮
+        function getTaskButtons(task) {
+            if (task.completed) {
+                return `<button class="btn btn-start" disabled>✨ 已完成</button>`;
+            }
+            
+            if (currentTaskId === task.id) {
+                if (isPaused) {
+                    return `
+                        <button class="btn btn-start" onclick="resumeTask()">▶ 继续</button>
+                        <button class="btn btn-complete" onclick="completeTask()">✓ 完成</button>
+                    `;
+                } else {
+                    return `
+                        <button class="btn btn-pause" onclick="pauseTask()">⏸ 暂停</button>
+                        <button class="btn btn-complete" onclick="completeTask()">✓ 完成</button>
+                    `;
+                }
+            }
+            
+            if (currentTaskId === null) {
+                return `<button class="btn btn-start" onclick="startTask(${task.id})">▶ 开始</button>`;
+            }
+            
+            return `<button class="btn btn-start" disabled>⏳ 等待中</button>`;
+        }
+        
+        // 开始任务
+        function startTask(taskId) {
+            if (currentTaskId !== null) return;
+            
+            currentTaskId = taskId;
+            startTime = Date.now();
+            elapsedTime = 0;
+            isPaused = false;
+            totalPauseTime = 0;
+            
+            timerInterval = setInterval(updateTimer, 1000);
+            renderTasks();
+            
+            document.getElementById(`task-${taskId}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
+        // 暂停任务
+        function pauseTask() {
+            isPaused = true;
+            pauseStartTime = Date.now();
+            clearInterval(timerInterval);
+            renderTasks();
+        }
+        
+        // 继续任务
+        function resumeTask() {
+            isPaused = false;
+            totalPauseTime += Date.now() - pauseStartTime;
+            timerInterval = setInterval(updateTimer, 1000);
+            renderTasks();
+        }
+        
+        // 更新计时器
+        function updateTimer() {
+            elapsedTime = Math.floor((Date.now() - startTime - totalPauseTime) / 1000);
+            
+            const timerDisplay = document.getElementById('timerTime');
+            const timeRemaining = document.getElementById('timeRemaining');
+            const timerClass = document.getElementById('timerDisplay');
+            
+            if (timerDisplay && timeRemaining && timerClass) {
+                timerDisplay.textContent = formatTime(elapsedTime);
+                const task = tasks.find(t => t.id === currentTaskId);
+                timeRemaining.textContent = getTimeRemainingText(task.suggestTime, elapsedTime);
+                timerClass.className = `timer-display ${getTimerClass()}`;
+            }
+        }
+        
+        // 格式化时间
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        // 完成任务
+        function completeTask() {
+            clearInterval(timerInterval);
+            
+            const task = tasks.find(t => t.id === currentTaskId);
+            let feedback = '';
+            let modalIcon = '🎉';
+            
+            if (task) {
+                task.completed = true;
+                const totalMinutes = Math.floor(elapsedTime / 60);
+                const studyMinutes = Math.floor((elapsedTime - totalPauseTime / 1000) / 60);
+                const restMinutes = Math.floor(totalPauseTime / 1000 / 60);
+                
+                if (task.suggestTime > 0) {
+                    const diff = task.suggestTime - totalMinutes;
+                    if (diff > 5) {
+                        feedback = praises[Math.floor(Math.random() * praises.length)];
+                        modalIcon = '🌟';
+                    } else if (diff >= -5) {
+                        feedback = '✅ 准时完成！继续加油！';
+                        modalIcon = '👍';
+                    } else {
+                        feedback = encourages[Math.floor(Math.random() * encourages.length)];
+                        modalIcon = '💪';
+                    }
+                } else {
+                    feedback = '✅ 完成！太棒了！';
+                    modalIcon = '🎉';
+                }
+                
+                completedTasks.push({
+                    name: task.name,
+                    icon: task.icon,
+                    suggestTime: task.suggestTime,
+                    actualTime: totalMinutes,
+                    studyTime: studyMinutes,
+                    restTime: restMinutes,
+                    feedback: feedback,
+                    completedAt: new Date().toISOString()
+                });
+                localStorage.setItem('yujia_completed_cat', JSON.stringify(completedTasks));
+            }
+            
+            currentTaskId = null;
+            elapsedTime = 0;
+            isPaused = false;
+            
+            // 显示完成弹窗
+            showModal(modalIcon, feedback);
+            
+            renderTasks();
+            updateProgress();
+            renderHistory();
+        }
+        
+        // 显示完成弹窗
+        function showModal(icon, message) {
+            const modal = document.getElementById('completeModal');
+            document.getElementById('modalIcon').textContent = icon;
+            document.getElementById('modalMessage').textContent = message;
+            modal.classList.add('show');
+            
+            // 添加星星动画
+            createStarAnimation();
+        }
+        
+        // 关闭弹窗
+        function closeModal() {
+            document.getElementById('completeModal').classList.remove('show');
+        }
+        
+        // 星星动画
+        function createStarAnimation() {
+            const stars = ['⭐', '🌟', '✨', '💫'];
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    const star = document.createElement('div');
+                    star.className = 'star-animation';
+                    star.textContent = stars[Math.floor(Math.random() * stars.length)];
+                    star.style.left = Math.random() * (window.innerWidth - 50) + 'px';
+                    star.style.top = Math.random() * (window.innerHeight - 50) + 'px';
+                    document.body.appendChild(star);
+                    setTimeout(() => star.remove(), 1000);
+                }, i * 200);
+            }
+        }
+        
+        // 更新进度
+        function updateProgress() {
+            const total = tasks.length;
+            const completed = tasks.filter(t => t.completed).length;
+            const percentage = Math.round((completed / total) * 100);
+            
+            document.getElementById('progressBar').style.width = percentage + '%';
+            document.getElementById('progressBar').textContent = percentage > 0 ? percentage + '%' : '';
+            document.getElementById('progressText').textContent = `${completed}/${total} 🌟`;
+            
+            let totalStudy = 0;
+            let totalRest = 0;
+            completedTasks.forEach(t => {
+                totalStudy += t.studyTime || 0;
+                totalRest += t.restTime || 0;
+            });
+            
+            document.getElementById('totalStudyTime').textContent = totalStudy;
+            document.getElementById('totalRestTime').textContent = totalRest;
+            
+            const totalTime = totalStudy + totalRest;
+            const efficiency = totalTime > 0 ? Math.round((totalStudy / totalTime) * 100) : 0;
+            document.getElementById('efficiency').textContent = efficiency + '%';
+        }
+        
+        // 添加任务
+        function addTask() {
+            const nameInput = document.getElementById('newTaskName');
+            const timeInput = document.getElementById('newTaskTime');
+            
+            const name = nameInput.value.trim();
+            const time = parseInt(timeInput.value) || 0;
+            
+            if (!name) {
+                alert('🐱 请输入作业名称~');
+                return;
+            }
+            
+            const icons = ['📝', '📚', '✏️', '📖', '🔬', '🎨'];
+            const newTask = {
+                id: Date.now(),
+                name: name,
+                icon: icons[Math.floor(Math.random() * icons.length)],
+                suggestTime: time,
+                completed: false
+            };
+            
+            tasks.push(newTask);
+            nameInput.value = '';
+            timeInput.value = '';
+            
+            renderTasks();
+            updateProgress();
+        }
+        
+        // 渲染历史记录
+        function renderHistory() {
+            const container = document.getElementById('historyList');
+            const section = document.getElementById('historySection');
+            
+            if (completedTasks.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+            
+            section.style.display = 'block';
+            container.innerHTML = '';
+            
+            const today = new Date().toDateString();
+            const todayTasks = completedTasks.filter(t => 
+                new Date(t.completedAt).toDateString() === today
+            );
+            
+            todayTasks.reverse().forEach(task => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.innerHTML = `
+                    <div class="task-name">${task.icon || '📝'} ${task.name}</div>
+                    <div class="task-stats">
+                        建议 ${task.suggestTime}分钟 → 实际 ${task.actualTime}分钟
+                    </div>
+                    <div class="feedback" style="color: ${task.feedback.includes('提前') ? '#228B22' : task.feedback.includes('超时') ? '#FF6B6B' : '#6495ED'}">
+                        ${task.feedback}
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+        
+        // 保存任务
+        function saveTasks() {
+            localStorage.setItem('yujia_tasks_cat', JSON.stringify(tasks));
+        }
+        
+        // 重置每日任务
+        function checkAndResetDaily() {
+            const lastDate = localStorage.getItem('yujia_lastDate_cat');
+            const today = new Date().toDateString();
+            
+            if (lastDate !== today) {
+                tasks = [...defaultTasks];
+                completedTasks = [];
+                localStorage.setItem('yujia_tasks_cat', JSON.stringify(tasks));
+                localStorage.setItem('yujia_completed_cat', JSON.stringify(completedTasks));
+                localStorage.setItem('yujia_lastDate_cat', today);
+            }
+        }
+        
+        // 启动
+        checkAndResetDaily();
+        init();
+    </script>
+</body>
+</html>

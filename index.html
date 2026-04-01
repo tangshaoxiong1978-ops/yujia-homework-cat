@@ -1228,7 +1228,10 @@
             // 检查是否全部完成
             const allDone = tasks.every(t => t.completed);
             if (allDone) {
-                setTimeout(() => sendDailyReport(), 1500);
+                // 延迟1.5秒后自动发送报告
+                setTimeout(() => {
+                    sendDailyReport(true); // true 表示自动发送
+                }, 1500);
             }
         }
         
@@ -1563,12 +1566,12 @@
         }
         
         // 发送每日学习报告
-        async function sendDailyReport() {
+        async function sendDailyReport(isAuto = false) {
             const completed = tasks.filter(t => t.completed).length;
             const total = tasks.length;
             
             if (completed === 0) {
-                alert('🐱 还没有完成作业呢，先做作业再来发报告吧！');
+                if (!isAuto) alert('🐱 还没有完成作业呢，先做作业再来发报告吧！');
                 return;
             }
             
@@ -1580,50 +1583,27 @@
             });
             
             const efficiency = (totalStudy + totalRest) > 0 ? Math.round((totalStudy / (totalStudy + totalRest)) * 100) : 0;
-            
             const today = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+            const completedList = completedTasks.map(t => `${t.icon || '✏️'} ${t.name}（建议${t.suggestTime}分钟，实际${t.actualTime}分钟，休息${t.restTime}分钟）`).join('\n');
+            const allDone = completed >= total;
             
-            // 构建完成列表
-            const completedList = completedTasks.map(t => `${t.icon || '✏️'} ${t.name} (${t.actualTime}分钟)`).join('\n');
-            
-            if (!WEBHOOK_URL) {
-                // 没有配置webhook，显示报告内容让用户手动发送
-                const report = `📊 羽佳今日学习报告\n\n` +
+            const reportText = `${allDone ? '🎉 羽佳今天所有作业全部完成啦！' : '📊 羽佳今日学习报告'}\n\n` +
                               `📅 ${today}\n\n` +
                               `✅ 完成进度：${completed}/${total}\n\n` +
-                              `📚 已完成作业：\n${completedList}\n\n` +
+                              `📚 完成详情：\n${completedList}\n\n` +
                               `⏱️ 总学习时间：${totalStudy}分钟\n` +
                               `☕ 休息时间：${totalRest}分钟\n` +
                               `📈 学习效率：${efficiency}%\n\n` +
-                              `🐱 加油！继续保持！`;
-                
-                alert(report);
+                              `🐱 ${allDone ? '太棒了！今天表现很好！' : '继续加油！'}`;
+            
+            if (!WEBHOOK_URL) {
+                if (!isAuto) alert(reportText);
                 return;
             }
             
             const message = {
-                msg_type: 'interactive',
-                card: {
-                    config: { wide_screen_mode: true },
-                    header: {
-                        title: { tag: 'plain_text', content: '📊 羽佳今日学习报告' },
-                        template: 'blue'
-                    },
-                    elements: [
-                        { tag: 'div', text: { tag: 'lark_md', content: `**📅 ${today}**` } },
-                        { tag: 'hr' },
-                        { tag: 'div', fields: [
-                            { is_short: true, text: { tag: 'lark_md', content: `**完成进度**\n${completed}/${total} ✅` } },
-                            { is_short: true, text: { tag: 'lark_md', content: `**学习效率**\n${efficiency}% 📈` } }
-                        ]},
-                        { tag: 'div', fields: [
-                            { is_short: true, text: { tag: 'lark_md', content: `**学习时长**\n${totalStudy}分钟 ⏱️` } },
-                            { is_short: true, text: { tag: 'lark_md', content: `**休息时长**\n${totalRest}分钟 ☕` } }
-                        ]},
-                        { tag: 'hr' },
-                        { tag: 'div', text: { tag: 'lark_md', content: `**📚 已完成作业：**\n${completedList}` } }
-                    ]
-                }
+                msg_type: 'text',
+                content: { text: reportText }
             };
             
             try {
@@ -1632,9 +1612,9 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(message)
                 });
-                alert('✅ 已发送学习报告给爸爸妈妈！');
+                if (!isAuto) alert('✅ 已发送学习报告给爸爸妈妈！');
             } catch (err) {
-                alert('❌ 发送失败，请稍后再试');
+                if (!isAuto) alert('❌ 发送失败，请稍后再试');
                 console.error('发送失败:', err);
             }
         }

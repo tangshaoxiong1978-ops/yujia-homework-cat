@@ -2,716 +2,91 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>羽佳的作业计时器</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🐚 学习计时器 — 选择孩子</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
-            justify-content: center;
             align-items: center;
-            padding: 20px;
+            justify-content: center;
         }
         .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            padding: 40px;
-            max-width: 400px;
-            width: 100%;
-        }
-        h1 {
             text-align: center;
-            color: #333;
-            font-size: 24px;
-            margin-bottom: 30px;
+            padding: 40px 20px;
         }
-        .task-name {
-            font-size: 20px;
-            font-weight: bold;
-            color: #667eea;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        .task-suggest {
-            font-size: 14px;
-            color: #999;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .timer-display {
-            font-size: 72px;
-            font-weight: bold;
-            color: #333;
-            text-align: center;
-            margin: 30px 0;
-            font-variant-numeric: tabular-nums;
-        }
-        .timer-display.paused {
-            color: #f5a623;
-        }
-        .timer-display.overtime {
-            color: #e74c3c;
-        }
-        .timer-display.early {
-            color: #52c41a;
-        }
-        .timer-display.ontime {
-            color: #1890ff;
-        }
-        .feedback {
-            text-align: center;
-            font-size: 18px;
-            font-weight: bold;
-            margin: 15px 0;
-            padding: 10px;
-            border-radius: 8px;
-        }
-        .feedback.early {
-            background: #f6ffed;
-            color: #52c41a;
-            border: 2px solid #b7eb8f;
-        }
-        .feedback.ontime {
-            background: #e6f7ff;
-            color: #1890ff;
-            border: 2px solid #91d5ff;
-        }
-        .feedback.late {
-            background: #fff2e8;
-            color: #fa541c;
-            border: 2px solid #ffbb96;
-        }
-        .time-comparison {
-            text-align: center;
-            font-size: 14px;
-            margin: 10px 0;
-            padding: 8px;
-            border-radius: 6px;
-            background: #fafafa;
-        }
-        .time-comparison.early {
-            color: #52c41a;
-            font-weight: bold;
-        }
-        .time-comparison.late {
-            color: #fa541c;
-            font-weight: bold;
-        }
-        .status {
-            text-align: center;
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 20px;
-        }
-        .buttons {
+        .logo { font-size: 72px; margin-bottom: 16px; }
+        .title { font-size: 32px; font-weight: 800; color: white; margin-bottom: 8px; }
+        .subtitle { font-size: 16px; color: rgba(255,255,255,0.7); margin-bottom: 48px; }
+        .cards {
             display: flex;
-            gap: 10px;
+            gap: 24px;
             justify-content: center;
-            margin-bottom: 30px;
+            flex-wrap: wrap;
+            max-width: 600px;
+            margin: 0 auto;
         }
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 500;
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 40px 32px;
+            flex: 1;
+            min-width: 240px;
+            max-width: 280px;
             cursor: pointer;
             transition: all 0.3s;
-            flex: 1;
+            text-decoration: none;
+            color: inherit;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
         }
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-        .btn:active {
-            transform: translateY(0);
-        }
-        .btn-start {
-            background: #52c41a;
-            color: white;
-        }
-        .btn-pause {
-            background: #f5a623;
-            color: white;
-        }
-        .btn-continue {
-            background: #1890ff;
-            color: white;
-        }
-        .btn-complete {
-            background: #667eea;
-            color: white;
-        }
-        .btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .stats {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 14px;
-        }
-        .stat-item:last-child {
-            margin-bottom: 0;
-        }
-        .stat-label {
-            color: #666;
-        }
-        .stat-value {
-            font-weight: bold;
-            color: #333;
-        }
-        .summary {
-            background: #e6f7ff;
-            border-radius: 10px;
-            padding: 15px;
-            border-left: 4px solid #1890ff;
-        }
-        .summary-title {
-            font-weight: bold;
-            color: #1890ff;
-            margin-bottom: 10px;
-        }
-        .summary-text {
-            font-size: 14px;
-            color: #666;
-            line-height: 1.6;
-        }
-        .hidden {
-            display: none;
-        }
+        .card:hover { transform: translateY(-8px); box-shadow: 0 24px 70px rgba(0,0,0,0.25); }
+        .card-icon { font-size: 80px; margin-bottom: 16px; display: block; }
+        .card-name { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+        .card-grade { font-size: 14px; color: #888; margin-bottom: 20px; }
+        .card-desc { font-size: 13px; color: #aaa; line-height: 1.6; }
+        .card.yujia .card-name { color: #E91E63; }
+        .card.yuhan .card-name { color: #2E7D32; }
+        .footer { margin-top: 48px; font-size: 13px; color: rgba(255,255,255,0.5); }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>⏱️ 羽佳的作业计时器</h1>
-        
-        <div id="running-view">
-            <div class="task-name" id="task-name">加载中...</div>
-            <div class="task-suggest" id="task-suggest">⏰ 预计完成时间：-- 分钟 | 🎯 截止时间：--</div>
+        <div class="logo">🐚</div>
+        <div class="title">学习计时器</div>
+        <div class="subtitle">选择孩子的专属计时器</div>
 
-            <div class="timer-display" id="timer">00:00:00</div>
-            <div class="status" id="status">👆 请点击"开始"按钮开始计时</div>
+        <div class="cards">
+            <a href="yujia.html" class="card yujia">
+                <span class="card-icon">🐱</span>
+                <div class="card-name">羽佳</div>
+                <div class="card-grade">三年级 · 猫咪风格</div>
+                <div class="card-desc">
+                    📱 橙果APP打卡<br>
+                    🎧 英语一起作业<br>
+                    📚 阅读半小时<br>
+                    🔢 口算题一页
+                </div>
+            </a>
 
-            <div class="time-comparison hidden" id="time-comparison"></div>
-            <div class="feedback hidden" id="feedback"></div>
-
-            <div class="buttons">
-                <button class="btn btn-start" id="btn-start" onclick="startTimer()">🚀 开始</button>
-                <button class="btn btn-pause hidden" id="btn-pause" onclick="pauseTimer()">⏸ 暂停</button>
-                <button class="btn btn-continue hidden" id="btn-continue" onclick="continueTimer()">▶ 继续</button>
-                <button class="btn btn-complete hidden" id="btn-complete" onclick="completeTimer()">✅ 完成</button>
-            </div>
-            
-            <div class="stats hidden" id="stats">
-                <div class="stat-item">
-                    <span class="stat-label">总用时</span>
-                    <span class="stat-value" id="stat-total">0 分钟</span>
+            <a href="yuhan.html" class="card yuhan">
+                <span class="card-icon">🌿</span>
+                <div class="card-name">羽菡</div>
+                <div class="card-grade">初二 · 森林风格</div>
+                <div class="card-desc">
+                    📖 语文作业<br>
+                    📐 数学练习<br>
+                    🎧 英语听说<br>
+                    🌏 生地会考倒计时
                 </div>
-                <div class="stat-item">
-                    <span class="stat-label">实际学习</span>
-                    <span class="stat-value" id="stat-study">0 分钟</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">休息时间</span>
-                    <span class="stat-value" id="stat-break">0 分钟</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">学习效率</span>
-                    <span class="stat-value" id="stat-efficiency">--</span>
-                </div>
-            </div>
+            </a>
         </div>
-        
-        <div id="completed-view" class="summary hidden">
-            <div class="summary-title">✅ 作业完成！</div>
-            <div class="summary-text" id="summary-text"></div>
-            <div style="margin-top: 15px; text-align: center;">
-                <button class="btn btn-complete" id="btn-send-report" onclick="sendReportToFeishu()" style="margin-bottom: 10px; width: 100%;">📤 发送报告给爸爸妈妈</button>
-                <button class="btn btn-continue" onclick="backToFeishu()">返回飞书</button>
-            </div>
+
+        <div class="footer">
+            💡 点击卡片即可进入计时器 · 数据自动保存在本地
         </div>
     </div>
-
-    <script>
-        // 从URL参数获取作业信息
-        const urlParams = new URLSearchParams(window.location.search);
-        const taskId = urlParams.get('task_id') || '';
-        const taskName = urlParams.get('task_name') || '未命名作业';
-        const suggestMinutes = parseInt(urlParams.get('suggest') || '30');
-        const deadline = urlParams.get('deadline') || '22:30';
-        
-        // 更新页面
-        document.getElementById('task-name').textContent = taskName;
-        document.getElementById('task-suggest').textContent = `⏰ 预计完成时间：${suggestMinutes} 分钟 | 🎯 截止时间：${deadline}`;
-        
-        // 计时器状态
-        let timerInterval = null;
-        let totalTime = 0; // 总用时（秒）
-        let studyTime = 0; // 学习时间（秒）
-        let breakTime = 0; // 休息时间（秒）
-        let isPaused = false;
-        let hasStarted = false; // 是否已经开始
-        let currentSessionStart = 0; // 当前计时段开始时间
-        let pauseStartTime = 0; // 暂停开始时间
-        
-        // 格式化时间
-        function formatTime(seconds) {
-            const h = Math.floor(seconds / 3600);
-            const m = Math.floor((seconds % 3600) / 60);
-            const s = seconds % 60;
-            return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-        }
-        
-        // 表扬语词库
-        const praiseWords = [
-            "太棒了！提前完成！🎉",
-            "效率超高！继续加油！✨",
-            "提前完成，真厉害！🌟",
-            "表现优秀，为你骄傲！💪",
-            "提前搞定，太优秀了！🏆"
-        ];
-        
-        // 鼓励语词库
-        const encourageWords = [
-            "虽然超时了，但已完成，下次加油！💪",
-            "坚持完成就是胜利！继续努力！🌈",
-            "已完成！下次注意时间安排！📚",
-            "完成啦！相信下次会更快！✨",
-            "坚持到底，值得表扬！👏"
-        ];
-        
-        // 获取随机表扬语
-        function getRandomPraise() {
-            return praiseWords[Math.floor(Math.random() * praiseWords.length)];
-        }
-        
-        // 获取随机鼓励语
-        function getRandomEncourage() {
-            return encourageWords[Math.floor(Math.random() * encourageWords.length)];
-        }
-        
-        // 更新显示
-        function updateDisplay() {
-            document.getElementById('timer').textContent = formatTime(totalTime);
-            
-            // 检查是否超时或提前
-            const totalMinutes = Math.floor(totalTime / 60);
-            const timerEl = document.getElementById('timer');
-            const timeComparisonEl = document.getElementById('time-comparison');
-            const feedbackEl = document.getElementById('feedback');
-            
-            if (totalMinutes > suggestMinutes) {
-                // 超时
-                timerEl.classList.add('overtime');
-                timerEl.classList.remove('paused', 'early', 'ontime');
-                const diff = totalMinutes - suggestMinutes;
-                timeComparisonEl.textContent = `⚠️ 已超时 ${diff} 分钟（预计 ${suggestMinutes} 分钟）`;
-                timeComparisonEl.classList.remove('early');
-                timeComparisonEl.classList.add('late');
-                timeComparisonEl.classList.remove('hidden');
-            } else if (totalMinutes >= suggestMinutes - 5 && totalMinutes <= suggestMinutes) {
-                // 准时（5分钟误差内）
-                timerEl.classList.add('ontime');
-                timerEl.classList.remove('paused', 'early', 'overtime');
-                timeComparisonEl.textContent = `✅ 按时完成（预计 ${suggestMinutes} 分钟）`;
-                timeComparisonEl.classList.remove('early', 'late');
-                timeComparisonEl.classList.add('hidden');
-            } else if (!isPaused && totalTime > 0) {
-                // 进行中，显示时间对比
-                const diff = suggestMinutes - totalMinutes;
-                timerEl.classList.add('early');
-                timerEl.classList.remove('paused', 'ontime', 'overtime');
-                timeComparisonEl.textContent = `⏳ 还剩 ${diff} 分钟（预计 ${suggestMinutes} 分钟）`;
-                timeComparisonEl.classList.add('early');
-                timeComparisonEl.classList.remove('late');
-                timeComparisonEl.classList.remove('hidden');
-            } else if (isPaused) {
-                timerEl.classList.add('paused');
-                timerEl.classList.remove('early', 'ontime', 'overtime');
-                const diff = suggestMinutes - totalMinutes;
-                timeComparisonEl.textContent = `☕ 暂停中，还剩 ${diff} 分钟`;
-                timeComparisonEl.classList.remove('early', 'late');
-                timeComparisonEl.classList.add('hidden');
-            } else {
-                timerEl.classList.remove('paused', 'early', 'ontime', 'overtime');
-                timeComparisonEl.classList.add('hidden');
-                feedbackEl.classList.add('hidden');
-            }
-        }
-        
-        // 更新统计
-        function updateStats() {
-            const totalM = Math.floor(totalTime / 60);
-            const studyM = Math.floor(studyTime / 60);
-            const breakM = Math.floor(breakTime / 60);
-            
-            document.getElementById('stat-total').textContent = `${totalM} 分钟`;
-            document.getElementById('stat-study').textContent = `${studyM} 分钟`;
-            document.getElementById('stat-break').textContent = `${breakM} 分钟`;
-            
-            if (totalM > 0) {
-                const efficiency = ((studyM / totalM) * 100).toFixed(1);
-                document.getElementById('stat-efficiency').textContent = `${efficiency}%`;
-            }
-        }
-        
-        // 开始计时
-        function startTimer() {
-            if (timerInterval) return;
-
-            hasStarted = true;
-            currentSessionStart = Date.now();
-            timerInterval = setInterval(() => {
-                const now = Date.now();
-                const sessionTime = Math.floor((now - currentSessionStart) / 1000);
-                totalTime = sessionTime;
-                studyTime = sessionTime;
-
-                updateDisplay();
-            }, 1000);
-
-            isPaused = false;
-            document.getElementById('status').textContent = '📚 正在学习中...';
-            document.getElementById('btn-start').classList.add('hidden');
-            document.getElementById('btn-pause').classList.remove('hidden');
-            document.getElementById('btn-complete').classList.remove('hidden');
-            document.getElementById('stats').classList.remove('hidden');
-        }
-
-        // 暂停计时
-        function pauseTimer() {
-            if (!timerInterval) return;
-
-            clearInterval(timerInterval);
-            timerInterval = null;
-
-            // 累计当前学习时间
-            const now = Date.now();
-            const sessionTime = Math.floor((now - currentSessionStart) / 1000);
-            studyTime += sessionTime;
-            // 累计总休息时间
-            breakTime += Math.floor((Date.now() - now) / 1000); // 暂停时刻开始算休息时间
-
-            isPaused = true;
-            document.getElementById('status').textContent = '☕ 休息中...';
-            document.getElementById('btn-pause').classList.add('hidden');
-            document.getElementById('btn-continue').classList.remove('hidden');
-
-            updateDisplay();
-            updateStats();
-        }
-
-        // 继续计时
-        function continueTimer() {
-            if (timerInterval) return;
-
-            // 累计休息时间
-            if (pauseStartTime > 0) {
-                const now = Date.now();
-                const pauseDuration = Math.floor((now - pauseStartTime) / 1000);
-                breakTime += pauseDuration;
-                pauseStartTime = 0;
-            }
-
-            currentSessionStart = Date.now();
-            timerInterval = setInterval(() => {
-                const now = Date.now();
-                const sessionTime = Math.floor((now - currentSessionStart) / 1000);
-                totalTime += 1;
-                studyTime += 1;
-
-                updateDisplay();
-            }, 1000);
-
-            isPaused = false;
-            document.getElementById('status').textContent = '📚 正在学习中...';
-            document.getElementById('btn-continue').classList.add('hidden');
-            document.getElementById('btn-pause').classList.remove('hidden');
-        }
-        
-        // 暂停计时
-        function pauseTimer() {
-            if (!timerInterval) return;
-
-            clearInterval(timerInterval);
-            timerInterval = null;
-
-            // 累计当前学习时间
-            const now = Date.now();
-            const sessionTime = Math.floor((now - currentSessionStart) / 1000);
-            studyTime += sessionTime;
-            // 记录暂停开始时间
-            pauseStartTime = now;
-
-            isPaused = true;
-            document.getElementById('status').textContent = '☕ 休息中...';
-            document.getElementById('btn-pause').classList.add('hidden');
-            document.getElementById('btn-continue').classList.remove('hidden');
-
-            updateDisplay();
-            updateStats();
-        }
-        
-        // 继续计时
-        function continueTimer() {
-            if (timerInterval) return;
-            
-            currentSessionStart = Date.now();
-            timerInterval = setInterval(() => {
-                const now = Date.now();
-                const sessionTime = Math.floor((now - currentSessionStart) / 1000);
-                totalTime += 1;
-                studyTime += 1;
-                
-                updateDisplay();
-            }, 1000);
-            
-            isPaused = false;
-            document.getElementById('status').textContent = '📚 正在学习中...';
-            document.getElementById('btn-continue').classList.add('hidden');
-            document.getElementById('btn-pause').classList.remove('hidden');
-        }
-        
-        // 飞书配置（从环境参数读取）
-        const FEISHU_APP_ID = 'cli_a9418dc6f439dbb5';
-        const FEISHU_APP_SECRET = 'NSMCKaQKBKnV8hx5zXsPdenZ08BPKOFH';
-        const FEISHU_WEBHOOK = 'https://open.feishu.cn/open-apis/bot/v2/hook/eff6ff06-c0cb-4c63-b032-a2b8776085d2';
-        const FEISHU_GROUP_CHAT_ID = 'oc_0b329c19150b954cdc229b6e176777ef'; // 龙虾学习群
-
-        // 获取飞书访问令牌
-        async function getFeishuToken() {
-            const resp = await fetch('https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ app_id: FEISHU_APP_ID, app_secret: FEISHU_APP_SECRET })
-            });
-            const data = await resp.json();
-            return data.tenant_access_token;
-        }
-
-        // 发送消息到飞书群（via API，需要token）
-        async function sendToFeishuGroup(token, content) {
-            await fetch('https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type=chat_id', {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    receive_id: FEISHU_GROUP_CHAT_ID,
-                    msg_type: 'text',
-                    content: JSON.stringify({ text: content })
-                })
-            });
-        }
-
-        // 发送富文本卡片到飞书群
-        async function sendCardToFeishuGroup(token, cardContent) {
-            await fetch('https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type=chat_id', {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    receive_id: FEISHU_GROUP_CHAT_ID,
-                    msg_type: 'interactive',
-                    content: JSON.stringify(cardContent)
-                })
-            });
-        }
-
-        // 发送报告到飞书群 + 触发 study-coach
-        async function sendReportToFeishu() {
-            const btn = document.getElementById('btn-send-report');
-            btn.disabled = true;
-            btn.textContent = '📤 发送中...';
-
-            // 获取今日日期
-            const today = new Date();
-            const dateStr = `${today.getMonth()+1}月${today.getDate()}日`;
-
-            // 判断状态
-            const totalM = Math.floor(totalTime / 60);
-            const studyM = Math.floor(studyTime / 60);
-            const breakM = Math.floor(breakTime / 60);
-            const efficiency = totalM > 0 ? ((studyM / totalM) * 100).toFixed(1) : 100;
-            const timeDiff = totalM - suggestMinutes;
-
-            let statusText = timeDiff < -5 ? '🎉 提前完成' : timeDiff <= 5 ? '✅ 准时完成' : '⏰ 超时完成';
-            let statusColor = timeDiff < -5 ? '#52c41a' : timeDiff <= 5 ? '#1890ff' : '#fa541c';
-            let cardColor = timeDiff < -5 ? 'green' : timeDiff <= 5 ? 'blue' : 'orange';
-
-            // 构建卡片
-            const cardContent = {
-                config: { wide_screen_mode: true },
-                header: {
-                    title: { tag: 'plain_text', content: `📚 ${taskName} 完成报告` },
-                    template: cardColor
-                },
-                elements: [
-                    {
-                        tag: 'div',
-                        text: {
-                            tag: 'lark_md',
-                            content: `**👧 羽佳学习报告**\n📅 ${dateStr}\n\n**📝 作业项目**：${taskName}\n**⏱️ 预计时间**：${suggestMinutes} 分钟\n**⏱️ 实际用时**：${totalM} 分钟\n\n---\n\n**⏱️ 实际学习**：${studyM} 分钟\n**☕ 休息时间**：${breakM} 分钟\n**📊 学习效率**：${efficiency}%\n\n**${statusText}**`
-                        }
-                    },
-                    {
-                        tag: 'hr'
-                    },
-                    {
-                        tag: 'note',
-                        elements: [
-                            { tag: 'plain_text', content: '📢 学习辅导员已收到报告，正在生成下一步计划...' }
-                        ]
-                    }
-                ]
-            };
-
-            try {
-                // 获取 token 并发送
-                const token = await getFeishuToken();
-
-                // 1. 发送卡片到群里
-                await sendCardToFeishuGroup(token, cardContent);
-
-                // 2. 发一条文字消息，触发 study-coach
-                await sendToFeishuGroup(token, `📊 羽佳 ${dateStr} 完成了「${taskName}」作业（实际用时${totalM}分钟，效率${efficiency}%）@学习辅导员 请处理后续（记录本次完成、评估是否需要复习、生成下一步建议）。`);
-
-                btn.textContent = '✅ 已发送 + 已通知辅导员';
-                btn.style.background = '#52c41a';
-            } catch(err) {
-                // 如果 API 失败，回退到 Webhook
-                fetch(FEISHU_WEBHOOK, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ msg_type: 'interactive', card: cardContent })
-                }).then(res => res.json()).then(data => {
-                    if (data.code === 0 || data.StatusCode === 0) {
-                        btn.textContent = '✅ 已发送';
-                        btn.style.background = '#52c41a';
-                    } else {
-                        btn.textContent = '❌ 发送失败';
-                        btn.disabled = false;
-                    }
-                }).catch(() => {
-                    btn.textContent = '❌ 发送失败';
-                    btn.disabled = false;
-                });
-            }
-        }
-
-        // 完成作业
-        function completeTimer() {
-            // 检查是否已经开始
-            if (!hasStarted) {
-                alert('请先点击"开始"按钮开始计时！\n\n💡 提示：计时器会记录您的学习时间，帮助您了解自己的学习效率。');
-                return;
-            }
-
-            // 如果正在计时，先停止
-            if (timerInterval) {
-                clearInterval(timerInterval);
-                timerInterval = null;
-                // 累计最后一段学习时间
-                const now = Date.now();
-                const sessionTime = Math.floor((now - currentSessionStart) / 1000);
-                studyTime += sessionTime;
-            }
-
-            // 如果暂停中，累计最后一段休息时间
-            if (isPaused && pauseStartTime > 0) {
-                const now = Date.now();
-                const pauseDuration = Math.floor((now - pauseStartTime) / 1000);
-                breakTime += pauseDuration;
-            }
-
-            const totalM = Math.floor(totalTime / 60);
-            const studyM = Math.floor(studyTime / 60);
-            const breakM = Math.floor(breakTime / 60);
-            const efficiency = totalM > 0 ? ((studyM / totalM) * 100).toFixed(1) : 100;
-
-            // 判断完成状态并生成反馈
-            let feedback = '';
-            let timeDiff = totalM - suggestMinutes;
-
-            if (timeDiff < -5) {
-                // 提前超过5分钟
-                feedback = getRandomPraise();
-                document.getElementById('feedback').innerHTML = feedback;
-                document.getElementById('feedback').classList.add('early');
-                document.getElementById('feedback').classList.remove('ontime', 'late');
-                document.getElementById('feedback').classList.remove('hidden');
-            } else if (timeDiff >= -5 && timeDiff <= 5) {
-                // 准时（5分钟误差内）
-                feedback = "✅ 准时完成，继续保持！👍";
-                document.getElementById('feedback').innerHTML = feedback;
-                document.getElementById('feedback').classList.add('ontime');
-                document.getElementById('feedback').classList.remove('early', 'late');
-                document.getElementById('feedback').classList.remove('hidden');
-            } else {
-                // 超时
-                feedback = getRandomEncourage();
-                document.getElementById('feedback').innerHTML = feedback;
-                document.getElementById('feedback').classList.add('late');
-                document.getElementById('feedback').classList.remove('early', 'ontime');
-                document.getElementById('feedback').classList.remove('hidden');
-            }
-
-            const timeInfo = totalM > suggestMinutes
-                ? `⚠️ 超时 ${timeDiff} 分钟（预计 ${suggestMinutes} 分钟）`
-                : totalM < suggestMinutes - 5
-                ? `🎉 提前 ${-timeDiff} 分钟（预计 ${suggestMinutes} 分钟）`
-                : `✅ 按时完成（预计 ${suggestMinutes} 分钟）`;
-
-            const summary = `${taskName}
-
-${timeInfo}
-
-总用时：${totalM} 分钟
-实际学习：${studyM} 分钟
-休息时间：${breakM} 分钟
-学习效率：${efficiency}%`;
-
-            document.getElementById('summary-text').innerHTML = summary.replace(/\n/g, '<br>');
-            document.getElementById('running-view').classList.add('hidden');
-            document.getElementById('completed-view').classList.remove('hidden');
-
-            // 保存到本地存储（飞书机器人后续读取）
-            const result = {
-                taskId,
-                taskName,
-                totalTime,
-                studyTime,
-                breakTime,
-                efficiency,
-                expectedMinutes: suggestMinutes,
-                timeDiff,
-                completedAt: new Date().toISOString()
-            };
-            localStorage.setItem('homework_timer_result', JSON.stringify(result));
-        }
-        
-        // 返回飞书
-        function backToFeishu() {
-            window.close();
-            // 如果无法关闭窗口，提示用户
-            setTimeout(() => {
-                alert('请回到飞书，说"我看完了"或"完成了"');
-            }, 500);
-        }
-    </script>
 </body>
 </html>

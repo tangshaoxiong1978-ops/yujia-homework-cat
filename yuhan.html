@@ -286,6 +286,8 @@
     const CHILD = 'yuhan';
     const DEADLINE = '23:00';
     const ICON = '🌿';
+    const CHILD_NAME = '羽菡';
+    const CHILD_OPEN_ID = '';  // TODO: 羽菡飞书 open_id（待补充）
     const SHENGDI_DATE = new Date('2026-06-15');
     const DEFAULT_HOMEWORK = [
         { id:1, name:'语文作业', icon:'📖', time:30, status:'waiting' },
@@ -412,6 +414,8 @@
             assignedTask = { name: decodeURIComponent(n), time: parseInt(s) || 0 };
             document.getElementById('assignedDesc').textContent = `${assignedTask.name}${assignedTask.time > 0 ? ' · ' + assignedTask.time + '分钟' : ''}`;
             document.getElementById('assignedAlert').style.display = 'block';
+            // 自动发送作业清单到飞书群
+            setTimeout(() => sendHomeworkCard(assignedTask), 800);
         }
     }
 
@@ -554,6 +558,68 @@
         const today = new Date().toISOString().split('T')[0];
         localStorage.removeItem(`timer_${CHILD}_${today}`); localStorage.removeItem(`hw_${CHILD}`);
         homework = JSON.parse(JSON.stringify(DEFAULT_HOMEWORK)); renderHomeworkList(); updateStats(); showToast('已重置 🔄');
+    }
+
+    // 发送作业清单卡片到飞书群（自动 @孩子和家长）
+    function sendHomeworkCard(task) {
+        const now = new Date();
+        const dateStr = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日`;
+        const timeTip = task.time > 0 ? `⏱ 建议完成时间：${task.time} 分钟` : '';
+        const atChild = CHILD_OPEN_ID ? `<at user_id="${CHILD_OPEN_ID}">${CHILD_NAME}</at>` : CHILD_NAME;
+        const card = {
+            msg_type: 'interactive',
+            card: {
+                config: { wide_screen_mode: true },
+                header: {
+                    title: { tag: 'plain_text', content: `📋 家长布置作业通知 — ${CHILD_NAME}` },
+                    template: 'green'
+                },
+                elements: [
+                    {
+                        tag: 'div',
+                        text: {
+                            tag: 'lark_md',
+                            content: `${atChild}，爸爸妈妈给你布置了作业啦！快去看看吧 🌿\n\n收到请回复：「好的！」`
+                        }
+                    },
+                    { tag: 'hr' },
+                    {
+                        tag: 'div',
+                        fields: [
+                            { is_short: true, text: { tag: 'lark_md', content: `**📌 作业内容**\n${task.name}` } },
+                            { is_short: true, text: { tag: 'lark_md', content: `**📅 日期**\n${dateStr}` } }
+                        ]
+                    },
+                    timeTip ? {
+                        tag: 'div',
+                        text: { tag: 'lark_md', content: `⏱ **建议完成时间**：${task.time} 分钟` }
+                    } : { tag: 'div', text: { tag: 'lark_md', content: `⏱ **建议完成时间**：自主安排` } },
+                    { tag: 'hr' },
+                    {
+                        tag: 'action',
+                        actions: [
+                            {
+                                tag: 'button',
+                                text: { tag: 'plain_text', content: '🌿 前往计时器' },
+                                type: 'primary',
+                                url: `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/yuhan.html`
+                            }
+                        ]
+                    },
+                    {
+                        tag: 'note',
+                        elements: [
+                            { tag: 'plain_text', content: '💡 打开上方链接即可开始计时，祝学习愉快！生地会考加油 🌿' }
+                        ]
+                    }
+                ]
+            }
+        };
+        fetch(FEISHU_WEBHOOK, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(card)
+        }).then(r => r.ok ? showToast('作业通知已发送 📨') : showToast('发送失败 ❌')).catch(() => showToast('发送失败 ❌'));
     }
 
     function sendReport() {

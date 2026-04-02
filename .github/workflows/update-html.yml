@@ -1,0 +1,30 @@
+name: Update HTML Files
+
+on:
+  workflow_dispatch:
+    inputs:
+      file:
+        description: 'File to update'
+        required: true
+        type: choice
+        options:
+          - parent_dashboard
+      content:
+        description: 'Base64 encoded content'
+        required: true
+        type: string
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Update file
+        run: |
+          echo "${{ inputs.content }}" | base64 -d > "${{ inputs.file }}.html"
+      
+      - uses: EndBug/add-and-commit@v9
+        with:
+          message: "Update ${{ inputs.file }}.html via workflow"
+          add: "${{ inputs.file }}.html"

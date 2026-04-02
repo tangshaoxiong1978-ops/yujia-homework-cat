@@ -633,6 +633,31 @@
         }
         .week-bar-label { font-size: 11px; color: #aaa; }
         .week-bar-value { font-size: 10px; color: #999; }
+        /* 家长模式样式 */
+        body.parent-mode { background: linear-gradient(135deg, #f0f0f5 0%, #e8eaf6 50%, #fce4ec 100%); }
+        .parent-banner { background: linear-gradient(135deg, #FF8FB3 0%, #FF6B9D 100%); border-radius: 16px; padding: 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; }
+        .parent-banner-icon { font-size: 36px; }
+        .parent-banner-text { flex: 1; }
+        .parent-banner-title { font-size: 16px; font-weight: 700; color: white; margin-bottom: 2px; }
+        .parent-banner-desc { font-size: 13px; color: rgba(255,255,255,0.85); }
+        .parent-banner-back { padding: 8px 16px; background: rgba(255,255,255,0.25); color: white; border: 1px solid rgba(255,255,255,0.4); border-radius: 20px; font-size: 13px; font-weight: 600; text-decoration: none; cursor: pointer; }
+        .parent-banner-back:hover { background: rgba(255,255,255,0.35); }
+        .homework-actions { display: flex; gap: 6px; margin-top: 8px; }
+        .action-edit { flex: 1; padding: 9px; background: #fce4ec; color: #c2185b; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .action-delete { flex: 1; padding: 9px; background: #ffebee; color: #c62828; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        /* 编辑弹窗 */
+        .edit-form { text-align: left; }
+        .edit-form label { font-size: 13px; font-weight: 600; color: #555; margin-bottom: 4px; display: block; }
+        .edit-form input { width: 100%; padding: 12px 14px; border: 2px solid #fce4ec; border-radius: 12px; font-size: 14px; outline: none; margin-bottom: 12px; }
+        .edit-form input:focus { border-color: #FF6B9D; }
+        .edit-icon-select { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+        .edit-icon-option { width: 44px; height: 44px; border-radius: 10px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; border: 2px solid transparent; }
+        .edit-icon-option.selected { border-color: #FF6B9D; background: #fce4ec; }
+        .edit-form-actions { display: flex; gap: 8px; }
+        .edit-save { flex: 1; padding: 12px; background: linear-gradient(135deg, #FF8FB3, #FF6B9D); color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; }
+        .edit-cancel { flex: 1; padding: 12px; background: #f5f5f5; color: #555; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; }
+        .add-homework-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #FF8FB3 0%, #FF6B9D 100%); color: white; border: none; border-radius: 14px; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; }
+        .add-homework-btn:hover { box-shadow: 0 4px 16px rgba(255,107,157,0.35); }
     </style>
 </head>
 <body>
@@ -640,14 +665,26 @@
     <div class="header">
         <div class="header-title">
             <div class="header-icon">🐱</div>
-            <div class="header-name">羽佳猫咪计时器</div>
+            <div class="header-name" id="headerName">羽佳猫咪计时器</div>
         </div>
         <!-- 截止时间倒计时 -->
         <div class="header-deadline" id="headerDeadline">
             <span class="header-deadline-icon">⏰</span>
             <span class="header-deadline-time" id="headerDeadlineTime">--:--</span>
         </div>
-        <a href="yuhan.html" class="header-switch">🌿 切换羽菡</a>
+        <a href="yuhan.html" class="header-switch" id="switchLink">🌿 切换羽菡</a>
+    </div>
+
+    <!-- 家长模式 Banner -->
+    <div class="main" id="parentBanner" style="display:none;">
+        <div class="parent-banner" style="margin-top:14px;">
+            <div class="parent-banner-icon">👨‍👧</div>
+            <div class="parent-banner-text">
+                <div class="parent-banner-title">👨‍👧 家长版 · 作业管理</div>
+                <div class="parent-banner-desc">可添加、编辑、删除作业（不影响计时）</div>
+            </div>
+            <a href="yujia.html" class="parent-banner-back" id="backToChild">返回孩子版</a>
+        </div>
     </div>
 
     <!-- 主内容 -->
@@ -739,24 +776,38 @@
             </div>
         </div>
 
-        <!-- 作业列表 -->
-        <div class="section-title">📝 今日作业</div>
-        <div id="homeworkList"></div>
-
-        <!-- 添加作业 -->
-        <div class="card">
-            <div class="section-title" style="margin-bottom:12px">✨ 添加额外作业</div>
-            <div class="add-form">
-                <input type="text" class="add-input" id="newName" placeholder="作业名称，如：练字一页">
-                <input type="number" class="time-input" id="newTime" placeholder="分钟" min="1">
-                <button class="add-btn" onclick="addHomework()">+</button>
+        <!-- 孩子版 -->
+        <div id="childAddSection">
+            <!-- 作业列表 -->
+            <div class="section-title">📝 今日作业</div>
+            <div id="homeworkList"></div>
+            <!-- 添加作业 -->
+            <div class="card">
+                <div class="section-title" style="margin-bottom:12px">✨ 添加额外作业</div>
+                <div class="add-form">
+                    <input type="text" class="add-input" id="newName" placeholder="作业名称，如：练字一页">
+                    <input type="number" class="time-input" id="newTime" placeholder="分钟" min="1">
+                    <button class="add-btn" onclick="addHomework()">+</button>
+                </div>
+            </div>
+            <!-- 数据管理 -->
+            <div class="card">
+                <button class="report-btn" onclick="sendReport()">
+                    📊 发送今日报告给爸爸妈妈
+                </button>
             </div>
         </div>
-        <!-- 数据管理 -->
-        <div class="card">
-            <button class="report-btn" onclick="sendReport()">
-                📊 发送今日报告给爸爸妈妈
-            </button>
+
+        <!-- 家长版作业管理 -->
+        <div id="parentManageSection" style="display:none;">
+            <div class="section-title">📋 作业清单（共 <span id="parentHwCount">0</span> 项）</div>
+            <div id="parentHomeworkList"></div>
+            <button class="add-homework-btn" onclick="openAddModal()">➕ 添加学校作业</button>
+            <div class="card">
+                <button class="report-btn" onclick="sendReport()">
+                    📊 发送今日报告给爸爸妈妈
+                </button>
+            </div>
         </div>
         <br><br>
     </div>
@@ -798,6 +849,26 @@
     <!-- Toast -->
     <div class="toast" id="toast"></div>
 
+    <!-- 家长模式：编辑/添加作业弹窗 -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal">
+            <div class="modal-cat" id="editModalIcon">📝</div>
+            <div class="modal-task" id="editModalTitle">编辑作业</div>
+            <div class="edit-form">
+                <label>作业名称</label>
+                <input type="text" id="editName" placeholder="如：数学练习">
+                <label>建议时间（分钟，0=待定）</label>
+                <input type="number" id="editTime" placeholder="30" min="0">
+                <label>选择图标</label>
+                <div class="edit-icon-select" id="editIconSelect"></div>
+                <div class="edit-form-actions">
+                    <button class="edit-cancel" onclick="closeEditModal()">取消</button>
+                    <button class="edit-save" id="editSaveBtn" onclick="saveHomework()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
     const CHILD = 'yujia';
     const DEADLINE = '22:30';
@@ -806,6 +877,8 @@
     const CHILD_OPEN_ID = 'ou_3a8e6123c7769ffc8ba603fdd74c8b1a';  // 羽佳飞书 open_id
     const PARENT_OPEN_ID = 'ou_04d8a814e9b4ce5640739ee9c2221df5'; // 爸爸
     const FEISHU_WEBHOOK = 'https://open.feishu.cn/open-apis/bot/v2/hook/eff6ff06-c0cb-4c63-b032-a2b8776085d2';
+    const ICON_OPTIONS = ['📖','📐','🎧','📝','📚','🔢','🌍','🧬','🎨','🎵','⚽','💪','🔬','📕','✏️'];
+    let isParentMode = false, editingHwId = null, selectedEditIcon = '📝';
 
     // 发送作业完成通知卡片给家长
     function sendTaskCompleteCard(completedTask) {
@@ -1019,8 +1092,116 @@
         renderHomeworkList();
         updateStats();
         updateDeadlineWithWarning();
+        initParentMode();
         setInterval(() => { updateDeadlineWithWarning(); updateStats(); }, 30000);
     }
+
+    function initParentMode() {
+        if (isParentMode) {
+            document.body.classList.add('parent-mode');
+            document.getElementById('headerName').textContent = '👨‍👧 羽佳作业管理';
+            document.getElementById('switchLink').style.display = 'none';
+            document.getElementById('headerDeadline').style.display = 'none';
+            document.getElementById('parentBanner').style.display = 'block';
+            document.getElementById('childAddSection').style.display = 'none';
+            document.getElementById('parentManageSection').style.display = 'block';
+            renderParentHomeworkList();
+        }
+    }
+
+    // ========== 家长模式函数 ==========
+    function renderParentHomeworkList() {
+        document.getElementById('parentHwCount').textContent = homework.length;
+        document.getElementById('parentHomeworkList').innerHTML = homework.length === 0
+            ? '<div style="text-align:center;color:#aaa;padding:30px 0;font-size:14px;">暂无作业，点击下方添加</div>'
+            : homework.map(task => `
+                <div class="homework-item">
+                    <div class="homework-header">
+                        <div class="homework-info">
+                            <div class="homework-icon">${task.icon}</div>
+                            <div>
+                                <div class="homework-name">${task.name}</div>
+                                <div class="homework-time">⏱ ${task.time > 0 ? task.time + ' 分钟' : '待定'}</div>
+                            </div>
+                        </div>
+                        <div class="homework-status status-${task.status}">${statusText(task.status)}</div>
+                    </div>
+                    <div class="homework-actions">
+                        <button class="action-edit" onclick="openEditModal(${task.id})">✏️ 编辑</button>
+                        <button class="action-delete" onclick="deleteHomework(${task.id})">🗑️ 删除</button>
+                    </div>
+                </div>`).join('');
+    }
+
+    function statusText(s) { return { waiting:'⏳ 等待', doing:'🔄 进行中', done:'✅ 完成' }[s] || s; }
+
+    function openAddModal() {
+        editingHwId = null;
+        document.getElementById('editModalIcon').textContent = '➕';
+        document.getElementById('editModalTitle').textContent = '添加作业';
+        document.getElementById('editName').value = '';
+        document.getElementById('editTime').value = '30';
+        selectedEditIcon = '📝';
+        renderIconPicker('📝');
+        document.getElementById('editModal').classList.add('active');
+    }
+
+    function openEditModal(id) {
+        const task = homework.find(t => t.id === id);
+        if (!task) return;
+        editingHwId = id;
+        document.getElementById('editModalIcon').textContent = task.icon;
+        document.getElementById('editModalTitle').textContent = '编辑作业';
+        document.getElementById('editName').value = task.name;
+        document.getElementById('editTime').value = task.time || 0;
+        selectedEditIcon = task.icon;
+        renderIconPicker(task.icon);
+        document.getElementById('editModal').classList.add('active');
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').classList.remove('active');
+        editingHwId = null;
+    }
+
+    function renderIconPicker(selected) {
+        document.getElementById('editIconSelect').innerHTML = ICON_OPTIONS.map(icon =>
+            `<div class="edit-icon-option ${icon === selected ? 'selected' : ''}" onclick="selectIcon('${icon}')">${icon}</div>`
+        ).join('');
+    }
+
+    function selectIcon(icon) {
+        selectedEditIcon = icon;
+        document.getElementById('editModalIcon').textContent = icon;
+        document.querySelectorAll('.edit-icon-option').forEach(el => {
+            el.classList.toggle('selected', el.textContent === icon);
+        });
+    }
+
+    function saveHomework() {
+        const name = document.getElementById('editName').value.trim();
+        const time = parseInt(document.getElementById('editTime').value) || 0;
+        if (!name) { showToast('请输入作业名称'); return; }
+        if (editingHwId) {
+            const task = homework.find(t => t.id === editingHwId);
+            if (task) { task.name = name; task.time = time; task.icon = selectedEditIcon; }
+        } else {
+            homework.push({ id: Date.now(), name, icon: selectedEditIcon, time, status: 'waiting' });
+        }
+        saveHomework();
+        renderParentHomeworkList();
+        closeEditModal();
+        showToast(editingHwId ? '作业已更新 ✅' : '作业已添加 ✅');
+    }
+
+    function deleteHomework(id) {
+        if (!confirm('确定删除这项作业吗？')) return;
+        homework = homework.filter(t => t.id !== id);
+        saveHomework();
+        renderParentHomeworkList();
+        showToast('已删除 🗑️');
+    }
+    // ========== 家长模式函数结束 ==========
 
     function updateDate() {
         const now = new Date();
@@ -1035,6 +1216,7 @@
         const tname = params.get('task_name');
         const sug = params.get('suggest');
         const deadline = params.get('deadline');
+        isParentMode = params.get('mode') === 'parent';
 
         if (task === 'assigned' && tname) {
             assignedTask = {
@@ -1064,6 +1246,7 @@
     }
 
     function renderHomeworkList() {
+        if (isParentMode) return;
         const list = document.getElementById('homeworkList');
         list.innerHTML = homework.map(task => `
             <div class="homework-item">
@@ -1087,10 +1270,6 @@
         const total = homework.length;
         document.getElementById('progressCount').textContent = `${done}/${total} ${ICON}`;
         document.getElementById('progressFill').style.width = `${total > 0 ? (done/total*100) : 0}%`;
-    }
-
-    function statusText(s) {
-        return { waiting:'⏳ 等待', doing:'🔄 进行中', done:'✅ 完成' }[s] || s;
     }
 
     function updateStats() {

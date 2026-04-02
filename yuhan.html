@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>羽菡森林计时器 🌿</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #f0f9f0 0%, #e8f5e9 50%, #f1f8e9 100%);
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+        body::before { content: '🍃'; position: fixed; top: 80px; right: 18px; font-size: 28px; opacity: 0.25; animation: sway 4s ease-in-out infinite; }
+        body::after { content: '🌲'; position: fixed; top: 150px; left: 12px; font-size: 22px; opacity: 0.2; animation: sway 5s ease-in-out infinite 1.5s; }
+        @keyframes sway { 0%,100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg) translateX(5px); } }
+        .header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; background: rgba(255,255,255,0.82); backdrop-filter: blur(10px); box-shadow: 0 2px 16px rgba(76,175,80,0.12); position: sticky; top: 0; z-index: 100; }
+        .header-title { display: flex; align-items: center; gap: 10px; }
+        .header-icon { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #81C784 0%, #4CAF50 100%); display: flex; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 4px 12px rgba(76,175,80,0.3); }
+        .header-name { font-size: 18px; font-weight: 700; color: #2E7D32; }
+        .header-switch { display: flex; align-items: center; gap: 6px; padding: 6px 14px; background: linear-gradient(135deg, #F8BBD9 0%, #F48FB1 100%); border-radius: 20px; font-size: 13px; font-weight: 600; color: #880E4F; text-decoration: none; }
+        .header-deadline { display: flex; align-items: center; gap: 6px; padding: 5px 12px; background: rgba(76,175,80,0.1); border-radius: 20px; font-size: 13px; font-weight: 600; color: #4CAF50; transition: all 0.3s; }
+        .header-deadline.warning { background: rgba(255,193,7,0.15); color: #e67e22; animation: blink-warn 1s ease-in-out infinite; }
+        .header-deadline.danger { background: rgba(231,76,60,0.15); color: #e74c3c; animation: blink-danger 0.6s ease-in-out infinite; }
+        @keyframes blink-warn { 0%,100% { opacity:1; } 50% { opacity:0.7; } }
+        @keyframes blink-danger { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
+        .header-deadline-icon { font-size: 14px; }
+        .main { padding: 0 16px; }
+        .avatar-section { text-align: center; padding: 24px 0 16px; }
+        .main-avatar { width: 90px; height: 90px; border-radius: 50%; background: linear-gradient(135deg, #81C784 0%, #4CAF50 100%); display: inline-flex; align-items: center; justify-content: center; font-size: 46px; box-shadow: 0 8px 24px rgba(76,175,80,0.3); margin-bottom: 10px; animation: pulse-forest 3.5s ease-in-out infinite; }
+        @keyframes pulse-forest { 0%,100% { box-shadow: 0 8px 24px rgba(76,175,80,0.3); } 50% { box-shadow: 0 8px 32px rgba(76,175,80,0.45); } }
+        .greeting { font-size: 20px; font-weight: 700; color: #2E7D32; margin-bottom: 4px; }
+        .date-display { font-size: 14px; color: #999; }
+        .card { background: rgba(255,255,255,0.9); border-radius: 20px; padding: 18px; margin-bottom: 14px; box-shadow: 0 4px 20px rgba(76,175,80,0.08); }
+        .progress-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .progress-title { font-size: 15px; font-weight: 600; color: #555; display: flex; align-items: center; gap: 6px; }
+        .progress-count { font-size: 18px; font-weight: 800; color: #4CAF50; }
+        .progress-bar { height: 10px; background: #e8f5e9; border-radius: 5px; overflow: hidden; margin-bottom: 14px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #81C784, #4CAF50); border-radius: 5px; transition: width 0.5s ease; }
+        .stats-row { display: flex; justify-content: space-around; }
+        .stat-item { text-align: center; }
+        .stat-value { font-size: 26px; font-weight: 800; color: #4CAF50; }
+        .stat-label { font-size: 12px; color: #aaa; margin-top: 2px; }
+        .deadline-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; font-size: 14px; color: #888; }
+        .deadline-time { font-size: 24px; font-weight: 800; color: #4CAF50; }
+        .deadline-time.overdue { color: #e74c3c; }
+        .shengdi-card { background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%); border-radius: 16px; padding: 14px; margin-bottom: 14px; border-left: 4px solid #FFA000; display: flex; align-items: center; gap: 12px; }
+        .shengdi-icon { font-size: 32px; }
+        .shengdi-info { flex: 1; }
+        .shengdi-title { font-size: 14px; font-weight: 700; color: #E65100; margin-bottom: 2px; }
+        .shengdi-count { font-size: 22px; font-weight: 800; color: #FF6D00; }
+        .shengdi-label { font-size: 12px; color: #888; }
+        .zhongkao-card { background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%); border-radius: 16px; padding: 14px; margin-bottom: 12px; border-left: 4px solid #7B1FA2; display: flex; align-items: center; gap: 12px; }
+        .zhongkao-icon { font-size: 32px; }
+        .zhongkao-info { flex: 1; }
+        .zhongkao-title { font-size: 14px; font-weight: 700; color: #6A1B9A; margin-bottom: 2px; }
+        .zhongkao-count { font-size: 22px; font-weight: 800; color: #7B1FA2; }
+        .zhongkao-label { font-size: 12px; color: #888; }
+        .assigned-alert { background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); border-radius: 16px; padding: 14px; margin-bottom: 14px; border-left: 4px solid #FF9800; display: flex; align-items: center; gap: 10px; }
+        .assigned-alert-text { flex: 1; }
+        .assigned-alert-title { font-size: 14px; font-weight: 700; color: #E65100; margin-bottom: 2px; }
+        .assigned-alert-desc { font-size: 13px; color: #777; }
+        .assigned-alert-action { padding: 8px 16px; background: linear-gradient(135deg, #FFB74D 0%, #FF9800 100%); color: white; border: none; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; }
+        .section-title { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; color: #555; margin-bottom: 12px; }
+        .homework-item { background: rgba(255,255,255,0.92); border-radius: 16px; padding: 16px; margin-bottom: 10px; box-shadow: 0 3px 14px rgba(76,175,80,0.06); transition: transform 0.2s; }
+        .homework-item:hover { transform: translateY(-1px); }
+        .homework-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .homework-info { display: flex; align-items: center; gap: 10px; }
+        .homework-icon { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #81C784 0%, #4CAF50 100%); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .homework-name { font-size: 16px; font-weight: 600; color: #333; }
+        .homework-time { font-size: 13px; color: #aaa; }
+        .homework-status { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .status-waiting { background: #e8f5e9; color: #388e3c; }
+        .status-doing { background: #e3f2fd; color: #1976d2; }
+        .status-done { background: #e8f5e9; color: #4caf50; }
+        .start-btn { width: 100%; padding: 13px; background: linear-gradient(135deg, #81C784 0%, #4CAF50 100%); color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
+        .start-btn:hover { transform: scale(1.02); box-shadow: 0 4px 16px rgba(76,175,80,0.35); }
+        .start-btn:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+        .add-form { display: flex; gap: 8px; margin-top: 8px; }
+        .add-input { flex: 1; padding: 12px 14px; border: 2px solid #e8f5e9; border-radius: 12px; font-size: 14px; outline: none; }
+        .add-input:focus { border-color: #4CAF50; }
+        .time-input { width: 72px; padding: 12px; border: 2px solid #e8f5e9; border-radius: 12px; font-size: 14px; text-align: center; outline: none; }
+        .time-input:focus { border-color: #4CAF50; }
+        .add-btn { padding: 12px 20px; background: linear-gradient(135deg, #81C784 0%, #4CAF50 100%); color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; }
+        .report-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #FFB74D 0%, #FF9800 100%); color: white; border: none; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 16px rgba(255,152,0,0.3); margin-top: 8px; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: white; border-radius: 24px; padding: 28px 24px; width: 90%; max-width: 340px; text-align: center; }
+        .modal-icon { font-size: 64px; margin-bottom: 8px; }
+        .modal-task { font-size: 17px; font-weight: 700; color: #333; margin-bottom: 6px; }
+        .modal-sub { font-size: 13px; color: #aaa; margin-bottom: 20px; }
+        .timer-display { font-size: 52px; font-weight: 800; color: #4CAF50; font-variant-numeric: tabular-nums; margin-bottom: 6px; }
+        .timer-display.overtime { color: #e74c3c; }
+        .timer-compare { font-size: 14px; color: #999; margin-bottom: 20px; }
+        .timer-compare.early { color: #27ae60; }
+        .timer-compare.late { color: #e74c3c; }
+        .timer-controls { display: flex; gap: 10px; justify-content: center; }
+        .timer-btn { padding: 12px 28px; border-radius: 30px; border: none; font-size: 15px; font-weight: 700; cursor: pointer; }
+        .btn-primary { background: linear-gradient(135deg, #81C784, #4CAF50); color: white; }
+        .btn-secondary { background: #f5f5f5; color: #555; }
+        .btn-success { background: #27ae60; color: white; }
+        .complete-emoji { font-size: 72px; margin-bottom: 8px; }
+        .complete-title { font-size: 22px; font-weight: 800; color: #333; margin-bottom: 16px; }
+        .complete-stats { background: #f1f8e9; border-radius: 16px; padding: 16px; margin-bottom: 16px; }
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+        .stat-row:last-child { margin-bottom: 0; }
+        .stat-row-label { color: #888; }
+        .stat-row-value { font-weight: 700; color: #333; }
+        .complete-feedback { font-size: 15px; color: #4CAF50; font-weight: 700; margin-bottom: 16px; }
+        .data-actions { display: flex; gap: 8px; margin-bottom: 12px; }
+        .data-btn { flex: 1; padding: 12px 8px; border-radius: 12px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .data-btn.export { background: #e3f2fd; color: #1565c0; }
+        .data-btn.import { background: #e8f5e9; color: #2e7d32; }
+        .data-btn.reset { background: #ffebee; color: #c62828; }
+        .data-btn-icon { font-size: 20px; }
+        #fileInput { display: none; }
+        .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(0,0,0,0.8); color: white; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: 600; z-index: 2000; opacity: 0; transition: all 0.3s; pointer-events: none; }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .tab-nav { display: flex; gap: 6px; margin-bottom: 14px; }
+        .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 12px; font-size: 13px; font-weight: 600; cursor: pointer; background: rgba(255,255,255,0.6); color: #999; transition: all 0.2s; }
+        .tab-btn.active { background: linear-gradient(135deg, #81C784, #4CAF50); color: white; box-shadow: 0 3px 10px rgba(76,175,80,0.3); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+        .stat-card { background: rgba(255,255,255,0.7); border-radius: 14px; padding: 14px; text-align: center; }
+        .stat-card-icon { font-size: 24px; margin-bottom: 4px; }
+        .stat-card-value { font-size: 22px; font-weight: 800; color: #4CAF50; }
+        .stat-card-label { font-size: 12px; color: #aaa; margin-top: 2px; }
+        .week-chart { display: flex; align-items: flex-end; justify-content: space-between; height: 80px; gap: 6px; padding: 10px 0; }
+        .week-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .week-bar { width: 100%; background: linear-gradient(to top, #81C784, #4CAF50); border-radius: 6px 6px 0 0; min-height: 4px; transition: height 0.3s; }
+        .week-bar-label { font-size: 11px; color: #aaa; }
+        .week-bar-value { font-size: 10px; color: #999; }
+        /* 家长模式样式 */
+        body.parent-mode { background: linear-gradient(135deg, #f0f4f8 0%, #e8eaf6 50%, #f3e5f5 100%); }
+        .parent-banner { background: linear-gradient(135deg, #7986CB 0%, #5C6BC0 100%); border-radius: 16px; padding: 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; }
+        .parent-banner-icon { font-size: 36px; }
+        .parent-banner-text { flex: 1; }
+        .parent-banner-title { font-size: 16px; font-weight: 700; color: white; margin-bottom: 2px; }
+        .parent-banner-desc { font-size: 13px; color: rgba(255,255,255,0.85); }
+        .parent-banner-back { padding: 8px 16px; background: rgba(255,255,255,0.25); color: white; border: 1px solid rgba(255,255,255,0.4); border-radius: 20px; font-size: 13px; font-weight: 600; text-decoration: none; cursor: pointer; }
+        .parent-banner-back:hover { background: rgba(255,255,255,0.35); }
+        .homework-actions { display: flex; gap: 6px; margin-top: 8px; }
+        .action-edit { flex: 1; padding: 9px; background: #e3f2fd; color: #1565c0; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .action-delete { flex: 1; padding: 9px; background: #ffebee; color: #c62828; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .action-start { flex: 1; }
+        /* 编辑弹窗 */
+        .edit-form { text-align: left; }
+        .edit-form label { font-size: 13px; font-weight: 600; color: #555; margin-bottom: 4px; display: block; }
+        .edit-form input { width: 100%; padding: 12px 14px; border: 2px solid #e3f2fd; border-radius: 12px; font-size: 14px; outline: none; margin-bottom: 12px; }
+        .edit-form input:focus { border-color: #5C6BC0; }
+        .edit-icon-select { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+        .edit-icon-option { width: 44px; height: 44px; border-radius: 10px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; border: 2px solid transparent; }
+        .edit-icon-option.selected { border-color: #5C6BC0; background: #e8eaf6; }
+        .edit-form-actions { display: flex; gap: 8px; }
+        .edit-save { flex: 1; padding: 12px; background: linear-gradient(135deg, #7986CB, #5C6BC0); color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; }
+        .edit-cancel { flex: 1; padding: 12px; background: #f5f5f5; color: #555; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; }
+        .add-homework-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #7986CB 0%, #5C6BC0 100%); color: white; border: none; border-radius: 14px; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; }
+        .add-homework-btn:hover { box-shadow: 0 4px 16px rgba(92,107,192,0.35); }
+        
+        /* 家长版专属样式 */
+        .parent-data-section { margin-top: 16px; }
+        .parent-data-title { font-size: 14px; font-weight: 700; color: #888; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+        .parent-data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .parent-data-btn { padding: 14px 10px; border-radius: 12px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .parent-data-btn-icon { font-size: 22px; }
+        .parent-data-btn-label { font-size: 12px; }
+        .parent-data-btn.export { background: #e3f2fd; color: #1565c0; }
+        .parent-data-btn.import { background: #e8f5e9; color: #2e7d32; }
+        .parent-data-btn.reset { background: #ffebee; color: #c62828; }
+        .parent-data-btn.send { background: #fff3e0; color: #e65100; }
+        .parent-data-btn.stats { background: #f3e5f5; color: #7b1fa2; }
+        .parent-stats-card { background: linear-gradient(135deg, #e8eaf6 0%, #c5cae9 100%); border-radius: 16px; padding: 16px; margin-top: 12px; }
+        .parent-stats-title { font-size: 14px; font-weight: 700; color: #3949ab; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+        .parent-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .parent-stat-item { background: rgba(255,255,255,0.7); border-radius: 12px; padding: 12px 8px; text-align: center; }
+        .parent-stat-value { font-size: 22px; font-weight: 800; color: #5C6BC0; }
+        .parent-stat-label { font-size: 11px; color: #888; margin-top: 2px; }
+        .parent-stat-item.highlight { background: rgba(92,107,192,0.12); }
+        .parent-stat-item.highlight .parent-stat-value { color: #3949ab; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-title">
+            <div class="header-icon">🌿</div>
+            <div class="header-name" id="headerName">羽菡森林计时器</div>
+        </div>
+        <div class="header-deadline" id="headerDeadline">
+            <span class="header-deadline-icon">⏰</span>
+            <span id="headerDeadlineTime">--:--</span>
+        </div>
+        <a href="yujia.html" class="header-switch" id="switchLink">🐱 切换羽佳</a>
+    </div>
+
+    <!-- 家长模式 Banner -->
+    <div class="main" id="parentBanner" style="display:none;">
+        <div class="parent-banner" style="margin-top:14px;">
+            <div class="parent-banner-icon">👨‍👧</div>
+            <div class="parent-banner-text">
+                <div class="parent-banner-title">👨‍👧 家长版 · 作业管理</div>
+                <div class="parent-banner-desc">可添加、编辑、删除作业（不影响计时）</div>
+            </div>
+            <a href="yuhan.html" class="parent-banner-back" id="backToChild">返回孩子版</a>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="avatar-section">
+            <div class="main-avatar">🌿</div>
+            <div class="greeting">🌿 羽菡加油！稳步前行！🌿</div>
+            <div class="date-display" id="dateDisplay"></div>
+        </div>
+
+        <div class="card">
+            <div class="deadline-row">
+                <span>⏰</span><span>今日截止</span>
+                <span class="deadline-time" id="deadlineTime">23:00</span>
+            </div>
+            <div class="deadline-row" style="margin-bottom:0">
+                <span id="deadlineRemaining" style="color:#4CAF50;font-weight:700;font-size:15px;"></span>
+            </div>
+        </div>
+
+        <div class="card" id="shengdiCard">
+            <div class="shengdi-card">
+                <div class="shengdi-icon">🌏</div>
+                <div class="shengdi-info">
+                    <div class="shengdi-title">生地会考倒计时</div>
+                    <div><span class="shengdi-count" id="shengdiDays">--</span> <span class="shengdi-label">天后考试</span></div>
+                </div>
+            </div>
+            <div class="deadline-row">
+                <span>📚</span><span>剩余复习时间</span>
+                <span id="shengdiStudy" style="font-weight:700;color:#4CAF50;font-size:15px;"></span>
+            </div>
+        </div>
+
+        <!-- 中考倒计时卡片 -->
+        <div class="card" id="zhongkaoCard">
+            <div class="zhongkao-card">
+                <div class="zhongkao-icon">🎓</div>
+                <div class="zhongkao-info">
+                    <div class="zhongkao-title">中考倒计时</div>
+                    <div><span class="zhongkao-count" id="zhongkaoDays">--</span> <span class="zhongkao-label">天后考试</span></div>
+                </div>
+            </div>
+            <div class="deadline-row">
+                <span>📚</span><span>剩余复习时间</span>
+                <span id="zhongkaoStudy" style="font-weight:700;color:#7B1FA2;font-size:15px;"></span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="progress-header">
+                <div class="progress-title">📚 今日进度</div>
+                <div class="progress-count" id="progressCount">0/4</div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+        </div>
+
+        <!-- Tab 统计 -->
+        <div class="card">
+            <div class="tab-nav">
+                <button class="tab-btn active" id="tabToday" onclick="switchTab('today')">📅 今日</button>
+                <button class="tab-btn" id="tabWeek" onclick="switchTab('week')">📆 本周</button>
+                <button class="tab-btn" id="tabMonth" onclick="switchTab('month')">📊 本月</button>
+            </div>
+            <div class="tab-content active" id="contentToday">
+                <div class="stats-row">
+                    <div class="stat-item"><div class="stat-value" id="studyMinutes">0</div><div class="stat-label">学习分钟</div></div>
+                    <div class="stat-item"><div class="stat-value" id="restMinutes">0</div><div class="stat-label">休息分钟</div></div>
+                    <div class="stat-item"><div class="stat-value" id="efficiency">0%</div><div class="stat-label">学习效率</div></div>
+                </div>
+            </div>
+            <div class="tab-content" id="contentWeek">
+                <div class="stat-grid">
+                    <div class="stat-card"><div class="stat-card-icon">📚</div><div class="stat-card-value" id="weekTotalMin">0</div><div class="stat-card-label">总学习分钟</div></div>
+                    <div class="stat-card"><div class="stat-card-icon">⭐</div><div class="stat-card-value" id="weekAvgEff">0%</div><div class="stat-card-label">平均效率</div></div>
+                    <div class="stat-card"><div class="stat-card-icon">✅</div><div class="stat-card-value" id="weekTasks">0</div><div class="stat-card-label">完成作业数</div></div>
+                    <div class="stat-card"><div class="stat-card-icon">🏆</div><div class="stat-card-value" id="weekDays">0</div><div class="stat-card-label">学习天数</div></div>
+                </div>
+                <div class="week-chart" id="weekChart"></div>
+            </div>
+            <div class="tab-content" id="contentMonth">
+                <div class="stat-grid">
+                    <div class="stat-card"><div class="stat-card-icon">📚</div><div class="stat-card-value" id="monthTotalMin">0</div><div class="stat-card-label">总学习分钟</div></div>
+                    <div class="stat-card"><div class="stat-card-icon">⭐</div><div class="stat-card-value" id="monthAvgEff">0%</div><div class="stat-card-label">平均效率</div></div>
+                    <div class="stat-card"><div class="stat-card-icon">✅</div><div class="stat-card-value" id="monthTasks">0</div><div class="stat-card-label">完成作业数</div></div>
+                    <div class="stat-card"><div class="stat-card-icon">🎯</div><div class="stat-card-value" id="monthBest">--</div><div class="stat-card-label">最高效率日</div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="assignedAlert" style="display:none;">
+            <div class="assigned-alert">
+                <div class="assigned-alert-icon">📋</div>
+                <div class="assigned-alert-text">
+                    <div class="assigned-alert-title" id="assignedTitle">家长布置了新作业</div>
+                    <div class="assigned-alert-desc" id="assignedDesc"></div>
+                </div>
+                <button class="assigned-alert-action" onclick="startAssigned()">开始 ⏱</button>
+            </div>
+        </div>
+
+        <!-- 孩子版添加作业区 -->
+        <div id="childAddSection">
+            <div class="section-title">📝 今日作业</div>
+            <div id="homeworkList"></div>
+            <div class="card">
+                <div class="section-title" style="margin-bottom:12px">✨ 添加额外作业</div>
+                <div class="add-form">
+                    <input type="text" class="add-input" id="newName" placeholder="作业名称，如：物理练习">
+                    <input type="number" class="time-input" id="newTime" placeholder="分钟" min="1">
+                    <button class="add-btn" onclick="addHomework()">+</button>
+                </div>
+            </div>
+            <div class="card">
+                <button class="report-btn" onclick="sendReport()">📊 发送今日报告给爸爸妈妈</button>
+            </div>
+        </div>
+
+        <!-- 家长版作业管理区 -->
+        <div id="parentManageSection" style="display:none;">
+            <div class="section-title">📋 作业清单（共 <span id="parentHwCount">0</span> 项）</div>
+            <div id="parentHomeworkList"></div>
+            <button class="add-homework-btn" onclick="openAddModal()">➕ 添加学校作业</button>
+            
+            <!-- 发送作业清单按钮 -->
+            <div class="card" style="margin-top:12px;">
+                <button class="report-btn" onclick="sendHomeworkListCard()" style="background: linear-gradient(135deg, #FFB74D 0%, #FF9800 100%);">📤 发送作业清单给孩子</button>
+            </div>
+            
+            <!-- 家长版统计数据 -->
+            <div class="parent-stats-card">
+                <div class="parent-stats-title">📊 学习统计</div>
+                <div class="parent-stats-grid">
+                    <div class="parent-stat-item highlight">
+                        <div class="parent-stat-value" id="parentTodayMin">0</div>
+                        <div class="parent-stat-label">今日分钟</div>
+                    </div>
+                    <div class="parent-stat-item">
+                        <div class="parent-stat-value" id="parentTodayEff">0%</div>
+                        <div class="parent-stat-label">今日效率</div>
+                    </div>
+                    <div class="parent-stat-item highlight">
+                        <div class="parent-stat-value" id="parentTodayTasks">0</div>
+                        <div class="parent-stat-label">完成作业</div>
+                    </div>
+                    <div class="parent-stat-item">
+                        <div class="parent-stat-value" id="parentWeekMin">0</div>
+                        <div class="parent-stat-label">本周分钟</div>
+                    </div>
+                    <div class="parent-stat-item">
+                        <div class="parent-stat-value" id="parentWeekEff">0%</div>
+                        <div class="parent-stat-label">本周效率</div>
+                    </div>
+                    <div class="parent-stat-item">
+                        <div class="parent-stat-value" id="parentMonthDays">0</div>
+                        <div class="parent-stat-label">本月天数</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 数据管理 -->
+            <div class="parent-data-section">
+                <div class="parent-data-title">💾 数据管理</div>
+                <div class="parent-data-grid">
+                    <button class="parent-data-btn export" onclick="exportData()">
+                        <span class="parent-data-btn-icon">📤</span>
+                        <span class="parent-data-btn-label">导出数据</span>
+                    </button>
+                    <button class="parent-data-btn import" onclick="document.getElementById('fileInput').click()">
+                        <span class="parent-data-btn-icon">📥</span>
+                        <span class="parent-data-btn-label">导入数据</span>
+                    </button>
+                    <button class="parent-data-btn reset" onclick="resetParentData()">
+                        <span class="parent-data-btn-icon">🔄</span>
+                        <span class="parent-data-btn-label">重置数据</span>
+                    </button>
+                    <button class="parent-data-btn send" onclick="sendReport()">
+                        <span class="parent-data-btn-icon">📊</span>
+                        <span class="parent-data-btn-label">发送日报</span>
+                    </button>
+                    <button class="parent-data-btn sync" onclick="manualSync()" id="syncBtn" style="background: linear-gradient(135deg, #4FC3F7 0%, #29B6F6 100%);">
+                        <span class="parent-data-btn-icon">🔄</span>
+                        <span class="parent-data-btn-label">刷新云端</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <br><br>
+    </div>
+
+    <input type="file" id="fileInput" accept=".json" onchange="importData(event)">
+
+    <div class="modal-overlay" id="timerModal">
+        <div class="modal">
+            <div class="modal-icon">🌿</div>
+            <div class="modal-task" id="modalTaskName">语文阅读</div>
+            <div class="modal-sub" id="modalSub">专注中...</div>
+            <div class="timer-display" id="timerDisplay">00:00</div>
+            <div class="timer-compare" id="timerCompare">预计 20 分钟</div>
+            <div class="timer-controls">
+                <button class="timer-btn btn-secondary" id="pauseBtn" onclick="pauseTimer()">⏸ 暂停</button>
+                <button class="timer-btn btn-success" onclick="finishTask()">✅ 完成</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="completeModal">
+        <div class="modal">
+            <div class="complete-emoji" id="completeEmoji">🎉</div>
+            <div class="complete-title" id="completeTitle">太棒了！</div>
+            <div class="complete-stats">
+                <div class="stat-row"><span class="stat-row-label">总用时</span><span class="stat-row-value" id="completeTotal">25分钟</span></div>
+                <div class="stat-row"><span class="stat-row-label">预计时间</span><span class="stat-row-value" id="completeExpected">20分钟</span></div>
+                <div class="stat-row"><span class="stat-row-label">实际学习</span><span class="stat-row-value" id="completeStudy">23分钟</span></div>
+                <div class="stat-row"><span class="stat-row-label">休息时间</span><span class="stat-row-value" id="completeRest">0分钟</span></div>
+                <div class="stat-row"><span class="stat-row-label">学习效率</span><span class="stat-row-value" id="completeEfficiency">92%</span></div>
+            </div>
+            <div class="complete-feedback" id="completeFeedback">提前完成！效率超高！✨</div>
+            <button class="timer-btn btn-primary" style="width:100%" onclick="closeComplete()">继续加油 💪</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <!-- 家长模式：编辑/添加作业弹窗 -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal">
+            <div class="modal-icon" id="editModalIcon">📝</div>
+            <div class="modal-task" id="editModalTitle">编辑作业</div>
+            <div class="edit-form">
+                <label>作业名称</label>
+                <input type="text" id="editName" placeholder="如：数学练习">
+                <label>建议时间（分钟，0=待定）</label>
+                <input type="number" id="editTime" placeholder="30" min="0">
+                <label>选择图标</label>
+                <div class="edit-icon-select" id="editIconSelect"></div>
+                <div class="edit-form-actions">
+                    <button class="edit-cancel" onclick="closeEditModal()">取消</button>
+                    <button class="edit-save" id="editSaveBtn" onclick="saveHomework()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const CHILD = 'yuhan';
+    const DEADLINE = '23:00';
+    const ICON = '🌿';
+    const CHILD_NAME = '羽菡';
+    const CHILD_OPEN_ID = 'ou_bdac81aee0c980d2bd351febe0393eb3';  // 羽菡飞书 open_id
+    const PARENT_OPEN_ID = 'ou_04d8a814e9b4ce5640739ee9c2221df5'; // 爸爸
+    const FEISHU_WEBHOOK = 'https://open.feishu.cn/open-apis/bot/v2/hook/eff6ff06-c0cb-4c63-b032-a2b8776085d2';
+    const SHENGDI_DATE = new Date('2026-06-16');  // 生地会考（考试当天仍显示0）
+    const ZHONGKAO_DATE = new Date('2027-06-30'); // 中考
+    const DEFAULT_HOMEWORK = [
+        { id:1, name:'语文作业', icon:'📖', time:30, status:'waiting' },
+        { id:2, name:'数学练习', icon:'📐', time:30, status:'waiting' },
+        { id:3, name:'英语听说', icon:'🎧', time:20, status:'waiting' },
+        { id:4, name:'学校作业', icon:'📝', time:0, status:'waiting' }
+    ];
+    const ICON_OPTIONS = ['📖','📐','🎧','📝','📚','🔢','🌍','🧬','🎨','🎵','⚽','💪','🔬','📕','✏️'];
+    // ⚠️ Token 只用于写入 Gist
+    const GITHUB_PAT = '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';
+    const GIST_ID = '0894bafe97c2a153f726c0edc6b44816';
+    const GIST_FILENAME = 'yuhan_sync.json';
+    const GIST_RAW_URL = `https://gist.githubusercontent.com/tangshaoxiong1978-ops/${GIST_ID}/raw/' + GIST_FILENAME + `?t=${Date.now()}`;
+    let cloudDataSha = null;
+    let cloudSyncing = false;
+    let homework = [], currentTask = null, timerInterval = null, startTime = null, pausedTime = 0, isPaused = false, restStartTime = null, assignedTask = null;
+    let isParentMode = false, editingHwId = null, selectedEditIcon = '📝';
+    const praises = ['太棒了！提前完成！🎉','专注力满分！继续加油！🌟','效率超高！💯','稳步前进！🌿','高效完成！👏','提前完成！厉害！🚀'];
+    const encouragements = ['虽然超时了，但坚持完成就是胜利！💪','做完就是好样的！继续努力！🌈','没关系，尽力就好！💖'];
+    let audioCtx = null;
+    function getAudioCtx() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
+    function playBeep(freq=880, dur=0.3, vol=0.4) {
+        try { const ctx = getAudioCtx(), osc = ctx.createOscillator(), gain = ctx.createGain(); osc.connect(gain); gain.connect(ctx.destination); osc.frequency.value = freq; gain.gain.value = vol; osc.start(); gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur); osc.stop(ctx.currentTime + dur); } catch(e) {}
+    }
+    function playWarningSound() { playBeep(660, 0.15); setTimeout(() => playBeep(880, 0.15), 200); }
+    function playDangerSound() { playBeep(440, 0.3, 0.6); setTimeout(() => playBeep(440, 0.3, 0.6), 400); setTimeout(() => playBeep(660, 0.3, 0.6), 800); }
+    
+    // ============ 云端同步 ============
+    async function syncFromCloud() {
+        try {
+            // 先尝试用公开URL读取（无需Token，家长手机必备）
+            try {
+                const rawResp = await fetch(GIST_RAW_URL.replace('?t=' + Date.now(), ''), { cache: 'no-store' });
+                if (rawResp.ok) {
+                    const text = await rawResp.text();
+                    return JSON.parse(text);
+                }
+            } catch (e) { /* 公开读取失败 */ }
+            // 备选：用API读取
+            const resp = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+                headers: { 'Authorization': `token ${GITHUB_PAT}`, 'Accept': 'application/vnd.github.v3+json' }
+            });
+            if (!resp.ok) return null;
+            const data = await resp.json();
+            cloudDataSha = data.history?.[0]?.version || data.id;
+            const fileData = data.files[GIST_FILENAME];
+            if (fileData) return JSON.parse(fileData.content);
+            return null;
+        } catch (e) { console.error('云端同步失败:', e); return null; }
+    }
+    
+    async function syncToCloud(data) {
+        if (cloudSyncing) return;
+        cloudSyncing = true;
+        try {
+            const payload = {
+                description: `${CHILD} homework sync`,
+                files: {
+                    [GIST_FILENAME]: {
+                        content: JSON.stringify(data, null, 2)
+                    }
+                }
+            };
+            const url = cloudDataSha 
+                ? `https://api.github.com/gists/${GIST_ID}` 
+                : 'https://api.github.com/gists';
+            if (cloudDataSha) {
+                payload.files[GIST_FILENAME] = {
+                    filename: GIST_FILENAME,
+                    content: JSON.stringify(data, null, 2)
+                };
+            }
+            const resp = await fetch(url, {
+                method: cloudDataSha ? 'PATCH' : 'POST',
+                headers: { 'Authorization': `token ${GITHUB_PAT}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (resp.ok) {
+                const result = await resp.json();
+                cloudDataSha = result.id;
+            }
+        } catch (e) { console.error('云端保存失败:', e); }
+        cloudSyncing = false;
+    }
+    
+    // 云端同步状态
+    let syncStatus = ''; // '', 'syncing', 'ok', 'error'
+    
+    function updateSyncStatus(status) {
+        syncStatus = status;
+        const btn = document.getElementById('syncBtn');
+        if (!btn) return;
+        if (status === 'syncing') {
+            btn.querySelector('.parent-data-btn-label').textContent = '同步中...';
+            btn.disabled = true;
+        } else if (status === 'ok') {
+            btn.querySelector('.parent-data-btn-label').textContent = '已同步 ✓';
+            btn.disabled = false;
+            setTimeout(() => {
+                if (syncStatus === 'ok') btn.querySelector('.parent-data-btn-label').textContent = '刷新云端';
+            }, 2000);
+        } else if (status === 'error') {
+            btn.querySelector('.parent-data-btn-label').textContent = '同步失败';
+            btn.disabled = false;
+        } else {
+            btn.querySelector('.parent-data-btn-label').textContent = '刷新云端';
+            btn.disabled = false;
+        }
+    }
+    
+    function manualSync() {
+        updateSyncStatus('syncing');
+        loadAllCloudData().then(() => { updateSyncStatus('ok'); }).catch(() => { updateSyncStatus('error'); });
+    }
+    
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && isParentMode) manualSync();
+    });
+    
+    let parentPollInterval = null;
+    
+    function loadAllCloudData() {
+        return syncFromCloud().then(cloudData => {
+            if (!cloudData) return;
+            const cloudHomework = cloudData.homework || cloudData.helmwork || [];
+            if (cloudHomework.length > 0) {
+                homework = cloudHomework;
+                localStorage.setItem(`hw_${CHILD}`, JSON.stringify(homework));
+            }
+            if (cloudData.timers) {
+                Object.entries(cloudData.timers).forEach(([k, v]) => {
+                    localStorage.setItem(k, JSON.stringify(v));
+                });
+            }
+            if (isParentMode) {
+                loadHomework();
+                renderParentHomeworkList();
+                updateParentStats();
+            }
+        });
+    }
+    
+    function saveAllToCloud() {
+        const timers = {};
+        for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k.startsWith(`timer_${CHILD}`)) {
+                timers[k] = JSON.parse(localStorage.getItem(k));
+            }
+        }
+        syncToCloud({ homework, timers, lastUpdated: new Date().toISOString() });
+    }
+
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+        document.getElementById('content' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+        if (tab === 'week') renderWeekStats();
+        if (tab === 'month') renderMonthStats();
+    }
+
+    function renderWeekStats() {
+        const days = ['日','一','二','三','四','五','六'], now = new Date(), today = now.getDay();
+        let totalMin = 0, totalEff = 0, effCount = 0, taskCount = 0, studyDays = 0, maxMin = 0;
+        const weekData = [];
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(now); d.setDate(d.getDate() - today + i);
+            const key = `timer_${CHILD}_${d.toISOString().split('T')[0]}`;
+            const data = JSON.parse(localStorage.getItem(key) || '{}');
+            const mins = data.studyMinutes || 0;
+            weekData.push({ label: days[i], mins, isToday: i === today });
+            totalMin += mins; if (mins > 0) studyDays++;
+            if (data.efficiency) { totalEff += data.efficiency; effCount++; }
+            taskCount += (data.tasks || []).length;
+            if (mins > maxMin) maxMin = mins;
+        }
+        document.getElementById('weekTotalMin').textContent = totalMin;
+        document.getElementById('weekAvgEff').textContent = effCount > 0 ? Math.round(totalEff / effCount) + '%' : '0%';
+        document.getElementById('weekTasks').textContent = taskCount;
+        document.getElementById('weekDays').textContent = studyDays;
+        const chart = document.getElementById('weekChart');
+        chart.innerHTML = weekData.map(d => {
+            const h = maxMin > 0 ? Math.max(4, Math.round(d.mins / maxMin * 70)) : 4;
+            return `<div class="week-bar-wrap"><div class="week-bar" style="height:${h}px;opacity:${d.isToday ? 1 : 0.5}"></div><div class="week-bar-label">${d.label}</div><div class="week-bar-value">${d.mins}m</div></div>`;
+        }).join('');
+    }
+
+    function renderMonthStats() {
+        const now = new Date();
+        let totalMin = 0, totalEff = 0, effCount = 0, taskCount = 0, bestDay = '--', bestEff = 0;
+        for (let d = 1; d <= 31; d++) {
+            const dt = new Date(now.getFullYear(), now.getMonth(), d);
+            if (dt > now) break;
+            const key = `timer_${CHILD}_${dt.toISOString().split('T')[0]}`;
+            const data = JSON.parse(localStorage.getItem(key) || '{}');
+            totalMin += data.studyMinutes || 0;
+            taskCount += (data.tasks || []).length;
+            if (data.efficiency && data.efficiency > bestEff) { bestEff = data.efficiency; bestDay = `${now.getMonth()+1}/${d}`; }
+            if (data.efficiency) { totalEff += data.efficiency; effCount++; }
+        }
+        document.getElementById('monthTotalMin').textContent = totalMin;
+        document.getElementById('monthAvgEff').textContent = effCount > 0 ? Math.round(totalEff / effCount) + '%' : '0%';
+        document.getElementById('monthTasks').textContent = taskCount;
+        document.getElementById('monthBest').textContent = bestDay;
+    }
+
+    let lastWarningLevel = 0;
+    function updateDeadlineWithWarning() {
+        const now = new Date(), [h,m] = DEADLINE.split(':').map(Number);
+        const deadline = new Date(now.setHours(h, m, 0));
+        const diff = deadline - now;
+        const el = document.getElementById('deadlineTime'), rem = document.getElementById('deadlineRemaining');
+        const hdr = document.getElementById('headerDeadline'), hdrTime = document.getElementById('headerDeadlineTime');
+        const rh = Math.floor(diff/3600000), rm = Math.floor((diff%3600000)/60000);
+        if (diff < 0) {
+            el.textContent = '已超时'; el.classList.add('overdue'); rem.textContent = '已过截止时间';
+            hdrTime.textContent = '超时!'; hdr.className = 'header-deadline danger'; rem.style.color = '#e74c3c';
+        } else if (diff < 30 * 60000) {
+            el.textContent = DEADLINE; el.classList.remove('overdue'); rem.textContent = `还有 ${rh>0?rh+'小时':''}${rm}分钟`; rem.style.color = '#e74c3c';
+            hdrTime.textContent = DEADLINE; hdr.className = 'header-deadline danger';
+            if (lastWarningLevel < 2) playDangerSound();
+        } else if (diff < 60 * 60000) {
+            el.textContent = DEADLINE; el.classList.remove('overdue'); rem.textContent = `还有 ${rh>0?rh+'小时':''}${rm}分钟`; rem.style.color = '#e67e22';
+            hdrTime.textContent = DEADLINE; hdr.className = 'header-deadline warning';
+            if (lastWarningLevel < 1) playWarningSound();
+        } else {
+            el.textContent = DEADLINE; el.classList.remove('overdue'); rem.textContent = `还有 ${rh}小时${rm}分钟`; rem.style.color = '#4CAF50';
+            hdrTime.textContent = DEADLINE; hdr.className = 'header-deadline';
+        }
+        lastWarningLevel = diff < 30*60000 ? 2 : diff < 60*60000 ? 1 : 0;
+    }
+
+    function init() {
+        updateDate(); updateShengdi(); updateZhongkao();
+        // 启动时尝试从云端同步数据
+        loadAllCloudData().then(() => {
+            loadHomework();
+            renderHomeworkList(); updateStats();
+        });
+        parseURLParams();
+        updateDeadlineWithWarning();
+        initParentMode();
+        setInterval(() => { updateDeadlineWithWarning(); updateShengdi(); updateZhongkao(); }, 30000);
+    }
+
+    function updateDate() {
+        const now = new Date(), days = ['日','一','二','三','四','五','六'];
+        document.getElementById('dateDisplay').textContent = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 星期${days[now.getDay()]}`;
+    }
+
+    function updateShengdi() {
+        const now = new Date(), diff = SHENGDI_DATE - now, days = Math.ceil(diff / 86400000);
+        const card = document.getElementById('shengdiCard');
+        if (card) {
+            if (days < 0) {
+                card.style.display = 'none';
+            } else {
+                card.style.display = 'block';
+                document.getElementById('shengdiDays').textContent = days;
+                document.getElementById('shengdiStudy').textContent = `约 ${Math.floor(days * 2)} 小时`;
+            }
+        }
+    }
+
+    function updateZhongkao() {
+        const now = new Date(), diff = ZHONGKAO_DATE - now, days = Math.ceil(diff / 86400000);
+        const card = document.getElementById('zhongkaoCard');
+        if (card) {
+            if (days < 0) {
+                card.style.display = 'none';
+            } else {
+                card.style.display = 'block';
+                document.getElementById('zhongkaoDays').textContent = days;
+                document.getElementById('zhongkaoStudy').textContent = `约 ${Math.floor(days * 2)} 小时`;
+            }
+        }
+    }
+
+    function parseURLParams() {
+        const p = new URLSearchParams(window.location.search);
+        const t = p.get('task'), n = p.get('task_name'), s = p.get('suggest');
+        isParentMode = p.get('mode') === 'parent';
+        if (t === 'assigned' && n) {
+            assignedTask = { name: decodeURIComponent(n), time: parseInt(s) || 0 };
+            document.getElementById('assignedDesc').textContent = `${assignedTask.name}${assignedTask.time > 0 ? ' · ' + assignedTask.time + '分钟' : ''}`;
+            document.getElementById('assignedAlert').style.display = 'block';
+            if (!isParentMode) setTimeout(() => sendHomeworkCard(assignedTask), 800);
+        }
+    }
+
+    function initParentMode() {
+        if (isParentMode) {
+            document.body.classList.add('parent-mode');
+            document.getElementById('headerName').textContent = '👨‍👧 羽菡作业管理';
+            document.getElementById('switchLink').style.display = 'none';
+            document.getElementById('headerDeadline').style.display = 'none';
+            document.getElementById('parentBanner').style.display = 'block';
+            document.getElementById('childAddSection').style.display = 'none';
+            document.getElementById('parentManageSection').style.display = 'block';
+            // 家长模式启动时同步云端
+            updateSyncStatus('syncing');
+            loadAllCloudData().then(() => { updateSyncStatus('ok'); }).catch(() => { updateSyncStatus('error'); });
+            // 启动每30秒轮询
+            if (parentPollInterval) clearInterval(parentPollInterval);
+            parentPollInterval = setInterval(() => {
+                if (document.visibilityState === 'visible') loadAllCloudData();
+            }, 30000);
+        }
+    }
+    
+    // 更新家长版统计数据
+    function updateParentStats() {
+        const today = new Date().toISOString().split('T')[0];
+        const todayData = JSON.parse(localStorage.getItem(`timer_${CHILD}_${today}`) || '{}');
+        
+        // 今日统计
+        document.getElementById('parentTodayMin').textContent = todayData.studyMinutes || 0;
+        document.getElementById('parentTodayEff').textContent = (todayData.efficiency || 0) + '%';
+        document.getElementById('parentTodayTasks').textContent = (todayData.tasks || []).length;
+        
+        // 本周统计
+        const days = ['日','一','二','三','四','五','六'];
+        const now = new Date(), todayIdx = now.getDay();
+        let weekMin = 0, weekEffSum = 0, weekEffCount = 0;
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(now);
+            d.setDate(d.getDate() - todayIdx + i);
+            const key = `timer_${CHILD}_${d.toISOString().split('T')[0]}`;
+            const data = JSON.parse(localStorage.getItem(key) || '{}');
+            weekMin += data.studyMinutes || 0;
+            if (data.efficiency) { weekEffSum += data.efficiency; weekEffCount++; }
+        }
+        document.getElementById('parentWeekMin').textContent = weekMin;
+        document.getElementById('parentWeekEff').textContent = weekEffCount > 0 ? Math.round(weekEffSum / weekEffCount) + '%' : '0%';
+        
+        // 本月学习天数
+        let monthDays = 0;
+        for (let d = 1; d <= 31; d++) {
+            const dt = new Date(now.getFullYear(), now.getMonth(), d);
+            if (dt > now) break;
+            const key = `timer_${CHILD}_${dt.toISOString().split('T')[0]}`;
+            const data = JSON.parse(localStorage.getItem(key) || '{}');
+            if ((data.studyMinutes || 0) > 0) monthDays++;
+        }
+        document.getElementById('parentMonthDays').textContent = monthDays;
+    }
+
+    function loadHomework() { homework = JSON.parse(localStorage.getItem(`hw_${CHILD}`)) || JSON.parse(JSON.stringify(DEFAULT_HOMEWORK)); }
+    function saveHomework() { localStorage.setItem(`hw_${CHILD}`, JSON.stringify(homework)); saveAllToCloud(); }
+
+    function renderHomeworkList() {
+        if (isParentMode) return;
+        const done = homework.filter(t => t.status === 'done').length;
+        const total = homework.length;
+        document.getElementById('progressCount').textContent = `${done}/${total} ${ICON}`;
+        document.getElementById('progressFill').style.width = `${total > 0 ? (done/total*100) : 0}%`;
+        document.getElementById('homeworkList').innerHTML = homework.map(task => `
+            <div class="homework-item">
+                <div class="homework-header">
+                    <div class="homework-info">
+                        <div class="homework-icon">${task.icon}</div>
+                        <div><div class="homework-name">${task.name}</div><div class="homework-time">⏱ ${task.time > 0 ? task.time + ' 分钟' : '待定'}</div></div>
+                    </div>
+                    <div class="homework-status status-${task.status}">${statusText(task.status)}</div>
+                </div>
+                <button class="start-btn" onclick="startTask(${task.id})" ${task.status === 'done' ? 'disabled' : ''}>▶ ${task.status === 'done' ? '已完成' : '开始'}</button>
+            </div>`).join('');
+    }
+
+    function statusText(s) { return { waiting:'⏳ 等待', doing:'🔄 进行中', done:'✅ 完成' }[s] || s; }
+
+    // ========== 家长模式函数 ==========
+    function renderParentHomeworkList() {
+        document.getElementById('parentHwCount').textContent = homework.length;
+        document.getElementById('parentHomeworkList').innerHTML = homework.length === 0
+            ? '<div style="text-align:center;color:#aaa;padding:30px 0;font-size:14px;">暂无作业，点击下方添加</div>'
+            : homework.map(task => `
+                <div class="homework-item">
+                    <div class="homework-header">
+                        <div class="homework-info">
+                            <div class="homework-icon">${task.icon}</div>
+                            <div>
+                                <div class="homework-name">${task.name}</div>
+                                <div class="homework-time">⏱ ${task.time > 0 ? task.time + ' 分钟' : '待定'}</div>
+                            </div>
+                        </div>
+                        <div class="homework-status status-${task.status}">${statusText(task.status)}</div>
+                    </div>
+                    <div class="homework-actions">
+                        <button class="action-edit" onclick="openEditModal(${task.id})">✏️ 编辑</button>
+                        <button class="action-delete" onclick="deleteHomework(${task.id})">🗑️ 删除</button>
+                    </div>
+                </div>`).join('');
+    }
+
+    function openAddModal() {
+        editingHwId = null;
+        document.getElementById('editModalIcon').textContent = '➕';
+        document.getElementById('editModalTitle').textContent = '添加作业';
+        document.getElementById('editName').value = '';
+        document.getElementById('editTime').value = '30';
+        selectedEditIcon = '📝';
+        renderIconPicker('📝');
+        document.getElementById('editModal').classList.add('active');
+    }
+
+    function openEditModal(id) {
+        const task = homework.find(t => t.id === id);
+        if (!task) return;
+        editingHwId = id;
+        document.getElementById('editModalIcon').textContent = task.icon;
+        document.getElementById('editModalTitle').textContent = '编辑作业';
+        document.getElementById('editName').value = task.name;
+        document.getElementById('editTime').value = task.time || 0;
+        selectedEditIcon = task.icon;
+        renderIconPicker(task.icon);
+        document.getElementById('editModal').classList.add('active');
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').classList.remove('active');
+        editingHwId = null;
+    }
+
+    function renderIconPicker(selected) {
+        document.getElementById('editIconSelect').innerHTML = ICON_OPTIONS.map(icon =>
+            `<div class="edit-icon-option ${icon === selected ? 'selected' : ''}" onclick="selectIcon('${icon}')">${icon}</div>`
+        ).join('');
+    }
+
+    function selectIcon(icon) {
+        selectedEditIcon = icon;
+        document.getElementById('editModalIcon').textContent = icon;
+        document.querySelectorAll('.edit-icon-option').forEach(el => {
+            el.classList.toggle('selected', el.textContent === icon);
+        });
+    }
+
+    function saveHomework() {
+        const name = document.getElementById('editName').value.trim();
+        const time = parseInt(document.getElementById('editTime').value) || 0;
+        if (!name) { showToast('请输入作业名称'); return; }
+        if (editingHwId) {
+            const task = homework.find(t => t.id === editingHwId);
+            if (task) { task.name = name; task.time = time; task.icon = selectedEditIcon; }
+        } else {
+            homework.push({ id: Date.now(), name, icon: selectedEditIcon, time, status: 'waiting' });
+        }
+        saveHomework();
+        renderParentHomeworkList();
+        closeEditModal();
+        showToast(editingHwId ? '作业已更新 ✅' : '作业已添加 ✅');
+    }
+
+    function deleteHomework(id) {
+        if (!confirm('确定删除这项作业吗？')) return;
+        homework = homework.filter(t => t.id !== id);
+        saveHomework();
+        renderParentHomeworkList();
+        showToast('已删除 🗑️');
+    }
+    // ========== 家长模式函数结束 ==========
+
+    function updateStats() {
+        const today = new Date().toISOString().split('T')[0];
+        const data = JSON.parse(localStorage.getItem(`timer_${CHILD}_${today}`) || '{}');
+        document.getElementById('studyMinutes').textContent = data.studyMinutes || 0;
+        document.getElementById('restMinutes').textContent = data.restMinutes || 0;
+        document.getElementById('efficiency').textContent = (data.efficiency || 0) + '%';
+    }
+
+    function updateDeadline() {
+        const now = new Date(), [h,m] = DEADLINE.split(':').map(Number), deadline = new Date(now.setHours(h,m,0));
+        const diff = deadline - now;
+        const el = document.getElementById('deadlineTime'), rem = document.getElementById('deadlineRemaining');
+        if (diff < 0) { el.classList.add('overdue'); rem.textContent = '已过截止时间'; }
+        else { el.classList.remove('overdue'); const rh = Math.floor(diff/3600000), rm = Math.floor((diff%3600000)/60000); rem.textContent = `还有 ${rh}小时${rm}分钟`; }
+    }
+
+    function startTask(id) {
+        currentTask = homework.find(t => t.id === id);
+        if (!currentTask || currentTask.status === 'done') return;
+        currentTask.status = 'doing'; saveHomework(); renderHomeworkList();
+        document.getElementById('modalTaskName').textContent = currentTask.name;
+        document.getElementById('modalSub').textContent = currentTask.time > 0 ? `建议 ${currentTask.time} 分钟` : '自主安排';
+        document.getElementById('timerModal').classList.add('active');
+        startTime = Date.now(); pausedTime = 0; isPaused = false;
+        document.getElementById('pauseBtn').textContent = '⏸ 暂停';
+        updateTimer(); timerInterval = setInterval(updateTimer, 1000);
+    }
+
+    function startAssigned() {
+        if (!assignedTask) return;
+        homework.push({ id: Date.now(), name: assignedTask.name, icon: '📋', time: assignedTask.time, status: 'waiting' });
+        saveHomework(); renderHomeworkList();
+        document.getElementById('assignedAlert').style.display = 'none';
+        startTask(homework[homework.length-1].id);
+    }
+
+    function updateTimer() {
+        if (isPaused) return;
+        const elapsed = Math.floor((Date.now() - startTime - pausedTime) / 1000);
+        document.getElementById('timerDisplay').textContent = `${String(Math.floor(elapsed/60)).padStart(2,'0')}:${String(elapsed%60).padStart(2,'0')}`;
+        if (currentTask && currentTask.time > 0) {
+            const remaining = currentTask.time * 60 - elapsed, comp = document.getElementById('timerCompare'), disp = document.getElementById('timerDisplay');
+            if (remaining > 0) { comp.textContent = `预计 ${currentTask.time} 分钟 · 还剩 ${Math.ceil(remaining/60)} 分钟`; comp.className = 'timer-compare'; disp.classList.remove('overtime'); }
+            else { comp.textContent = `预计 ${currentTask.time} 分钟 · 已超时 ${Math.floor(-remaining/60)} 分钟`; comp.className = 'timer-compare late'; disp.classList.add('overtime'); }
+        }
+    }
+
+    function pauseTimer() {
+        if (isPaused) { pausedTime += Date.now() - restStartTime; isPaused = false; document.getElementById('pauseBtn').textContent = '⏸ 暂停'; document.getElementById('modalSub').textContent = '继续加油！'; }
+        else { restStartTime = Date.now(); isPaused = true; document.getElementById('pauseBtn').textContent = '▶ 继续'; document.getElementById('modalSub').textContent = '休息一下...'; }
+    }
+
+    function finishTask() {
+        clearInterval(timerInterval); document.getElementById('timerModal').classList.remove('active');
+        if (!currentTask) return;
+        const elapsed = Math.floor((Date.now() - startTime - pausedTime) / 1000);
+        const totalMin = Math.ceil(elapsed / 60);
+        const eff = currentTask.time > 0 ? Math.min(Math.round((currentTask.time / totalMin) * 100), 100) : 100;
+        saveTaskData(currentTask, totalMin, totalMin, eff);
+        const isEarly = currentTask.time > 0 && totalMin < currentTask.time - 3;
+        const isLate = currentTask.time > 0 && totalMin > currentTask.time + 5;
+        document.getElementById('completeEmoji').textContent = isEarly ? '🎉' : isLate ? '💪' : '👍';
+        document.getElementById('completeTitle').textContent = isEarly ? '太棒了！' : isLate ? '坚持完成！' : '完成！';
+        document.getElementById('completeTotal').textContent = totalMin + '分钟';
+        document.getElementById('completeExpected').textContent = currentTask.time > 0 ? currentTask.time + '分钟' : '自主';
+        document.getElementById('completeStudy').textContent = totalMin + '分钟';
+        document.getElementById('completeEfficiency').textContent = eff + '%';
+        document.getElementById('completeFeedback').textContent = isEarly ? praises[Math.floor(Math.random()*praises.length)] : isLate ? encouragements[Math.floor(Math.random()*encouragements.length)] : '准时完成，继续保持！👍';
+        document.getElementById('completeModal').classList.add('active');
+        
+        // 保存任务信息用于发送通知
+        const completedTaskInfo = {
+            name: currentTask.name,
+            icon: currentTask.icon,
+            totalMin: totalMin,
+            efficiency: eff
+        };
+        
+        currentTask.status = 'done'; saveHomework(); currentTask = null; renderHomeworkList(); updateStats();
+        // 自动发送完成通知给家长
+        sendTaskCompleteCard(completedTaskInfo);
+    }
+
+    // 发送作业完成通知卡片给家长
+    function sendTaskCompleteCard(completedTask) {
+        const done = homework.filter(t => t.status === 'done').length;
+        const total = homework.length;
+        const remaining = total - done;
+        const remainingTasks = homework.filter(t => t.status !== 'done');
+        const remainingList = remainingTasks.length > 0 
+            ? remainingTasks.map(t => `${t.icon} ${t.name}`).join('、') 
+            : '无';
+
+        const now = new Date();
+        const timeStr = `${now.getHours()}点${now.getMinutes()}分`;
+        
+        const effText = completedTask.efficiency >= 90 ? '🎉 效率超高！' 
+            : completedTask.efficiency >= 70 ? '👍 表现不错！' 
+            : '💪 继续加油！';
+
+        const card = {
+            msg_type: 'interactive',
+            card: {
+                config: { wide_screen_mode: true },
+                header: {
+                    title: { tag: 'plain_text', content: `✅ 羽菡完成作业通知` },
+                    template: 'green'
+                },
+                elements: [
+                    {
+                        tag: 'div',
+                        text: {
+                            tag: 'lark_md',
+                            content: `@小龙虾爸爸 @小龙虾妈妈，${effText}\n\n🌿 **${completedTask.name}** 已完成！\n用时 ${completedTask.totalMin} 分钟，效率 ${completedTask.efficiency}%`
+                        }
+                    },
+                    { tag: 'hr' },
+                    {
+                        tag: 'column_set',
+                        flex_mode: 'none',
+                        horizontal_spacing: 'large',
+                        columns: [
+                            { tag: 'column', width: 'auto', elements: [{ tag: 'div', text: { tag: 'lark_md', content: '**✅ 已完成**\n`' + done + '/' + total + '` 项' } }] },
+                            { tag: 'column', width: 'auto', elements: [{ tag: 'div', text: { tag: 'lark_md', content: '**📋 剩余**\n`' + remaining + '` 项' } }] }
+                        ]
+                    },
+                    { tag: 'hr' },
+                    {
+                        tag: 'div',
+                        text: { tag: 'lark_md', content: `**📝 剩余作业**\n${remainingList}` }
+                    },
+                    {
+                        tag: 'note',
+                        elements: [
+                            { tag: 'plain_text', content: `⏰ ${timeStr} · 作业计时器自动通知` }
+                        ]
+                    }
+                ]
+            }
+        };
+        fetch(FEISHU_WEBHOOK, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(card)
+        }).then(r => r.ok ? showToast('已完成通知已发送 📨') : showToast('发送失败 ❌')).catch(() => showToast('发送失败 ❌'));
+    }
+
+    function saveTaskData(task, total, study, eff) {
+        const today = new Date().toISOString().split('T')[0], key = `timer_${CHILD}_${today}`;
+        const data = JSON.parse(localStorage.getItem(key) || '{}');
+        data.studyMinutes = (data.studyMinutes || 0) + study;
+        data.restMinutes = (data.restMinutes || 0);
+        // 加权平均效率
+        const prevTasks = data.tasks || [];
+        const prevEffs = prevTasks.map(t => t.efficiency).filter(Boolean);
+        const allEffs = [...prevEffs, eff];
+        data.efficiency = Math.round(allEffs.reduce((a, b) => a + b, 0) / allEffs.length);
+        data.tasks = prevTasks.concat({ name: task.name, time: task.time, actual: total, study, efficiency: eff });
+        localStorage.setItem(key, JSON.stringify(data));
+    }
+
+    function closeComplete() { document.getElementById('completeModal').classList.remove('active'); }
+
+    function addHomework() {
+        const name = document.getElementById('newName').value.trim(), time = parseInt(document.getElementById('newTime').value);
+        if (!name) { showToast('请输入作业名称'); return; }
+        if (!time || time < 1) { showToast('请输入有效时间'); return; }
+        homework.push({ id: Date.now(), name, icon: '📝', time, status: 'waiting' });
+        saveHomework(); renderHomeworkList();
+        document.getElementById('newName').value = ''; document.getElementById('newTime').value = '';
+        showToast('作业已添加 ✅');
+    }
+
+    function exportData() {
+        const keys = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k.startsWith('timer_') || k.startsWith('hw_')) keys[k] = localStorage.getItem(k); }
+        const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(keys, null, 2)], { type: 'application/json' }));
+        a.download = `yuhan_data_${new Date().toISOString().split('T')[0]}.json`; a.click(); showToast('数据已导出 📤');
+    }
+
+    function importData(e) {
+        const file = e.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev) { try { const d = JSON.parse(ev.target.result); Object.entries(d).forEach(([k,v]) => localStorage.setItem(k,v)); showToast('导入成功 ✅'); loadHomework(); renderHomeworkList(); updateStats(); } catch(err) { showToast('导入失败 ❌'); } };
+        reader.readAsText(file);
+    }
+
+    function resetData() {
+        if (!confirm('确定清空今日数据吗？')) return;
+        const today = new Date().toISOString().split('T')[0];
+        localStorage.removeItem(`timer_${CHILD}_${today}`); localStorage.removeItem(`hw_${CHILD}`);
+        homework = JSON.parse(JSON.stringify(DEFAULT_HOMEWORK)); renderHomeworkList(); updateStats(); showToast('已重置 🔄');
+    }
+    
+    // 家长版重置数据（带二次确认）
+    function resetParentData() {
+        if (!confirm('⚠️ 确定要重置所有数据吗？\n\n这将清空：\n• 所有作业记录\n• 所有计时数据\n• 所有统计数据\n\n此操作不可恢复！')) return;
+        if (!confirm('再次确认：数据将被永久删除！')) return;
+        
+        // 清空该孩子相关的所有 localStorage
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k.startsWith(`timer_${CHILD}`) || k.startsWith(`hw_${CHILD}`)) {
+                keysToRemove.push(k);
+            }
+        }
+        keysToRemove.forEach(k => localStorage.removeItem(k));
+        
+        // 重置作业为默认
+        homework = JSON.parse(JSON.stringify(DEFAULT_HOMEWORK));
+        saveHomework();
+        
+        // 刷新页面或更新UI
+        if (isParentMode) {
+            renderParentHomeworkList();
+            updateParentStats();
+        } else {
+            renderHomeworkList();
+            updateStats();
+        }
+        
+        showToast('所有数据已重置 🔄');
+    }
+
+    // 发送作业清单卡片到飞书群（自动 @孩子和家长）
+    function sendHomeworkCard(task) {
+        const now = new Date();
+        const dateStr = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日`;
+        const timeTip = task.time > 0 ? `⏱ 建议完成时间：${task.time} 分钟` : '';
+        const atChild = CHILD_OPEN_ID ? `<at user_id="${CHILD_OPEN_ID}">${CHILD_NAME}</at>` : CHILD_NAME;
+        const card = {
+            msg_type: 'interactive',
+            card: {
+                config: { wide_screen_mode: true },
+                header: {
+                    title: { tag: 'plain_text', content: `📋 家长布置作业通知 — ${CHILD_NAME}` },
+                    template: 'green'
+                },
+                elements: [
+                    {
+                        tag: 'div',
+                        text: {
+                            tag: 'lark_md',
+                            content: `${atChild}，爸爸妈妈给你布置了作业啦！快去看看吧 🌿\n\n收到请回复：「好的！」`
+                        }
+                    },
+                    { tag: 'hr' },
+                    {
+                        tag: 'div',
+                        fields: [
+                            { is_short: true, text: { tag: 'lark_md', content: `**📌 作业内容**\n${task.name}` } },
+                            { is_short: true, text: { tag: 'lark_md', content: `**📅 日期**\n${dateStr}` } }
+                        ]
+                    },
+                    timeTip ? {
+                        tag: 'div',
+                        text: { tag: 'lark_md', content: `⏱ **建议完成时间**：${task.time} 分钟` }
+                    } : { tag: 'div', text: { tag: 'lark_md', content: `⏱ **建议完成时间**：自主安排` } },
+                    { tag: 'hr' },
+                    {
+                        tag: 'action',
+                        actions: [
+                            {
+                                tag: 'button',
+                                text: { tag: 'plain_text', content: '🌿 前往计时器' },
+                                type: 'primary',
+                                url: `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/yuhan.html`
+                            }
+                        ]
+                    },
+                    {
+                        tag: 'note',
+                        elements: [
+                            { tag: 'plain_text', content: '💡 打开上方链接即可开始计时，祝学习愉快！生地会考加油 🌿' }
+                        ]
+                    }
+                ]
+            }
+        };
+        fetch(FEISHU_WEBHOOK, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(card)
+        }).then(r => r.ok ? showToast('作业通知已发送 📨') : showToast('发送失败 ❌')).catch(() => showToast('发送失败 ❌'));
+    }
+
+    // 发送完整作业清单卡片到飞书群
+    function sendHomeworkListCard() {
+        const hw = JSON.parse(localStorage.getItem(`hw_${CHILD}`)) || homework;
+        if (!hw || hw.length === 0) { showToast('暂无作业 ❌'); return; }
+        const now = new Date();
+        const dateStr = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日`;
+        const totalMin = hw.reduce((s, t) => s + (t.time || 0), 0);
+        const hwList = hw.map(t => `• ${t.icon} ${t.name} ${t.time > 0 ? `(${t.time}分钟)` : '(待定)'}`).join('\n');
+        const card = {
+            msg_type: 'interactive',
+            card: {
+                config: { wide_screen_mode: true },
+                header: {
+                    title: { tag: 'plain_text', content: `📋 今日作业清单 — ${CHILD_NAME}` },
+                    template: 'green'
+                },
+                elements: [
+                    {
+                        tag: 'div',
+                        text: { tag: 'lark_md', content: `${CHILD_OPEN_ID ? `<at user_id="${CHILD_OPEN_ID}">${CHILD_NAME}</at>` : CHILD_NAME}，爸爸妈妈查了一下，今天有以下作业哦！认真完成吧 🌿\n\n收到请回复：「好的！」` }
+                    },
+                    { tag: 'hr' },
+                    {
+                        tag: 'div',
+                        fields: [
+                            { is_short: true, text: { tag: 'lark_md', content: `**📝 作业数量**\n${hw.length} 项` } },
+                            { is_short: true, text: { tag: 'lark_md', content: `**📅 日期**\n${dateStr}` } },
+                            { is_short: true, text: { tag: 'lark_md', content: `**⏱ 建议时长**\n${totalMin} 分钟` } }
+                        ]
+                    },
+                    { tag: 'hr' },
+                    {
+                        tag: 'div',
+                        text: { tag: 'lark_md', content: `**📋 作业清单**\n${hwList}` }
+                    },
+                    { tag: 'hr' },
+                    {
+                        tag: 'action',
+                        actions: [
+                            {
+                                tag: 'button',
+                                text: { tag: 'plain_text', content: '🌿 前往计时器' },
+                                type: 'primary',
+                                url: `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/yuhan.html`
+                            }
+                        ]
+                    },
+                    {
+                        tag: 'note',
+                        elements: [{ tag: 'plain_text', content: '💡 生地会考加油！🌿' }]
+                    }
+                ]
+            }
+        };
+        fetch(FEISHU_WEBHOOK, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(card)
+        }).then(r => r.ok ? showToast('作业清单已发送 📨') : showToast('发送失败 ❌')).catch(() => showToast('发送失败 ❌'));
+    }
+
+    function sendReport() {
+        const today = new Date().toISOString().split('T')[0], data = JSON.parse(localStorage.getItem(`timer_${CHILD}_${today}`) || '{}');
+        const done = homework.filter(t => t.status === 'done').length, total = homework.length;
+        const sd = Math.max(0, Math.ceil((SHENGDI_DATE - new Date()) / 86400000));
+        const m = new Date().getMonth()+1, d = new Date().getDate();
+        const tasksMd = data.tasks && data.tasks.length > 0 ? data.tasks.map(t => {
+            const effLabel = t.efficiency >= 90 ? '🟢' : t.efficiency >= 70 ? '🟡' : '🔴';
+            return { tag: 'div', text: { tag: 'lark_md', content: `${effLabel} ${t.name}：${t.actual}分钟（效率${t.efficiency}%）` } };
+        }) : [{ tag: 'div', text: { tag: 'lark_md', content: '暂无计时记录' } }];
+
+        const card = {
+            msg_type: 'interactive',
+            card: {
+                schema: '2023-08-01',
+                header: {
+                    title: { tag: 'plain_text', content: `🌿 羽菡作业日报 · ${m}月${d}日` },
+                    template: 'green'
+                },
+                elements: [
+                    { tag: 'hr' },
+                    {
+                        tag: 'column_set',
+                        flex_mode: 'none',
+                        horizontal_spacing: 'large',
+                        columns: [
+                            { tag: 'column', width: 'auto', elements: [{ tag: 'div', text: { tag: 'lark_md', content: '**📊 完成进度**\n`' + done + '/' + total + '` 项' } }] },
+                            { tag: 'column', width: 'auto', elements: [{ tag: 'div', text: { tag: 'lark_md', content: '**⏱ 学习时长**\n`' + (data.studyMinutes || 0) + '` 分钟' } }] },
+                            { tag: 'column', width: 'auto', elements: [{ tag: 'div', text: { tag: 'lark_md', content: '**📈 效率**\n`' + (data.efficiency || 0) + '`%' } }] }
+                        ]
+                    },
+                    { tag: 'hr' },
+                    {
+                        tag: 'div',
+                        text: { tag: 'lark_md', content: '**🌏 生地会考倒计时：** `' + sd + '` 天\n**📚 建议复习：**每天 ≥2小时，重点突破自然地理概念图' }
+                    },
+                    { tag: 'hr' },
+                    { tag: 'div', text: { tag: 'lark_md', content: '**✅ 完成详情**' } },
+                    ...tasksMd,
+                    { tag: 'hr' },
+                    {
+                        tag: 'note',
+                        elements: [
+                            { tag: 'plain_text', content: '🌿 由作业计时器自动生成 · @学习辅导员小龙虾' }
+                        ]
+                    }
+                ]
+            }
+        };
+        fetch(FEISHU_WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(card) })
+            .then(r => r.ok ? (
+                showToast('报告已发送飞书 📬'),
+                fetch(FEISHU_WEBHOOK, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        msg_type: 'text',
+                        content: { text: `🌿 羽菡作业报告已更新！请爸爸妈妈查收～ @小龙虾爸爸 @小龙虾妈妈` }
+                    })
+                }).catch(() => {})
+            ) : showToast('发送失败，请重试'))
+            .catch(() => { navigator.clipboard.writeText(JSON.stringify(card, null, 2)); showToast('飞书发送失败，已复制卡片JSON'); });
+    }
+
+    function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
+    init();
+    </script>
+</body>
+</html>

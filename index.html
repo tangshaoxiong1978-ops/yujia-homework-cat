@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🐚 学习计时器 — 选择孩子</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .logo { font-size: 72px; margin-bottom: 16px; }
+        .title { font-size: 32px; font-weight: 800; color: white; margin-bottom: 8px; }
+        .subtitle { font-size: 16px; color: rgba(255,255,255,0.7); margin-bottom: 48px; }
+        .cards {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 40px 32px;
+            flex: 1;
+            min-width: 240px;
+            max-width: 280px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: inherit;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+        .card:hover { transform: translateY(-8px); box-shadow: 0 24px 70px rgba(0,0,0,0.25); }
+        .card-icon { font-size: 80px; margin-bottom: 16px; display: block; }
+        .card-name { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+        .card-grade { font-size: 14px; color: #888; margin-bottom: 20px; }
+        .card-desc { font-size: 13px; color: #aaa; line-height: 1.6; }
+        .card.yujia .card-name { color: #E91E63; }
+        .card.yuhan .card-name { color: #2E7D32; }
+        .footer { margin-top: 48px; font-size: 13px; color: rgba(255,255,255,0.5); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🐚</div>
+        <div class="title">学习计时器</div>
+        <div class="subtitle">选择孩子的专属计时器</div>
+
+        <div class="cards">
+            <a href="yujia.html" class="card yujia">
+                <span class="card-icon">🐱</span>
+                <div class="card-name">羽佳</div>
+                <div class="card-grade">三年级 · 猫咪风格</div>
+                <div class="card-desc">
+                    📱 橙果APP打卡<br>
+                    🎧 英语一起作业<br>
+                    📚 阅读半小时<br>
+                    🔢 口算题一页
+                </div>
+            </a>
+
+            <a href="yuhan.html" class="card yuhan">
+                <span class="card-icon">🌿</span>
+                <div class="card-name">羽菡</div>
+                <div class="card-grade">初二 · 森林风格</div>
+                <div class="card-desc">
+                    📖 语文作业<br>
+                    📐 数学练习<br>
+                    🎧 英语听说<br>
+                    🌏 生地会考倒计时
+                </div>
+            </a>
+        </div>
+
+        <div class="footer">
+            💡 点击卡片即可进入计时器 · 数据自动保存在本地
+        </div>
+    </div>
+</body>
+</html>

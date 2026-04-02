@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👨‍👧 家长看板 - 羽佳学习进度</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(180deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.7;
+        }
+        
+        /* 孩子选择器 */
+        .child-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .child-btn {
+            padding: 12px 24px;
+            border: 2px solid #3498db;
+            background: white;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .child-btn.active {
+            background: #3498db;
+            color: white;
+        }
+        
+        .child-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* 实时进度卡片 */
+        .realtime-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .card-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .progress-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .stat-box.green {
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            color: #2c3e50;
+        }
+        
+        .stat-box.orange {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: #2c3e50;
+        }
+        
+        .stat-box.blue {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        /* 任务进度表 */
+        .tasks-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .tasks-table th {
+            background: #ecf0f1;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+            color: #2c3e50;
+            border-bottom: 2px solid #bdc3c7;
+        }
+        
+        .tasks-table td {
+            padding: 12px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .task-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .task-status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status-pending {
+            background: #ecf0f1;
+            color: #7f8c8d;
+        }
+        
+        .status-running {
+            background: #f39c12;
+            color: white;
+            animation: pulse 1s infinite;
+        }
+        
+        .status-completed {
+            background: #27ae60;
+            color: white;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .task-time {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        /* 日报卡片 */
+        .daily-report {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .report-section {
+            margin-bottom: 20px;
+        }
+        
+        .report-section h3 {
+            font-size: 16px;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+        
+        .report-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            color: #555;
+        }
+        
+        .report-value {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        /* 通知设置 */
+        .notification-settings {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+        
+        .toggle {
+            width: 50px;
+            height: 28px;
+            background: #bdc3c7;
+            border-radius: 14px;
+            cursor: pointer;
+            position: relative;
+            transition: background 0.3s ease;
+        }
+        
+        .toggle.active {
+            background: #27ae60;
+        }
+        
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: left 0.3s ease;
+        }
+        
+        .toggle.active::after {
+            left: 24px;
+        }
+        
+        /* 实时更新指示 */
+        .live-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #27ae60;
+            border-radius: 50%;
+            animation: blink 1s infinite;
+            margin-right: 5px;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .last-update {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>👨‍👧 家长看板</h1>
+            <p>实时查看孩子的学习进度</p>
+        </div>
+        
+        <!-- 孩子选择 -->
+        <div class="child-selector">
+            <button class="child-btn active" onclick="selectChild('yujia')">👧 羽佳</button>
+            <button class="child-btn" onclick="selectChild('yuhan')">👧 羽菡</button>
+        </div>
+        
+        <!-- 实时进度 -->
+        <div class="realtime-card">
+            <div class="card-title">
+                <span class="live-indicator"></span>
+                📊 今日实时进度
+            </div>
+            
+            <div class="progress-grid">
+                <div class="stat-box green">
+                    <div class="stat-value" id="completedCount">0</div>
+                    <div class="stat-label">已完成作业</div>
+                </div>
+                <div class="stat-box orange">
+                    <div class="stat-value" id="totalTime">0</div>
+                    <div class="stat-label">学习时长（分钟）</div>
+                </div>
+                <div class="stat-box blue">
+                    <div class="stat-value" id="efficiency">0%</div>
+                    <div class="stat-label">学习效率</div>
+                </div>
+            </div>
+            
+            <table class="tasks-table">
+                <thead>
+                    <tr>
+                        <th>作业项目</th>
+                        <th>状态</th>
+                        <th>用时</th>
+                    </tr>
+                </thead>
+                <tbody id="tasksTableBody">
+                    <!-- 动态生成 -->
+                </tbody>
+            </table>
+            
+            <div class="last-update">
+                最后更新：<span id="lastUpdate">--</span>
+            </div>
+        </div>
+        
+        <!-- 每日报告 -->
+        <div class="daily-report">
+            <div class="card-title">📋 每日学习报告</div>
+            
+            <div class="report-section">
+                <h3>📈 学习统计</h3>
+                <div class="report-item">
+                    <span>总学习时间</span>
+                    <span class="report-value" id="reportTotalTime">0 分钟</span>
+                </div>
+                <div class="report-item">
+                    <span>休息时间</span>
+                    <span class="report-value" id="reportRestTime">0 分钟</span>
+                </div>
+                <div class="report-item">
+                    <span>学习效率</span>
+                    <span class="report-value" id="reportEfficiency">0%</span>
+                </div>
+            </div>
+            
+            <div class="report-section">
+                <h3>⭐ 亮点</h3>
+                <div id="reportHighlight">暂无数据</div>
+            </div>
+            
+            <div class="report-section">
+                <h3>⚠️ 需要关注</h3>
+                <div id="reportConcern">暂无数据</div>
+            </div>
+        </div>
+        
+        <!-- 通知设置 -->
+        <div class="notification-settings">
+            <div class="card-title">🔔 通知设置</div>
+            
+            <div class="setting-item">
+                <span>作业完成时提醒</span>
+                <div class="toggle active" onclick="toggleNotification(this, 'taskComplete')"></div>
+            </div>
+            <div class="setting-item">
+                <span>每日学习报告</span>
+                <div class="toggle active" onclick="toggleNotification(this, 'dailyReport')"></div>
+            </div>
+            <div class="setting-item">
+                <span>超时提醒</span>
+                <div class="toggle active" onclick="toggleNotification(this, 'overtime')"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentChild = 'yujia';
+        let notificationSettings = {
+            taskComplete: true,
+            dailyReport: true,
+            overtime: true
+        };
+        
+        // 模拟数据（实际应该从服务器获取）
+        const mockData = {
+            yujia: {
+                name: '羽佳',
+                tasks: [
+                    { name: '橙果APP打卡', status: 'completed', time: '15分钟' },
+                    { name: '英语一起作业', status: 'running', time: '12分钟' },
+                    { name: '阅读半小时', status: 'pending', time: '--' },
+                    { name: '口算题一页', status: 'pending', time: '--' }
+                ],
+                stats: {
+                    completed: 1,
+                    totalTime: 27,
+                    efficiency: 85
+                }
+            },
+            yuhan: {
+                name: '羽菡',
+                tasks: [
+                    { name: '数学练习', status: 'completed', time: '45分钟' },
+                    { name: '英语作文', status: 'completed', time: '30分钟' },
+                    { name: '物理实验', status: 'running', time: '20分钟' },
+                    { name: '历史复习', status: 'pending', time: '--' }
+                ],
+                stats: {
+                    completed: 2,
+                    totalTime: 95,
+                    efficiency: 92
+                }
+            }
+        };
+        
+        // 选择孩子
+        function selectChild(child) {
+            currentChild = child;
+            document.querySelectorAll('.child-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            updateDashboard();
+        }
+        
+        // 更新看板
+        function updateDashboard() {
+            const data = mockData[currentChild];
+            
+            // 更新统计数据
+            document.getElementById('completedCount').textContent = data.stats.completed;
+            document.getElementById('totalTime').textContent = data.stats.totalTime;
+            document.getElementById('efficiency').textContent = data.stats.efficiency + '%';
+            
+            // 更新任务表
+            const tbody = document.getElementById('tasksTableBody');
+            tbody.innerHTML = '';
+            data.tasks.forEach(task => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="task-name">${task.name}</td>
+                    <td>
+                        <span class="task-status status-${task.status}">
+                            ${getStatusText(task.status)}
+                        </span>
+                    </td>
+                    <td class="task-time">${task.time}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // 更新报告
+            document.getElementById('reportTotalTime').textContent = data.stats.totalTime + ' 分钟';
+            document.getElementById('reportRestTime').textContent = Math.floor(data.stats.totalTime * 0.1) + ' 分钟';
+            document.getElementById('reportEfficiency').textContent = data.stats.efficiency + '%';
+            
+            // 更新亮点和关注
+            if (data.stats.efficiency >= 90) {
+                document.getElementById('reportHighlight').innerHTML = '✨ 学习效率很高，继续保持！';
+            } else {
+                document.getElementById('reportHighlight').innerHTML = '👍 今天完成了 ' + data.stats.completed + ' 项作业';
+            }
+            
+            if (data.stats.completed < 2) {
+                document.getElementById('reportConcern').innerHTML = '⚠️ 还有 ' + (4 - data.stats.completed) + ' 项作业未完成，加油！';
+            } else {
+                document.getElementById('reportConcern').innerHTML = '✅ 进度良好，继续加油！';
+            }
+            
+            // 更新时间
+            const now = new Date();
+            document.getElementById('lastUpdate').textContent = now.toLocaleTimeString('zh-CN');
+        }
+        
+        // 获取状态文字
+        function getStatusText(status) {
+            const statusMap = {
+                'pending': '⏳ 未开始',
+                'running': '🔄 进行中',
+                'completed': '✅ 已完成'
+            };
+            return statusMap[status] || status;
+        }
+        
+        // 切换通知
+        function toggleNotification(element, type) {
+            element.classList.toggle('active');
+            notificationSettings[type] = element.classList.contains('active');
+            console.log('通知设置已更新:', notificationSettings);
+        }
+        
+        // 实时更新（每5秒）
+        setInterval(updateDashboard, 5000);
+        
+        // 初始化
+        updateDashboard();
+    </script>
+</body>
+</html>

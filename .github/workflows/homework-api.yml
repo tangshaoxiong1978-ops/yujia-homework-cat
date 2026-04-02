@@ -1,0 +1,79 @@
+name: Homework Timer API
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action: read, write_yujia, write_yuhan'
+        required: true
+        type: choice
+        options:
+          - read
+          - write_yujia
+          - write_yuhan
+      child:
+        description: 'Child: yujia or yuhan'
+        required: false
+        type: string
+      data:
+        description: 'JSON data to write (for write actions)'
+        required: false
+        type: string
+      sha:
+        description: 'File SHA (for write actions, omit to create new)'
+        required: false
+        type: string
+
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github
+            data
+          sparse-checkout-cone-mode: false
+
+      - name: Read data
+        if: inputs.action == 'read'
+        run: |
+          if [ -f "data/yujia_data.json" ]; then
+            echo "yujia_data=$(cat data/yujia_data.json | base64)" >> $GITHUB_OUTPUT
+          fi
+          if [ -f "data/yuhan_data.json" ]; then
+            echo "yuhan_data=$(cat data/yuhan_data.json | base64)" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Write yujia data
+        if: inputs.action == 'write_yujia'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "${{ inputs.data }}" | base64 -d > data/yujia_data.json
+          SHA=""
+          if [ -n "${{ inputs.sha }}" ]; then
+            SHA="sha: ${{ inputs.sha }}"
+          fi
+          git config user.name "Homework Timer Bot"
+          git config user.email "bot@homework-cat"
+          git add data/yujia_data.json
+          git -c interactive.singlekey=true commit -m "Update yujia_data.json $(date +'%Y-%m-%d %H:%M:%S')" || echo "No changes to commit"
+          git push origin gh-pages || echo "Push skipped"
+
+      - name: Write yuhan data
+        if: inputs.action == 'write_yuhan'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "${{ inputs.data }}" | base64 -d > data/yuhan_data.json
+          SHA=""
+          if [ -n "${{ inputs.sha }}" ]; then
+            SHA="sha: ${{ inputs.sha }}"
+          fi
+          git config user.name "Homework Timer Bot"
+          git config user.email "bot@homework-cat"
+          git add data/yuhan_data.json
+          git -c interactive.singlekey=true commit -m "Update yuhan_data.json $(date +'%Y-%m-%d %H:%M:%S')" || echo "No changes to commit"
+          git push origin gh-pages || echo "Push skipped"

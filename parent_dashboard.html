@@ -398,6 +398,9 @@
     </div>
     
     <script>
+        // 同步状态显示
+        let syncStatus = { yujia: false, yuhan: false };
+        
         let currentChild = 'yujia';
         let notificationSettings = {
             taskComplete: true,
@@ -405,37 +408,72 @@
             overtime: true
         };
         
-        // 模拟数据（实际应该从服务器获取）
+        // 真实数据存储
+        let realData = {
+            yujia: null,
+            yuhan: null
+        };
+        
+        // 模拟数据（当无法获取真实数据时的fallback）
         const mockData = {
             yujia: {
                 name: '羽佳',
                 tasks: [
-                    { name: '橙果APP打卡', status: 'completed', time: '15分钟' },
-                    { name: '英语一起作业', status: 'running', time: '12分钟' },
+                    { name: '橙果APP打卡', status: 'pending', time: '--' },
+                    { name: '英语一起作业', status: 'pending', time: '--' },
                     { name: '阅读半小时', status: 'pending', time: '--' },
                     { name: '口算题一页', status: 'pending', time: '--' }
                 ],
-                stats: {
-                    completed: 1,
-                    totalTime: 27,
-                    efficiency: 85
-                }
+                stats: { completed: 0, totalTime: 0, efficiency: 0 }
             },
             yuhan: {
                 name: '羽菡',
                 tasks: [
-                    { name: '数学练习', status: 'completed', time: '45分钟' },
-                    { name: '英语作文', status: 'completed', time: '30分钟' },
-                    { name: '物理实验', status: 'running', time: '20分钟' },
+                    { name: '数学练习', status: 'pending', time: '--' },
+                    { name: '英语作文', status: 'pending', time: '--' },
+                    { name: '物理实验', status: 'pending', time: '--' },
                     { name: '历史复习', status: 'pending', time: '--' }
                 ],
-                stats: {
-                    completed: 2,
-                    totalTime: 95,
-                    efficiency: 92
-                }
+                stats: { completed: 0, totalTime: 0, efficiency: 0 }
             }
         };
+        
+        // 从GitHub仓库读取JSON数据
+        async function fetchFromGitHub(child) {
+            try {
+                const response = await fetch(`data/${child}_data.json`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return await response.json();
+            } catch (error) {
+                console.warn(`读取 ${child} 数据失败，使用模拟数据:`, error);
+                return null;
+            }
+        }
+        
+        // 加载所有数据
+        async function loadAllData() {
+            const [yujia, yuhan] = await Promise.all([
+                fetchFromGitHub('yujia'),
+                fetchFromGitHub('yuhan')
+            ]);
+            realData.yujia = yujia;
+            realData.yuhan = yuhan;
+            updateSyncStatus();
+            updateDashboard();
+        }
+        
+        // 更新同步状态显示
+        function updateSyncStatus() {
+            const el = document.getElementById('syncStatus');
+            const hasData = realData.yujia || realData.yuhan;
+            if (hasData) {
+                el.className = 'sync-status ok';
+                el.textContent = '✅ 数据同步成功';
+            } else {
+                el.className = 'sync-status error';
+                el.textContent = '⚠️ 无法加载数据，请检查网络';
+            }
+        }
         
         // 选择孩子
         function selectChild(child) {
@@ -447,7 +485,31 @@
         
         // 更新看板
         function updateDashboard() {
-            const data = mockData[currentChild];
+            // 优先使用真实数据，回退到模拟数据
+            const rawData = realData[currentChild];
+            let data;
+            
+            if (rawData && rawData.tasks) {
+                // 真实数据格式转换
+                const tasks = rawData.tasks.map(t => ({
+                    name: t.taskName || t.name || '作业',
+                    status: t.status || 'pending',
+                    time: t.actualMinutes ? t.actualMinutes + '分钟' : (t.time || '--')
+                }));
+                const completed = tasks.filter(t => t.status === 'completed').length;
+                const totalTime = rawData.tasks.reduce((sum, t) => sum + (t.actualMinutes || 0), 0);
+                data = {
+                    name: currentChild === 'yujia' ? '羽佳' : '羽菡',
+                    tasks: tasks,
+                    stats: {
+                        completed: completed,
+                        totalTime: totalTime,
+                        efficiency: tasks.length > 0 ? Math.min(100, Math.round((completed / tasks.length) * 100)) : 0
+                    }
+                };
+            } else {
+                data = mockData[currentChild];
+            }
             
             // 更新统计数据
             document.getElementById('completedCount').textContent = data.stats.completed;
@@ -511,11 +573,11 @@
             console.log('通知设置已更新:', notificationSettings);
         }
         
-        // 实时更新（每5秒）
-        setInterval(updateDashboard, 5000);
+        // 实时更新（每30秒重新加载数据）
+        setInterval(loadAllData, 30000);
         
-        // 初始化
-        updateDashboard();
+        // 初始化 - 加载真实数据
+        loadAllData();
     </script>
 </body>
 </html>

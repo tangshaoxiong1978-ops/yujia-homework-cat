@@ -51,6 +51,12 @@
         .shengdi-title { font-size: 14px; font-weight: 700; color: #E65100; margin-bottom: 2px; }
         .shengdi-count { font-size: 22px; font-weight: 800; color: #FF6D00; }
         .shengdi-label { font-size: 12px; color: #888; }
+        .zhongkao-card { background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%); border-radius: 16px; padding: 14px; margin-bottom: 12px; border-left: 4px solid #7B1FA2; display: flex; align-items: center; gap: 12px; }
+        .zhongkao-icon { font-size: 32px; }
+        .zhongkao-info { flex: 1; }
+        .zhongkao-title { font-size: 14px; font-weight: 700; color: #6A1B9A; margin-bottom: 2px; }
+        .zhongkao-count { font-size: 22px; font-weight: 800; color: #7B1FA2; }
+        .zhongkao-label { font-size: 12px; color: #888; }
         .assigned-alert { background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); border-radius: 16px; padding: 14px; margin-bottom: 14px; border-left: 4px solid #FF9800; display: flex; align-items: center; gap: 10px; }
         .assigned-alert-text { flex: 1; }
         .assigned-alert-title { font-size: 14px; font-weight: 700; color: #E65100; margin-bottom: 2px; }
@@ -169,6 +175,21 @@
             <div class="deadline-row">
                 <span>📚</span><span>剩余复习时间</span>
                 <span id="shengdiStudy" style="font-weight:700;color:#4CAF50;font-size:15px;"></span>
+            </div>
+        </div>
+
+        <!-- 中考倒计时卡片 -->
+        <div class="card">
+            <div class="zhongkao-card">
+                <div class="zhongkao-icon">🎓</div>
+                <div class="zhongkao-info">
+                    <div class="zhongkao-title">中考倒计时</div>
+                    <div><span class="zhongkao-count" id="zhongkaoDays">--</span> <span class="zhongkao-label">天后考试</span></div>
+                </div>
+            </div>
+            <div class="deadline-row">
+                <span>📚</span><span>剩余复习时间</span>
+                <span id="zhongkaoStudy" style="font-weight:700;color:#7B1FA2;font-size:15px;"></span>
             </div>
         </div>
 
@@ -291,6 +312,8 @@
     const CHILD_OPEN_ID = 'ou_bdac81aee0c980d2bd351febe0393eb3';  // 羽菡飞书 open_id
     const PARENT_OPEN_ID = 'ou_04d8a814e9b4ce5640739ee9c2221df5'; // 爸爸
     const FEISHU_WEBHOOK = 'https://open.feishu.cn/open-apis/bot/v2/hook/eff6ff06-c0cb-4c63-b032-a2b8776085d2';
+    const SHENGDI_DATE = new Date('2026-06-16');  // 生地会考（考试当天仍显示0）
+    const ZHONGKAO_DATE = new Date('2027-06-30'); // 中考
     const DEFAULT_HOMEWORK = [
         { id:1, name:'语文作业', icon:'📖', time:30, status:'waiting' },
         { id:2, name:'数学练习', icon:'📐', time:30, status:'waiting' },
@@ -391,11 +414,9 @@
     }
 
     function init() {
-        updateDate(); updateShengdi(); loadHomework(); parseURLParams();
+        updateDate(); updateShengdi(); updateZhongkao(); loadHomework(); parseURLParams();
         renderHomeworkList(); updateStats(); updateDeadlineWithWarning();
-        setInterval(() => { updateDeadlineWithWarning(); updateShengdi(); }, 30000);
-    }
-        setInterval(() => { updateDeadline(); updateShengdi(); }, 60000);
+        setInterval(() => { updateDeadlineWithWarning(); updateShengdi(); updateZhongkao(); }, 30000);
     }
 
     function updateDate() {
@@ -404,9 +425,32 @@
     }
 
     function updateShengdi() {
-        const now = new Date(), diff = SHENGDI_DATE - now, days = Math.max(0, Math.ceil(diff / 86400000));
-        document.getElementById('shengdiDays').textContent = days;
-        document.getElementById('shengdiStudy').textContent = `约 ${Math.floor(days * 2)} 小时`;
+        const now = new Date(), diff = SHENGDI_DATE - now, days = Math.ceil(diff / 86400000);
+        const card = document.querySelector('.shengdi-card');
+        if (card) {
+            if (days < 0) {
+                card.style.display = 'none';  // 生地会考结束，隐藏卡片
+            } else {
+                card.style.display = 'flex';
+                document.getElementById('shengdiDays').textContent = days;
+                document.getElementById('shengdiStudy').textContent = `约 ${Math.floor(days * 2)} 小时`;
+            }
+        }
+    }
+
+    function updateZhongkao() {
+        const now = new Date(), diff = ZHONGKAO_DATE - now, days = Math.ceil(diff / 86400000);
+        const el = document.getElementById('zhongkaoDays');
+        const card = document.getElementById('zhongkaoCard');
+        if (el && card) {
+            if (days < 0) {
+                card.style.display = 'none';
+            } else {
+                card.style.display = 'flex';
+                el.textContent = days;
+                document.getElementById('zhongkaoStudy').textContent = `约 ${Math.floor(days * 2)} 小时`;
+            }
+        }
     }
 
     function parseURLParams() {

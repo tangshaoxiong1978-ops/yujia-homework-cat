@@ -132,19 +132,57 @@
         .week-bar { width: 100%; background: linear-gradient(to top, #81C784, #4CAF50); border-radius: 6px 6px 0 0; min-height: 4px; transition: height 0.3s; }
         .week-bar-label { font-size: 11px; color: #aaa; }
         .week-bar-value { font-size: 10px; color: #999; }
+        /* 家长模式样式 */
+        body.parent-mode { background: linear-gradient(135deg, #f0f4f8 0%, #e8eaf6 50%, #f3e5f5 100%); }
+        .parent-banner { background: linear-gradient(135deg, #7986CB 0%, #5C6BC0 100%); border-radius: 16px; padding: 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; }
+        .parent-banner-icon { font-size: 36px; }
+        .parent-banner-text { flex: 1; }
+        .parent-banner-title { font-size: 16px; font-weight: 700; color: white; margin-bottom: 2px; }
+        .parent-banner-desc { font-size: 13px; color: rgba(255,255,255,0.85); }
+        .parent-banner-back { padding: 8px 16px; background: rgba(255,255,255,0.25); color: white; border: 1px solid rgba(255,255,255,0.4); border-radius: 20px; font-size: 13px; font-weight: 600; text-decoration: none; cursor: pointer; }
+        .parent-banner-back:hover { background: rgba(255,255,255,0.35); }
+        .homework-actions { display: flex; gap: 6px; margin-top: 8px; }
+        .action-edit { flex: 1; padding: 9px; background: #e3f2fd; color: #1565c0; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .action-delete { flex: 1; padding: 9px; background: #ffebee; color: #c62828; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .action-start { flex: 1; }
+        /* 编辑弹窗 */
+        .edit-form { text-align: left; }
+        .edit-form label { font-size: 13px; font-weight: 600; color: #555; margin-bottom: 4px; display: block; }
+        .edit-form input { width: 100%; padding: 12px 14px; border: 2px solid #e3f2fd; border-radius: 12px; font-size: 14px; outline: none; margin-bottom: 12px; }
+        .edit-form input:focus { border-color: #5C6BC0; }
+        .edit-icon-select { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+        .edit-icon-option { width: 44px; height: 44px; border-radius: 10px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; border: 2px solid transparent; }
+        .edit-icon-option.selected { border-color: #5C6BC0; background: #e8eaf6; }
+        .edit-form-actions { display: flex; gap: 8px; }
+        .edit-save { flex: 1; padding: 12px; background: linear-gradient(135deg, #7986CB, #5C6BC0); color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; }
+        .edit-cancel { flex: 1; padding: 12px; background: #f5f5f5; color: #555; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; }
+        .add-homework-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #7986CB 0%, #5C6BC0 100%); color: white; border: none; border-radius: 14px; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; }
+        .add-homework-btn:hover { box-shadow: 0 4px 16px rgba(92,107,192,0.35); }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="header-title">
             <div class="header-icon">🌿</div>
-            <div class="header-name">羽菡森林计时器</div>
+            <div class="header-name" id="headerName">羽菡森林计时器</div>
         </div>
         <div class="header-deadline" id="headerDeadline">
             <span class="header-deadline-icon">⏰</span>
             <span id="headerDeadlineTime">--:--</span>
         </div>
-        <a href="yujia.html" class="header-switch">🐱 切换羽佳</a>
+        <a href="yujia.html" class="header-switch" id="switchLink">🐱 切换羽佳</a>
+    </div>
+
+    <!-- 家长模式 Banner -->
+    <div class="main" id="parentBanner" style="display:none;">
+        <div class="parent-banner" style="margin-top:14px;">
+            <div class="parent-banner-icon">👨‍👧</div>
+            <div class="parent-banner-text">
+                <div class="parent-banner-title">👨‍👧 家长版 · 作业管理</div>
+                <div class="parent-banner-desc">可添加、编辑、删除作业（不影响计时）</div>
+            </div>
+            <a href="yuhan.html" class="parent-banner-back" id="backToChild">返回孩子版</a>
+        </div>
     </div>
 
     <div class="main">
@@ -245,20 +283,31 @@
             </div>
         </div>
 
-        <div class="section-title">📝 今日作业</div>
-        <div id="homeworkList"></div>
-
-        <div class="card">
-            <div class="section-title" style="margin-bottom:12px">✨ 添加额外作业</div>
-            <div class="add-form">
-                <input type="text" class="add-input" id="newName" placeholder="作业名称，如：物理练习">
-                <input type="number" class="time-input" id="newTime" placeholder="分钟" min="1">
-                <button class="add-btn" onclick="addHomework()">+</button>
+        <!-- 孩子版添加作业区 -->
+        <div id="childAddSection">
+            <div class="section-title">📝 今日作业</div>
+            <div id="homeworkList"></div>
+            <div class="card">
+                <div class="section-title" style="margin-bottom:12px">✨ 添加额外作业</div>
+                <div class="add-form">
+                    <input type="text" class="add-input" id="newName" placeholder="作业名称，如：物理练习">
+                    <input type="number" class="time-input" id="newTime" placeholder="分钟" min="1">
+                    <button class="add-btn" onclick="addHomework()">+</button>
+                </div>
+            </div>
+            <div class="card">
+                <button class="report-btn" onclick="sendReport()">📊 发送今日报告给爸爸妈妈</button>
             </div>
         </div>
 
-        <div class="card">
-            <button class="report-btn" onclick="sendReport()">📊 发送今日报告给爸爸妈妈</button>
+        <!-- 家长版作业管理区 -->
+        <div id="parentManageSection" style="display:none;">
+            <div class="section-title">📋 作业清单（共 <span id="parentHwCount">0</span> 项）</div>
+            <div id="parentHomeworkList"></div>
+            <button class="add-homework-btn" onclick="openAddModal()">➕ 添加学校作业</button>
+            <div class="card">
+                <button class="report-btn" onclick="sendReport()">📊 发送今日报告给爸爸妈妈</button>
+            </div>
         </div>
         <br><br>
     </div>
@@ -297,6 +346,26 @@
 
     <div class="toast" id="toast"></div>
 
+    <!-- 家长模式：编辑/添加作业弹窗 -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal">
+            <div class="modal-icon" id="editModalIcon">📝</div>
+            <div class="modal-task" id="editModalTitle">编辑作业</div>
+            <div class="edit-form">
+                <label>作业名称</label>
+                <input type="text" id="editName" placeholder="如：数学练习">
+                <label>建议时间（分钟，0=待定）</label>
+                <input type="number" id="editTime" placeholder="30" min="0">
+                <label>选择图标</label>
+                <div class="edit-icon-select" id="editIconSelect"></div>
+                <div class="edit-form-actions">
+                    <button class="edit-cancel" onclick="closeEditModal()">取消</button>
+                    <button class="edit-save" id="editSaveBtn" onclick="saveHomework()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
     const CHILD = 'yuhan';
     const DEADLINE = '23:00';
@@ -313,7 +382,9 @@
         { id:3, name:'英语听说', icon:'🎧', time:20, status:'waiting' },
         { id:4, name:'学校作业', icon:'📝', time:0, status:'waiting' }
     ];
+    const ICON_OPTIONS = ['📖','📐','🎧','📝','📚','🔢','🌍','🧬','🎨','🎵','⚽','💪','🔬','📕','✏️'];
     let homework = [], currentTask = null, timerInterval = null, startTime = null, pausedTime = 0, isPaused = false, restStartTime = null, assignedTask = null;
+    let isParentMode = false, editingHwId = null, selectedEditIcon = '📝';
     const praises = ['太棒了！提前完成！🎉','专注力满分！继续加油！🌟','效率超高！💯','稳步前进！🌿','高效完成！👏','提前完成！厉害！🚀'];
     const encouragements = ['虽然超时了，但坚持完成就是胜利！💪','做完就是好样的！继续努力！🌈','没关系，尽力就好！💖'];
     let audioCtx = null;
@@ -407,6 +478,7 @@
     function init() {
         updateDate(); updateShengdi(); updateZhongkao(); loadHomework(); parseURLParams();
         renderHomeworkList(); updateStats(); updateDeadlineWithWarning();
+        initParentMode();
         setInterval(() => { updateDeadlineWithWarning(); updateShengdi(); updateZhongkao(); }, 30000);
     }
 
@@ -446,12 +518,25 @@
     function parseURLParams() {
         const p = new URLSearchParams(window.location.search);
         const t = p.get('task'), n = p.get('task_name'), s = p.get('suggest');
+        isParentMode = p.get('mode') === 'parent';
         if (t === 'assigned' && n) {
             assignedTask = { name: decodeURIComponent(n), time: parseInt(s) || 0 };
             document.getElementById('assignedDesc').textContent = `${assignedTask.name}${assignedTask.time > 0 ? ' · ' + assignedTask.time + '分钟' : ''}`;
             document.getElementById('assignedAlert').style.display = 'block';
-            // 自动发送作业清单到飞书群
-            setTimeout(() => sendHomeworkCard(assignedTask), 800);
+            if (!isParentMode) setTimeout(() => sendHomeworkCard(assignedTask), 800);
+        }
+    }
+
+    function initParentMode() {
+        if (isParentMode) {
+            document.body.classList.add('parent-mode');
+            document.getElementById('headerName').textContent = '👨‍👧 羽菡作业管理';
+            document.getElementById('switchLink').style.display = 'none';
+            document.getElementById('headerDeadline').style.display = 'none';
+            document.getElementById('parentBanner').style.display = 'block';
+            document.getElementById('childAddSection').style.display = 'none';
+            document.getElementById('parentManageSection').style.display = 'block';
+            renderParentHomeworkList();
         }
     }
 
@@ -459,6 +544,7 @@
     function saveHomework() { localStorage.setItem(`hw_${CHILD}`, JSON.stringify(homework)); }
 
     function renderHomeworkList() {
+        if (isParentMode) return;
         const done = homework.filter(t => t.status === 'done').length;
         const total = homework.length;
         document.getElementById('progressCount').textContent = `${done}/${total} ${ICON}`;
@@ -477,6 +563,98 @@
     }
 
     function statusText(s) { return { waiting:'⏳ 等待', doing:'🔄 进行中', done:'✅ 完成' }[s] || s; }
+
+    // ========== 家长模式函数 ==========
+    function renderParentHomeworkList() {
+        document.getElementById('parentHwCount').textContent = homework.length;
+        document.getElementById('parentHomeworkList').innerHTML = homework.length === 0
+            ? '<div style="text-align:center;color:#aaa;padding:30px 0;font-size:14px;">暂无作业，点击下方添加</div>'
+            : homework.map(task => `
+                <div class="homework-item">
+                    <div class="homework-header">
+                        <div class="homework-info">
+                            <div class="homework-icon">${task.icon}</div>
+                            <div>
+                                <div class="homework-name">${task.name}</div>
+                                <div class="homework-time">⏱ ${task.time > 0 ? task.time + ' 分钟' : '待定'}</div>
+                            </div>
+                        </div>
+                        <div class="homework-status status-${task.status}">${statusText(task.status)}</div>
+                    </div>
+                    <div class="homework-actions">
+                        <button class="action-edit" onclick="openEditModal(${task.id})">✏️ 编辑</button>
+                        <button class="action-delete" onclick="deleteHomework(${task.id})">🗑️ 删除</button>
+                    </div>
+                </div>`).join('');
+    }
+
+    function openAddModal() {
+        editingHwId = null;
+        document.getElementById('editModalIcon').textContent = '➕';
+        document.getElementById('editModalTitle').textContent = '添加作业';
+        document.getElementById('editName').value = '';
+        document.getElementById('editTime').value = '30';
+        selectedEditIcon = '📝';
+        renderIconPicker('📝');
+        document.getElementById('editModal').classList.add('active');
+    }
+
+    function openEditModal(id) {
+        const task = homework.find(t => t.id === id);
+        if (!task) return;
+        editingHwId = id;
+        document.getElementById('editModalIcon').textContent = task.icon;
+        document.getElementById('editModalTitle').textContent = '编辑作业';
+        document.getElementById('editName').value = task.name;
+        document.getElementById('editTime').value = task.time || 0;
+        selectedEditIcon = task.icon;
+        renderIconPicker(task.icon);
+        document.getElementById('editModal').classList.add('active');
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').classList.remove('active');
+        editingHwId = null;
+    }
+
+    function renderIconPicker(selected) {
+        document.getElementById('editIconSelect').innerHTML = ICON_OPTIONS.map(icon =>
+            `<div class="edit-icon-option ${icon === selected ? 'selected' : ''}" onclick="selectIcon('${icon}')">${icon}</div>`
+        ).join('');
+    }
+
+    function selectIcon(icon) {
+        selectedEditIcon = icon;
+        document.getElementById('editModalIcon').textContent = icon;
+        document.querySelectorAll('.edit-icon-option').forEach(el => {
+            el.classList.toggle('selected', el.textContent === icon);
+        });
+    }
+
+    function saveHomework() {
+        const name = document.getElementById('editName').value.trim();
+        const time = parseInt(document.getElementById('editTime').value) || 0;
+        if (!name) { showToast('请输入作业名称'); return; }
+        if (editingHwId) {
+            const task = homework.find(t => t.id === editingHwId);
+            if (task) { task.name = name; task.time = time; task.icon = selectedEditIcon; }
+        } else {
+            homework.push({ id: Date.now(), name, icon: selectedEditIcon, time, status: 'waiting' });
+        }
+        saveHomework();
+        renderParentHomeworkList();
+        closeEditModal();
+        showToast(editingHwId ? '作业已更新 ✅' : '作业已添加 ✅');
+    }
+
+    function deleteHomework(id) {
+        if (!confirm('确定删除这项作业吗？')) return;
+        homework = homework.filter(t => t.id !== id);
+        saveHomework();
+        renderParentHomeworkList();
+        showToast('已删除 🗑️');
+    }
+    // ========== 家长模式函数结束 ==========
 
     function updateStats() {
         const today = new Date().toISOString().split('T')[0];

@@ -164,7 +164,7 @@
             </div>
         </div>
 
-        <div class="card">
+        <div class="card" id="shengdiCard">
             <div class="shengdi-card">
                 <div class="shengdi-icon">🌏</div>
                 <div class="shengdi-info">
@@ -179,7 +179,7 @@
         </div>
 
         <!-- 中考倒计时卡片 -->
-        <div class="card">
+        <div class="card" id="zhongkaoCard">
             <div class="zhongkao-card">
                 <div class="zhongkao-icon">🎓</div>
                 <div class="zhongkao-info">
@@ -426,12 +426,12 @@
 
     function updateShengdi() {
         const now = new Date(), diff = SHENGDI_DATE - now, days = Math.ceil(diff / 86400000);
-        const card = document.querySelector('.shengdi-card');
+        const card = document.getElementById('shengdiCard');
         if (card) {
             if (days < 0) {
-                card.style.display = 'none';  // 生地会考结束，隐藏卡片
+                card.style.display = 'none';
             } else {
-                card.style.display = 'flex';
+                card.style.display = 'block';
                 document.getElementById('shengdiDays').textContent = days;
                 document.getElementById('shengdiStudy').textContent = `约 ${Math.floor(days * 2)} 小时`;
             }
@@ -440,14 +440,13 @@
 
     function updateZhongkao() {
         const now = new Date(), diff = ZHONGKAO_DATE - now, days = Math.ceil(diff / 86400000);
-        const el = document.getElementById('zhongkaoDays');
         const card = document.getElementById('zhongkaoCard');
-        if (el && card) {
+        if (card) {
             if (days < 0) {
                 card.style.display = 'none';
             } else {
-                card.style.display = 'flex';
-                el.textContent = days;
+                card.style.display = 'block';
+                document.getElementById('zhongkaoDays').textContent = days;
                 document.getElementById('zhongkaoStudy').textContent = `约 ${Math.floor(days * 2)} 小时`;
             }
         }

@@ -289,7 +289,8 @@
     const ICON = '🌿';
     const CHILD_NAME = '羽菡';
     const CHILD_OPEN_ID = 'ou_bdac81aee0c980d2bd351febe0393eb3';  // 羽菡飞书 open_id
-    const SHENGDI_DATE = new Date('2026-06-15');
+    const PARENT_OPEN_ID = 'ou_04d8a814e9b4ce5640739ee9c2221df5'; // 爸爸
+    const FEISHU_WEBHOOK = 'https://open.feishu.cn/open-apis/bot/v2/hook/eff6ff06-c0cb-4c63-b032-a2b8776085d2';
     const DEFAULT_HOMEWORK = [
         { id:1, name:'语文作业', icon:'📖', time:30, status:'waiting' },
         { id:2, name:'数学练习', icon:'📐', time:30, status:'waiting' },
@@ -512,7 +513,82 @@
         document.getElementById('completeEfficiency').textContent = eff + '%';
         document.getElementById('completeFeedback').textContent = isEarly ? praises[Math.floor(Math.random()*praises.length)] : isLate ? encouragements[Math.floor(Math.random()*encouragements.length)] : '准时完成，继续保持！👍';
         document.getElementById('completeModal').classList.add('active');
+        
+        // 保存任务信息用于发送通知
+        const completedTaskInfo = {
+            name: currentTask.name,
+            icon: currentTask.icon,
+            totalMin: totalMin,
+            efficiency: eff
+        };
+        
         currentTask.status = 'done'; saveHomework(); currentTask = null; renderHomeworkList(); updateStats();
+        // 自动发送完成通知给家长
+        sendTaskCompleteCard(completedTaskInfo);
+    }
+
+    // 发送作业完成通知卡片给家长
+    function sendTaskCompleteCard(completedTask) {
+        const done = homework.filter(t => t.status === 'done').length;
+        const total = homework.length;
+        const remaining = total - done;
+        const remainingTasks = homework.filter(t => t.status !== 'done');
+        const remainingList = remainingTasks.length > 0 
+            ? remainingTasks.map(t => `${t.icon} ${t.name}`).join('、') 
+            : '无';
+
+        const now = new Date();
+        const timeStr = `${now.getHours()}点${now.getMinutes()}分`;
+        
+        const effText = completedTask.efficiency >= 90 ? '🎉 效率超高！' 
+            : completedTask.efficiency >= 70 ? '👍 表现不错！' 
+            : '💪 继续加油！';
+
+        const card = {
+            msg_type: 'interactive',
+            card: {
+                config: { wide_screen_mode: true },
+                header: {
+                    title: { tag: 'plain_text', content: `✅ 羽菡完成作业通知` },
+                    template: 'green'
+                },
+                elements: [
+                    {
+                        tag: 'div',
+                        text: {
+                            tag: 'lark_md',
+                            content: `@小龙虾爸爸 @小龙虾妈妈，${effText}\n\n🌿 **${completedTask.name}** 已完成！\n用时 ${completedTask.totalMin} 分钟，效率 ${completedTask.efficiency}%`
+                        }
+                    },
+                    { tag: 'hr' },
+                    {
+                        tag: 'column_set',
+                        flex_mode: 'none',
+                        horizontal_spacing: 'large',
+                        columns: [
+                            { tag: 'column', width: 'auto', elements: [{ tag: 'div', text: { tag: 'lark_md', content: '**✅ 已完成**\n`' + done + '/' + total + '` 项' } }] },
+                            { tag: 'column', width: 'auto', elements: [{ tag: 'div', text: { tag: 'lark_md', content: '**📋 剩余**\n`' + remaining + '` 项' } }] }
+                        ]
+                    },
+                    { tag: 'hr' },
+                    {
+                        tag: 'div',
+                        text: { tag: 'lark_md', content: `**📝 剩余作业**\n${remainingList}` }
+                    },
+                    {
+                        tag: 'note',
+                        elements: [
+                            { tag: 'plain_text', content: `⏰ ${timeStr} · 作业计时器自动通知` }
+                        ]
+                    }
+                ]
+            }
+        };
+        fetch(FEISHU_WEBHOOK, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(card)
+        }).then(r => r.ok ? showToast('已完成通知已发送 📨') : showToast('发送失败 ❌')).catch(() => showToast('发送失败 ❌'));
     }
 
     function saveTaskData(task, total, study, eff) {

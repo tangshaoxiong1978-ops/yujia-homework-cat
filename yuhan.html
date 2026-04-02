@@ -323,8 +323,6 @@
     let homework = [], currentTask = null, timerInterval = null, startTime = null, pausedTime = 0, isPaused = false, restStartTime = null, assignedTask = null;
     const praises = ['太棒了！提前完成！🎉','专注力满分！继续加油！🌟','效率超高！💯','稳步前进！🌿','高效完成！👏','提前完成！厉害！🚀'];
     const encouragements = ['虽然超时了，但坚持完成就是胜利！💪','做完就是好样的！继续努力！🌈','没关系，尽力就好！💖'];
-    const FEISHU_WEBHOOK = 'https://open.feishu.cn/open-apis/bot/v2/hook/eff6ff06-c0cb-4c63-b032-a2b8776085d2';
-
     let audioCtx = null;
     function getAudioCtx() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
     function playBeep(freq=880, dur=0.3, vol=0.4) {

@@ -2,7 +2,7 @@
   "child": "yuhan",
   "childName": "羽菡",
   "date": "2026-04-03",
-  "lastUpdated": "2026-04-03T11:36:15.040Z",
+  "lastUpdated": "2026-04-03T11:43:03.596Z",
   "homework": [
     {
       "id": 1,
@@ -16,7 +16,7 @@
       "name": "数学练习",
       "icon": "📐",
       "time": 30,
-      "status": "waiting"
+      "status": "done"
     },
     {
       "id": 3,
@@ -33,8 +33,14 @@
       "status": "done"
     }
   ],
-  "points": 17,
+  "points": 20,
   "pointsLog": [
+    {
+      "amount": 3,
+      "reason": "✅ 完成「数学练习」（高效+1）",
+      "time": "2026-04-03T11:43:03.596Z",
+      "total": 20
+    },
     {
       "amount": 5,
       "reason": "🎉 今日所有作业全部完成！",
@@ -67,7 +73,7 @@
     }
   ],
   "todayStats": {
-    "studyMinutes": 8,
+    "studyMinutes": 13,
     "restMinutes": 0,
     "efficiency": 100,
     "tasks": [
@@ -118,6 +124,13 @@
         "time": 0,
         "actual": 1,
         "study": 1,
+        "efficiency": 100
+      },
+      {
+        "name": "数学练习",
+        "time": 30,
+        "actual": 5,
+        "study": 5,
         "efficiency": 100
       }
     ]

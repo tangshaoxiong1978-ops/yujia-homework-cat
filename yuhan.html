@@ -31,12 +31,18 @@
         .header-clock {
             display: flex;
             align-items: center;
+            gap: 4px;
             padding: 5px 12px;
-            background: rgba(255,255,255,0.9);
+            background: rgba(76,175,80,0.1);
+            border-radius: 20px;
             font-size: 14px;
             font-weight: 600;
-            color: #333;
+            color: #4CAF50;
             font-variant-numeric: tabular-nums;
+        }
+        .header-clock img {
+            width: 16px;
+            height: 16px;
         }
         
         .main { padding: 0 16px; }
@@ -212,7 +218,7 @@
             <div class="header-name" id="headerName">羽菡森林计时器</div>
         </div>
         <!-- 本地时间 -->
-        <div class="header-clock" id="headerClock">🕐 --:--</div>
+        <div class="header-clock" id="headerClock"><img src="https://img.icons8.com/ios-filled/24/4CAF50/clock.png" alt="时间"> --:--:--</div>
         <a href="yujia.html" class="header-switch" id="switchLink">🐱 切换羽佳</a>
     </div>
 
@@ -663,12 +669,11 @@
         const timeStr = hours + ':' + String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
         const el = document.getElementById('headerClock');
         if (el) {
-            el.textContent = '🕐 ' + timeStr;
+            el.innerHTML = '<img src="https://img.icons8.com/ios-filled/24/4CAF50/clock.png" alt="时间"> ' + timeStr;
         }
     }
-        if (el) {
-            el.textContent = '🕐 ' + timeStr;
-        }
+    
+    // ========== 初始化
     }
 
     // ========== 初始化（核心：先GitHub后本地）==========

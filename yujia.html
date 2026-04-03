@@ -1349,6 +1349,17 @@
                     localStorage.setItem(`${POINTS_KEY}_update`, githubData.lastUpdated);
                 }
             }
+            // 【关键】同步今日学习统计数据从GitHub到本地
+            if (githubData.todayStats) {
+                const today = new Date().toISOString().split('T')[0];
+                const timerKey = `timer_${CHILD}_${today}`;
+                const localTimer = JSON.parse(localStorage.getItem(timerKey) || '{}');
+                // 如果GitHub数据更完整则使用
+                if (!localTimer.studyMinutes || (githubData.todayStats.studyMinutes && githubData.todayStats.studyMinutes > (localTimer.studyMinutes || 0))) {
+                    console.log('🔄 同步GitHub学习数据到本地:', githubData.todayStats);
+                    localStorage.setItem(timerKey, JSON.stringify(githubData.todayStats));
+                }
+            }
         }
         
         // 解析URL参数（来自OpenClaw布置作业）

@@ -584,7 +584,14 @@
                 // 直接用 GitHub Pages URL，浏览器原生支持
                 const url = `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/data/${child}_data.json`;
                 console.log(`[${child}] URL:`, url);
-                const resp = await fetch(url);
+                
+                // 使用 AbortController 添加5秒超时
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+                
+                const resp = await fetch(url, { signal: controller.signal });
+                clearTimeout(timeoutId);
+                
                 if (resp.ok) {
                     const data = await resp.json();
                     console.log(`[${child}] ✅ 成功! points:`, data.points);

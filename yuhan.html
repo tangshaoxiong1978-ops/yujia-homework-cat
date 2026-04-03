@@ -509,26 +509,30 @@
     }
 
     // 从 GitHub 拉取最新数据（跨设备同步核心）
+    // 改用 GitHub Pages，因为部分环境无法访问 GitHub API
     async function loadFromGitHub() {
         try {
-            const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_DATA_FILE}`;
-            const resp = await fetch(apiUrl, {
-                headers: {
-                    'Authorization': `token ${GITHUB_TOKEN}`,
-                    'Accept': 'application/vnd.github.v3+json'
-                }
-            });
+            // 使用 GitHub Pages URL（静态文件），无需 token
+            const url = 'https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/data/yuhan_data.json';
+            console.log('📡 使用 GitHub Pages URL:', url);
+            
+            // 添加5秒超时
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            
+            const resp = await fetch(url, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            
             if (resp.ok) {
-                const fileInfo = await resp.json();
-                const content = JSON.parse(decodeURIComponent(escape(atob(fileInfo.content))));
-                console.log('✅ 从GitHub拉取数据成功', content);
-                return content;
+                const data = await resp.json();
+                console.log('✅ 从GitHub拉取数据成功, points:', data.points);
+                return data;
             } else {
                 console.log('ℹ️ GitHub无数据（或首次同步），使用本地数据');
                 return null;
             }
         } catch (e) {
-            console.warn('⚠️ GitHub拉取失败，使用本地数据:', e);
+            console.warn('⚠️ GitHub拉取失败，使用本地数据:', e.message);
             return null;
         }
     }

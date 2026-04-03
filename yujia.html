@@ -765,8 +765,9 @@
             <div class="header-icon">🐱</div>
             <div class="header-name" id="headerName">羽佳猫咪计时器</div>
         </div>
-        <!-- 截止时间倒计时 -->
+        <!-- 截止时间倒计时 + 本地时间 -->
         <div class="header-deadline" id="headerDeadline">
+            <span class="header-clock" id="headerClock">🕐 --:--</span>
             <span class="header-deadline-icon">⏰</span>
             <span class="header-deadline-time" id="headerDeadlineTime">--:--</span>
         </div>
@@ -1294,6 +1295,18 @@
         lastWarningLevel = diff < 30 * 60000 ? 2 : diff < 60 * 60000 ? 1 : 0;
     }
 
+    // 更新本地时间显示
+    function updateLocalTime() {
+        const now = new Date();
+        const hours = now.getHours();
+        const minutes = now.getMinutes();
+        const timeStr = `${hours}:${String(minutes).padStart(2, '0')}`;
+        const el = document.getElementById('headerClock');
+        if (el) {
+            el.textContent = '🕐 ' + timeStr;
+        }
+    }
+
     // 默认作业（从URL参数或localStorage恢复）
     const DEFAULT_HOMEWORK = [
         { id:1, name:'橙果APP打卡', icon:'📱', time:15, status:'waiting' },
@@ -1370,9 +1383,10 @@
         renderHomeworkList();
         updateStats();
         updateDeadlineWithWarning();
+        updateLocalTime(); // 更新本地时间
         updatePointsDisplay();
         initParentMode();
-        setInterval(() => { updateDeadlineWithWarning(); updateStats(); }, 30000);
+        setInterval(() => { updateDeadlineWithWarning(); updateStats(); updateLocalTime(); }, 30000);
         
         // 页面打开时自动同步到GitHub（确保最新数据上传）
         syncToGitHub(buildSyncData());

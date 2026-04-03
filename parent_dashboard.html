@@ -628,13 +628,39 @@
         
         // 加载所有数据
         async function loadAllData() {
-            document.getElementById('syncStatus').textContent = '🔄 同步中...';
-            const [yujia, yuhan] = await Promise.all([
-                fetchFromGitHub('yujia'),
-                fetchFromGitHub('yuhan')
-            ]);
-            realData.yujia = yujia;
-            realData.yuhan = yuhan;
+            const statusEl = document.getElementById('syncStatus');
+            if (statusEl) statusEl.textContent = '🔄 同步中...';
+            
+            try {
+                const [yujia, yuhan] = await Promise.all([
+                    fetchFromGitHub('yujia'),
+                    fetchFromGitHub('yuhan')
+                ]);
+                
+                // 如果获取失败，使用 fallback 数据（确保界面能显示）
+                if (!yujia && !yuhan) {
+                    console.warn('两个孩子的数据都获取失败，使用 fallback 数据');
+                    realData.yujia = mockData.yujia;
+                    realData.yuhan = mockData.yuhan;
+                    if (statusEl) {
+                        statusEl.className = 'sync-status warning';
+                        statusEl.textContent = '⚠️ 网络异常，显示缓存数据';
+                    }
+                } else {
+                    realData.yujia = yujia || mockData.yujia;
+                    realData.yuhan = yuhan || mockData.yuhan;
+                }
+            } catch (e) {
+                console.error('loadAllData 异常:', e);
+                // 使用 mock 数据作为 fallback
+                realData.yujia = mockData.yujia;
+                realData.yuhan = mockData.yuhan;
+                if (statusEl) {
+                    statusEl.className = 'sync-status error';
+                    statusEl.textContent = '⚠️ 加载失败，显示默认数据';
+                }
+            }
+            
             updateSyncStatus();
             updateDashboard();
         }

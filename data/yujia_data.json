@@ -2,7 +2,7 @@
   "child": "yujia",
   "childName": "羽佳",
   "date": "2026-04-03",
-  "lastUpdated": "2026-04-03T09:42:44.993Z",
+  "lastUpdated": "2026-04-03T09:47:57.075Z",
   "homework": [
     {
       "id": 1,
@@ -40,8 +40,14 @@
       "status": "waiting"
     }
   ],
-  "points": 0,
-  "pointsLog": [],
+  "points": 1,
+  "pointsLog": [
+    {
+      "change": 1,
+      "reason": "积极做家务（测试）",
+      "time": "2026-04-03T09:47:57.075Z"
+    }
+  ],
   "todayStats": {
     "studyMinutes": 1,
     "restMinutes": 0,

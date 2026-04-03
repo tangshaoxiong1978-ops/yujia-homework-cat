@@ -2,7 +2,7 @@
   "child": "yujia",
   "childName": "羽佳",
   "date": "2026-04-03",
-  "lastUpdated": "2026-04-03T11:09:14.602Z",
+  "lastUpdated": "2026-04-03T11:26:39.533Z",
   "homework": [
     {
       "id": 1,
@@ -43,17 +43,9 @@
   "points": 0,
   "pointsLog": [],
   "todayStats": {
-    "studyMinutes": 1,
+    "studyMinutes": 0,
     "restMinutes": 0,
-    "efficiency": 100,
-    "tasks": [
-      {
-        "name": "橙果APP打卡",
-        "time": 15,
-        "actual": 1,
-        "study": 1,
-        "efficiency": 100
-      }
-    ]
+    "efficiency": 0,
+    "tasks": []
   }
 }

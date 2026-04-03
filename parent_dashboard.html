@@ -405,6 +405,7 @@
         <div class="sync-bar">
             <div class="sync-status loading" id="syncStatus">🔄 初始化中...</div>
             <button class="refresh-btn" id="refreshBtn" onclick="manualRefresh()">🔄 手动刷新</button>
+            <button class="refresh-btn" onclick="backupAllData()">💾 备份数据</button>
         </div>
         
         <!-- 孩子选择 -->
@@ -572,9 +573,11 @@
         const GITHUB_REPO = 'tangshaoxiong1978-ops/yujia-homework-cat';
 
         async function fetchFromGitHub(child) {
+            console.log(`[${child}] 开始从GitHub获取数据...`);
             try {
                 // 用 GitHub Contents API，内容是 base64 编码，绕过 Pages CDN 缓存
                 const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/data/${child}_data.json`;
+                console.log(`[${child}] API URL:`, apiUrl);
                 const response = await fetch(apiUrl, {
                     headers: {
                         'Authorization': `token ${GITHUB_TOKEN}`,
@@ -582,13 +585,17 @@
                         'Cache-Control': 'no-cache'
                     }
                 });
+                console.log(`[${child}] 响应状态:`, response.status);
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const fileInfo = await response.json();
+                console.log(`[${child}] 文件信息:`, fileInfo);
                 // base64 解码内容
                 const decoded = decodeURIComponent(escape(atob(fileInfo.content.replace(/\n/g, ''))));
-                return JSON.parse(decoded);
+                const data = JSON.parse(decoded);
+                console.log(`[${child}] 解析后的数据:`, data);
+                return data;
             } catch (error) {
-                console.warn(`读取 ${child} 数据失败，使用模拟数据:`, error);
+                console.error(`[${child}] 获取数据失败:`, error);
                 return null;
             }
         }
@@ -643,6 +650,56 @@
                     btn.textContent = '🔄 手动刷新';
                     btn.disabled = false;
                 }, 4000);
+            }
+        }
+
+        // 备份所有数据到本地文件
+        async function backupAllData() {
+            const btn = event.target;
+            btn.textContent = '⏳ 备份中...';
+            btn.disabled = true;
+            
+            try {
+                // 获取所有数据
+                const [yujiaData, yuhanData] = await Promise.all([
+                    fetchFromGitHub('yujia'),
+                    fetchFromGitHub('yuhan')
+                ]);
+                
+                // 构建备份数据
+                const backup = {
+                    backupTime: new Date().toISOString(),
+                    children: {
+                        yujia: yujiaData,
+                        yuhan: yuhanData
+                    }
+                };
+                
+                // 生成文件名：backup_YYYY-MM-DD_HH-mm-ss.json
+                const now = new Date();
+                const timestamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}-${String(now.getSeconds()).padStart(2,'0')}`;
+                const filename = `homework_backup_${timestamp}.json`;
+                
+                // 创建并下载文件
+                const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                btn.textContent = '✅ 已备份';
+                setTimeout(() => {
+                    btn.textContent = '💾 备份数据';
+                    btn.disabled = false;
+                }, 2000);
+            } catch (e) {
+                alert('备份失败: ' + e.message);
+                btn.textContent = '💾 备份数据';
+                btn.disabled = false;
             }
         }
 

@@ -521,6 +521,8 @@
         const today = new Date().toISOString().split('T')[0];
         const key = `timer_${CHILD}_${today}`;
         const timerData = JSON.parse(localStorage.getItem(key) || '{}');
+        // 获取积分明细
+        const pointsLog = JSON.parse(localStorage.getItem(POINTS_LOG_KEY) || '[]');
         return {
             child: CHILD,
             childName: CHILD_NAME,
@@ -528,6 +530,7 @@
             lastUpdated: new Date().toISOString(),
             homework: homework,
             points: getPoints(),
+            pointsLog: pointsLog.slice(-20), // 保留最近20条
             todayStats: {
                 studyMinutes: timerData.studyMinutes || 0,
                 restMinutes: timerData.restMinutes || 0,

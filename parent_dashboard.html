@@ -332,6 +332,66 @@
             font-weight: 700;
             margin-left: 10px;
         }
+        .points-card {
+            background: linear-gradient(135deg, #fff8e1 0%, #fff3e0 100%);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 14px;
+            border-left: 4px solid #FFA000;
+        }
+        .points-current {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            font-size: 15px;
+        }
+        .points-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: #FF6D00;
+            margin-left: 8px;
+        }
+        .points-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .points-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .points-btn.plus { background: #4CAF50; color: white; }
+        .points-btn.minus { background: #f44336; color: white; }
+        .points-btn.detail { background: #2196F3; color: white; }
+        .points-log-section {
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid #ddd;
+        }
+        .points-log-section h4 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        .points-log-list {
+            max-height: 150px;
+            overflow-y: auto;
+            font-size: 13px;
+        }
+        .points-log-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .points-log-item .time { color: #888; font-size: 12px; }
+        .points-log-item .plus { color: #4CAF50; }
+        .points-log-item .minus { color: #f44336; }
     </style>
 </head>
 <body>
@@ -421,6 +481,27 @@
             <div class="report-section">
                 <h3>⚠️ 需要关注</h3>
                 <div id="reportConcern">暂无数据</div>
+            </div>
+        </div>
+        
+        <!-- 积分管理卡片 -->
+        <div class="points-card">
+            <div class="card-title">⭐ 积分管理</div>
+            
+            <div class="points-current">
+                <span>当前积分：</span>
+                <span class="points-value" id="currentPoints">0</span>
+            </div>
+            
+            <div class="points-actions">
+                <button class="points-btn plus" onclick="adjustPoints(1)">➕ 加分</button>
+                <button class="points-btn minus" onclick="adjustPoints(-1)">➖ 减分</button>
+                <button class="points-btn detail" onclick="showPointsLog()">📋 明细</button>
+            </div>
+            
+            <div class="points-log-section" id="pointsLogSection" style="display:none;">
+                <h4>积分明细</h4>
+                <div class="points-log-list" id="pointsLogList"></div>
             </div>
         </div>
         
@@ -672,6 +753,26 @@
                     ptsBadge.style.display = 'none';
                 }
             }
+            
+            // 更新积分卡片
+            const currentPts = rawData && rawData.points != null ? rawData.points : 0;
+            document.getElementById('currentPoints').textContent = currentPts;
+            
+            // 更新积分明细
+            const logSection = document.getElementById('pointsLogSection');
+            const logList = document.getElementById('pointsLogList');
+            const pointsLog = rawData && rawData.pointsLog ? rawData.pointsLog : [];
+            if (pointsLog.length > 0) {
+                logList.innerHTML = pointsLog.map(log => `
+                    <div class="points-log-item">
+                        <span>${log.reason || '积分变动'}</span>
+                        <span class="${log.change > 0 ? 'plus' : 'minus'}">${log.change > 0 ? '+' : ''}${log.change}</span>
+                        <span class="time">${log.time ? new Date(log.time).toLocaleString('zh-CN') : ''}</span>
+                    </div>
+                `).join('');
+            } else {
+                logList.innerHTML = '<div style="color:#888;text-align:center;padding:10px">暂无明细</div>';
+            }
 
             const remaining = (data.stats.total || data.tasks.length) - data.stats.completed;
             if (remaining > 0) {
@@ -702,6 +803,70 @@
             element.classList.toggle('active');
             notificationSettings[type] = element.classList.contains('active');
             console.log('通知设置已更新:', notificationSettings);
+        }
+        
+        // 积分调整（家长手动加减分）
+        async function adjustPoints(direction) {
+            const reason = direction > 0 ? prompt('加分原因（可选）') : prompt('减分原因（可选）');
+            if (reason === null) return; // 取消
+            
+            const change = direction > 0 ? parseInt(prompt('加分/减分分值（正数）：', '1') || '1') : -parseInt(prompt('减分分值（正数）：', '1') || '1');
+            if (isNaN(change) || change === 0) { alert('请输入有效分值'); return; }
+            
+            const child = currentChild;
+            const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/data/${child}_data.json`;
+            
+            // 先获取当前数据
+            try {
+                const getResp = await fetch(apiUrl, {
+                    headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' }
+                });
+                if (!getResp.ok) { alert('获取数据失败'); return; }
+                
+                const fileInfo = await getResp.json();
+                let data = JSON.parse(decodeURIComponent(escape(atob(fileInfo.content))));
+                
+                // 更新积分
+                data.points = (data.points || 0) + change;
+                data.lastUpdated = new Date().toISOString();
+                
+                // 添加积分记录
+                if (!data.pointsLog) data.pointsLog = [];
+                data.pointsLog.push({
+                    change: change,
+                    reason: reason || (change > 0 ? '家长加分' : '家长减分'),
+                    time: new Date().toISOString()
+                });
+                data.pointsLog = data.pointsLog.slice(-20); // 保留最近20条
+                
+                // 推送到GitHub
+                const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+                const body = {
+                    message: `家长手动调整积分：${change > 0 ? '+' : ''}${change}`,
+                    content: content,
+                    sha: fileInfo.sha
+                };
+                const putResp = await fetch(apiUrl, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                
+                if (putResp.ok) {
+                    alert(`✅ ${change > 0 ? '加分' : '减分'}成功！当前积分：${data.points}`);
+                    loadAllData(); // 刷新显示
+                } else {
+                    alert('❌ 同步失败，请重试');
+                }
+            } catch (e) {
+                alert('❌ 操作失败：' + e.message);
+            }
+        }
+        
+        // 显示/隐藏积分明细
+        function showPointsLog() {
+            const section = document.getElementById('pointsLogSection');
+            section.style.display = section.style.display === 'none' ? 'block' : 'none';
         }
         
         // 实时更新（每30秒重新加载数据）

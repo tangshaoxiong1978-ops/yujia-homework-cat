@@ -2,7 +2,7 @@
   "child": "yujia",
   "childName": "羽佳",
   "date": "2026-04-03",
-  "lastUpdated": "2026-04-03T11:45:28.521Z",
+  "lastUpdated": "2026-04-03T11:45:51.458Z",
   "homework": [
     {
       "id": 1,
@@ -30,7 +30,7 @@
       "name": "口算题一页",
       "icon": "🔢",
       "time": 20,
-      "status": "waiting"
+      "status": "done"
     },
     {
       "id": 5,
@@ -40,8 +40,14 @@
       "status": "waiting"
     }
   ],
-  "points": 15,
+  "points": 18,
   "pointsLog": [
+    {
+      "amount": 3,
+      "reason": "✅ 完成「口算题一页」（高效+1）",
+      "time": "2026-04-03T11:45:51.458Z",
+      "total": 18
+    },
     {
       "amount": 5,
       "reason": "🎉 今日所有作业全部完成！",
@@ -62,9 +68,9 @@
     }
   ],
   "todayStats": {
-    "studyMinutes": 44,
+    "studyMinutes": 45,
     "restMinutes": 0,
-    "efficiency": 45,
+    "efficiency": 73,
     "tasks": [
       {
         "name": "英语一起作业",
@@ -72,6 +78,13 @@
         "actual": 44,
         "study": 44,
         "efficiency": 45
+      },
+      {
+        "name": "口算题一页",
+        "time": 20,
+        "actual": 1,
+        "study": 1,
+        "efficiency": 100
       }
     ]
   }

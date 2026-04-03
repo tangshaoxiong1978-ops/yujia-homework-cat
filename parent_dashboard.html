@@ -582,6 +582,21 @@
         const GITHUB_TOKEN = _t.join('');
         const GITHUB_REPO = 'tangshaoxiong1978-ops/yujia-homework-cat';
         
+        // Base64 解码（兼容 Unicode）
+        function base64Decode(str) {
+            try {
+                // 替换 Base64 特殊字符
+                const base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+                // 解码
+                const decoded = atob(base64);
+                // 处理 Unicode 字符
+                return decodeURIComponent(escape(decoded));
+            } catch (e) {
+                console.error('Base64 解码失败:', e);
+                return null;
+            }
+        }
+        
         async function fetchFromGitHub(child) {
             console.log(`[${child}] ========== 开始获取数据 ==========`);
             try {
@@ -596,7 +611,12 @@
                 console.log(`[${child}] 响应状态:`, resp.status);
                 if (resp.ok) {
                     const fileInfo = await resp.json();
-                    const content = JSON.parse(decodeURIComponent(escape(atob(fileInfo.content))));
+                    const decoded = base64Decode(fileInfo.content);
+                    if (!decoded) {
+                        console.error(`[${child}] Base64 解码失败`);
+                        return null;
+                    }
+                    const content = JSON.parse(decoded);
                     console.log(`[${child}] ✅ 解析成功! lastUpdated:`, content.lastUpdated);
                     return content;
                 }
@@ -965,7 +985,9 @@
                 if (!getResp.ok) { alert('获取数据失败'); return; }
                 
                 const fileInfo = await getResp.json();
-                let data = JSON.parse(decodeURIComponent(escape(atob(fileInfo.content))));
+                const decoded = base64Decode(fileInfo.content);
+                if (!decoded) { alert('解码失败'); return; }
+                let data = JSON.parse(decoded);
                 
                 // 更新积分
                 data.points = (data.points || 0) + change;

@@ -2,7 +2,7 @@
   "child": "yujia",
   "childName": "羽佳",
   "date": "2026-04-03",
-  "lastUpdated": "2026-04-03T10:32:03.930Z",
+  "lastUpdated": "2026-04-03T10:34:19.863Z",
   "homework": [
     {
       "id": 1,
@@ -16,7 +16,7 @@
       "name": "英语一起作业",
       "icon": "🎧",
       "time": 20,
-      "status": "waiting"
+      "status": "done"
     },
     {
       "id": 3,
@@ -40,12 +40,27 @@
       "status": "waiting"
     }
   ],
-  "points": 0,
-  "pointsLog": [],
+  "points": 2,
+  "pointsLog": [
+    {
+      "amount": 2,
+      "reason": "✅ 完成「英语一起作业」",
+      "time": "2026-04-03T10:34:19.851Z",
+      "total": 2
+    }
+  ],
   "todayStats": {
-    "studyMinutes": 0,
+    "studyMinutes": 44,
     "restMinutes": 0,
-    "efficiency": 0,
-    "tasks": []
+    "efficiency": 45,
+    "tasks": [
+      {
+        "name": "英语一起作业",
+        "time": 20,
+        "actual": 44,
+        "study": 44,
+        "efficiency": 45
+      }
+    ]
   }
 }

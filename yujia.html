@@ -658,6 +658,104 @@
         .edit-cancel { flex: 1; padding: 12px; background: #f5f5f5; color: #555; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; }
         .add-homework-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #FF8FB3 0%, #FF6B9D 100%); color: white; border: none; border-radius: 14px; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; }
         .add-homework-btn:hover { box-shadow: 0 4px 16px rgba(255,107,157,0.35); }
+
+        /* ===== 积分系统 ===== */
+        .points-card {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
+            border-radius: 20px;
+            padding: 16px 18px;
+            margin-bottom: 14px;
+            box-shadow: 0 4px 16px rgba(255,193,7,0.2);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .points-icon { font-size: 36px; }
+        .points-info { flex: 1; }
+        .points-label { font-size: 13px; color: #856404; font-weight: 600; }
+        .points-value { font-size: 28px; font-weight: 900; color: #e67e00; line-height: 1.1; }
+        .points-sub { font-size: 12px; color: #aaa; margin-top: 2px; }
+        .points-history-btn {
+            padding: 8px 14px;
+            background: linear-gradient(135deg, #ffc107, #ff9800);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* ===== 彩蛋全屏弹窗 ===== */
+        .egg-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, rgba(255,107,157,0.96) 0%, rgba(255,143,179,0.97) 100%);
+            z-index: 5000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+            overflow: hidden;
+        }
+        .egg-overlay.active { display: flex; }
+        .egg-fireworks { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .egg-content { position: relative; z-index: 1; padding: 30px; }
+        .egg-emoji { font-size: 80px; animation: egg-bounce 0.6s ease-in-out infinite alternate; margin-bottom: 10px; }
+        @keyframes egg-bounce { from { transform: scale(1) rotate(-5deg); } to { transform: scale(1.15) rotate(5deg); } }
+        .egg-title { font-size: 32px; font-weight: 900; color: white; margin-bottom: 8px; text-shadow: 0 2px 10px rgba(0,0,0,0.15); }
+        .egg-subtitle { font-size: 18px; color: rgba(255,255,255,0.9); margin-bottom: 20px; }
+        .egg-points { font-size: 44px; font-weight: 900; color: #fff200; text-shadow: 0 2px 12px rgba(0,0,0,0.2); margin-bottom: 6px; }
+        .egg-points-label { font-size: 16px; color: rgba(255,255,255,0.85); margin-bottom: 28px; }
+        .egg-close-btn {
+            padding: 14px 40px;
+            background: white;
+            color: #FF6B9D;
+            border: none;
+            border-radius: 30px;
+            font-size: 17px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .confetti-piece {
+            position: absolute;
+            width: 10px; height: 10px;
+            border-radius: 2px;
+            animation: confetti-fall linear forwards;
+        }
+        @keyframes confetti-fall {
+            0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* ===== 积分历史弹窗 ===== */
+        .points-log-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 3000;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        .points-log-overlay.active { display: flex; }
+        .points-log-sheet {
+            background: white;
+            border-radius: 24px 24px 0 0;
+            padding: 24px 20px;
+            width: 100%;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        .points-log-title { font-size: 18px; font-weight: 800; color: #333; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .points-log-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f5f5f5; }
+        .points-log-item:last-child { border-bottom: none; }
+        .points-log-desc { font-size: 14px; color: #333; }
+        .points-log-date { font-size: 12px; color: #aaa; margin-top: 2px; }
+        .points-log-amount { font-size: 18px; font-weight: 800; color: #e67e00; }
+        .points-log-close { width: 100%; padding: 14px; background: #f5f5f5; color: #555; border: none; border-radius: 14px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 12px; }
     </style>
 </head>
 <body>
@@ -717,6 +815,17 @@
             <div class="progress-bar">
                 <div class="progress-fill" id="progressFill" style="width:0%"></div>
             </div>
+        </div>
+
+        <!-- 积分卡片 -->
+        <div class="points-card" id="pointsCard">
+            <div class="points-icon">⭐</div>
+            <div class="points-info">
+                <div class="points-label">🐱 羽佳积分</div>
+                <div class="points-value" id="pointsDisplay">0</div>
+                <div class="points-sub" id="pointsSub">完成作业赢取积分！</div>
+            </div>
+            <button class="points-history-btn" onclick="openPointsLog()">明细</button>
         </div>
 
         <!-- Tab 统计 -->
@@ -849,6 +958,28 @@
     <!-- Toast -->
     <div class="toast" id="toast"></div>
 
+    <!-- 全部完成彩蛋弹窗 -->
+    <div class="egg-overlay" id="eggOverlay">
+        <canvas class="egg-fireworks" id="eggCanvas"></canvas>
+        <div class="egg-content">
+            <div class="egg-emoji">🎉</div>
+            <div class="egg-title">全部完成！！！</div>
+            <div class="egg-subtitle">🐱 羽佳今天太厉害了！</div>
+            <div class="egg-points" id="eggPointsEarned">+10</div>
+            <div class="egg-points-label">积分入账，继续加油！</div>
+            <button class="egg-close-btn" onclick="closeEgg()">好棒！继续！💪</button>
+        </div>
+    </div>
+
+    <!-- 积分历史弹窗 -->
+    <div class="points-log-overlay" id="pointsLogOverlay" onclick="closePointsLog()">
+        <div class="points-log-sheet" onclick="event.stopPropagation()">
+            <div class="points-log-title">⭐ 积分明细</div>
+            <div id="pointsLogList"></div>
+            <button class="points-log-close" onclick="closePointsLog()">关闭</button>
+        </div>
+    </div>
+
     <!-- 家长模式：编辑/添加作业弹窗 -->
     <div class="modal-overlay" id="editModal">
         <div class="modal">
@@ -863,7 +994,7 @@
                 <div class="edit-icon-select" id="editIconSelect"></div>
                 <div class="edit-form-actions">
                     <button class="edit-cancel" onclick="closeEditModal()">取消</button>
-                    <button class="edit-save" id="editSaveBtn" onclick="saveHomework()">保存</button>
+                    <button class="edit-save" id="editSaveBtn" onclick="saveEditedHomework()">保存</button>
                 </div>
             </div>
         </div>
@@ -942,6 +1073,7 @@
             date: today,
             lastUpdated: new Date().toISOString(),
             homework: homework,
+            points: getPoints(),
             todayStats: {
                 studyMinutes: timerData.studyMinutes || 0,
                 restMinutes: timerData.restMinutes || 0,
@@ -1163,6 +1295,7 @@
         renderHomeworkList();
         updateStats();
         updateDeadlineWithWarning();
+        updatePointsDisplay();
         initParentMode();
         setInterval(() => { updateDeadlineWithWarning(); updateStats(); }, 30000);
     }
@@ -1249,10 +1382,11 @@
         });
     }
 
-    function saveHomework() {
+    function saveEditedHomework() {
         const name = document.getElementById('editName').value.trim();
         const time = parseInt(document.getElementById('editTime').value) || 0;
         if (!name) { showToast('请输入作业名称'); return; }
+        const wasEditing = editingHwId;
         if (editingHwId) {
             const task = homework.find(t => t.id === editingHwId);
             if (task) { task.name = name; task.time = time; task.icon = selectedEditIcon; }
@@ -1262,7 +1396,7 @@
         saveHomework();
         renderParentHomeworkList();
         closeEditModal();
-        showToast(editingHwId ? '作业已更新 ✅' : '作业已添加 ✅');
+        showToast(wasEditing ? '作业已更新 ✅' : '作业已添加 ✅');
     }
 
     function deleteHomework(id) {
@@ -1468,6 +1602,15 @@
         renderHomeworkList();
         updateStats();
         
+        // 积分奖励：完成作业 +2，效率≥90% 额外+1
+        let pts = 2;
+        if (capped >= 90) pts += 1;
+        addPoints(pts, `✅ 完成「${completedTaskInfo.name}」${capped >= 90 ? '（高效+1）' : ''}`);
+        showToast(`+${pts} 积分！⭐`);
+
+        // 检查是否全部完成，触发彩蛋
+        setTimeout(checkAllDone, 800);
+
         // 自动发送完成通知给家长
         sendTaskCompleteCard(completedTaskInfo);
 
@@ -1763,6 +1906,133 @@
         t.textContent = msg;
         t.classList.add('show');
         setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    // ===== 积分系统 =====
+    const POINTS_KEY = `points_${CHILD}`;
+    const POINTS_LOG_KEY = `points_log_${CHILD}`;
+    const ALL_DONE_KEY = `all_done_${CHILD}`;
+
+    // 积分规则：每完成一项作业 +2分；效率≥90% 额外+1；全部完成额外+5
+    function addPoints(amount, reason) {
+        const pts = getPoints();
+        const newPts = pts + amount;
+        localStorage.setItem(POINTS_KEY, newPts);
+        // 记录日志
+        const log = JSON.parse(localStorage.getItem(POINTS_LOG_KEY) || '[]');
+        log.unshift({ amount, reason, time: new Date().toISOString(), total: newPts });
+        if (log.length > 100) log.pop();
+        localStorage.setItem(POINTS_LOG_KEY, JSON.stringify(log));
+        updatePointsDisplay();
+        return newPts;
+    }
+
+    function getPoints() {
+        return parseInt(localStorage.getItem(POINTS_KEY) || '0');
+    }
+
+    function updatePointsDisplay() {
+        const pts = getPoints();
+        document.getElementById('pointsDisplay').textContent = pts;
+        const sub = pts >= 100 ? '🏆 积分超级多！快去兑换奖励！' :
+                    pts >= 50 ? '⭐ 积分收集中，继续加油！' :
+                    pts >= 20 ? '🌟 还不错！保持下去！' : '完成作业赢取积分！';
+        document.getElementById('pointsSub').textContent = sub;
+    }
+
+    function openPointsLog() {
+        const log = JSON.parse(localStorage.getItem(POINTS_LOG_KEY) || '[]');
+        const list = document.getElementById('pointsLogList');
+        if (log.length === 0) {
+            list.innerHTML = '<div style="text-align:center;color:#aaa;padding:30px 0">暂无积分记录，完成作业来赚积分！🐱</div>';
+        } else {
+            list.innerHTML = log.map(item => {
+                const d = new Date(item.time);
+                const timeStr = `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
+                return `<div class="points-log-item">
+                    <div>
+                        <div class="points-log-desc">${item.reason}</div>
+                        <div class="points-log-date">${timeStr} · 累计 ${item.total} 分</div>
+                    </div>
+                    <div class="points-log-amount">+${item.amount}</div>
+                </div>`;
+            }).join('');
+        }
+        document.getElementById('pointsLogOverlay').classList.add('active');
+    }
+
+    function closePointsLog() {
+        document.getElementById('pointsLogOverlay').classList.remove('active');
+    }
+
+    // ===== 彩蛋系统 =====
+    function checkAllDone() {
+        if (homework.length === 0) return;
+        const done = homework.filter(t => t.status === 'done').length;
+        if (done < homework.length) return;
+
+        // 防重复触发（当天只弹一次）
+        const today = new Date().toISOString().split('T')[0];
+        const lastKey = `${ALL_DONE_KEY}_${today}`;
+        if (localStorage.getItem(lastKey)) return;
+        localStorage.setItem(lastKey, '1');
+
+        // 全部完成：额外奖励 5 分
+        const bonusPts = 5;
+        const total = addPoints(bonusPts, '🎉 今日所有作业全部完成！');
+        document.getElementById('eggPointsEarned').textContent = `+${bonusPts} 分`;
+        document.getElementById('eggOverlay').classList.add('active');
+        launchConfetti();
+    }
+
+    function closeEgg() {
+        document.getElementById('eggOverlay').classList.remove('active');
+    }
+
+    function launchConfetti() {
+        const canvas = document.getElementById('eggCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const colors = ['#FF6B9D','#FFD700','#7ED321','#4A90E2','#FF8C00','#E91E63','#00BCD4','#9C27B0'];
+        const pieces = [];
+        for (let i = 0; i < 120; i++) {
+            pieces.push({
+                x: Math.random() * canvas.width,
+                y: -10 - Math.random() * 200,
+                w: 8 + Math.random() * 8,
+                h: 4 + Math.random() * 4,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                speed: 2 + Math.random() * 4,
+                angle: Math.random() * 360,
+                spin: (Math.random() - 0.5) * 8,
+                wobble: Math.random() * 10
+            });
+        }
+        let frame = 0;
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let alive = false;
+            pieces.forEach(p => {
+                p.y += p.speed;
+                p.angle += p.spin;
+                p.x += Math.sin(frame * 0.05 + p.wobble) * 1.5;
+                if (p.y < canvas.height + 20) alive = true;
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.angle * Math.PI / 180);
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+                ctx.restore();
+            });
+            frame++;
+            if (alive && document.getElementById('eggOverlay').classList.contains('active')) {
+                requestAnimationFrame(draw);
+            } else {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+        draw();
     }
 
     init();

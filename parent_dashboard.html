@@ -610,6 +610,13 @@
             } else {
                 document.getElementById('reportConcern').innerHTML = '📖 暂无完成记录';
             }
+
+            // 显示积分（如果有）
+            const pts = rawData && rawData.points != null ? rawData.points : null;
+            const ptsBadge = document.getElementById('pointsBadge');
+            if (ptsBadge) {
+                ptsBadge.textContent = pts != null ? `⭐ 积分：${pts}` : '';
+            }
             
             // 更新时间
             const now = new Date();

@@ -708,10 +708,14 @@
         }
         
         // 选择孩子
-        function selectChild(child) {
+        function selectChild(child, evt) {
             currentChild = child;
             document.querySelectorAll('.child-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            if (evt && evt.target) {
+                evt.target.classList.add('active');
+            } else if (window.event && window.event.target) {
+                window.event.target.classList.add('active');
+            }
             updateDashboard();
         }
         

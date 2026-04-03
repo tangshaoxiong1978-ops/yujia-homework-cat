@@ -2,7 +2,7 @@
   "child": "yuhan",
   "childName": "羽菡",
   "date": "2026-04-03",
-  "lastUpdated": "2026-04-03T00:53:37.064Z",
+  "lastUpdated": "2026-04-03T00:53:48.404Z",
   "homework": [
     {
       "id": 1,
@@ -33,7 +33,7 @@
       "status": "done"
     }
   ],
-  "points": 12,
+  "points": 17,
   "todayStats": {
     "studyMinutes": 8,
     "restMinutes": 0,

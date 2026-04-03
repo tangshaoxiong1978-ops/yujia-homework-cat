@@ -628,14 +628,20 @@
         
         // 加载所有数据
         async function loadAllData() {
+            console.log('[loadAllData] 开始执行...');
             const statusEl = document.getElementById('syncStatus');
-            if (statusEl) statusEl.textContent = '🔄 同步中...';
+            if (statusEl) {
+                statusEl.textContent = '🔄 同步中...';
+                statusEl.className = 'sync-status loading';
+            }
             
             try {
+                console.log('[loadAllData] 正在请求数据...');
                 const [yujia, yuhan] = await Promise.all([
                     fetchFromGitHub('yujia'),
                     fetchFromGitHub('yuhan')
                 ]);
+                console.log('[loadAllData] 请求完成, yujia:', yujia ? '有数据' : 'null', 'yuhan:', yuhan ? '有数据' : 'null');
                 
                 // 如果获取失败，使用 fallback 数据（确保界面能显示）
                 if (!yujia && !yuhan) {
@@ -649,9 +655,13 @@
                 } else {
                     realData.yujia = yujia || mockData.yujia;
                     realData.yuhan = yuhan || mockData.yuhan;
+                    if (statusEl) {
+                        statusEl.className = 'sync-status ok';
+                        statusEl.textContent = '✅ 数据已加载';
+                    }
                 }
             } catch (e) {
-                console.error('loadAllData 异常:', e);
+                console.error('[loadAllData] 异常:', e);
                 // 使用 mock 数据作为 fallback
                 realData.yujia = mockData.yujia;
                 realData.yuhan = mockData.yuhan;
@@ -661,8 +671,10 @@
                 }
             }
             
+            console.log('[loadAllData] 调用 updateSyncStatus 和 updateDashboard');
             updateSyncStatus();
             updateDashboard();
+            console.log('[loadAllData] 完成');
         }
         
         // 更新同步状态显示

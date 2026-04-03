@@ -105,6 +105,18 @@
         @keyframes blink-danger { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
         .header-deadline-icon { font-size: 14px; }
         .header-deadline-time { font-variant-numeric: tabular-nums; }
+        
+        /* 本地时间 */
+        .header-clock {
+            display: flex;
+            align-items: center;
+            padding: 5px 12px;
+            background: rgba(255,255,255,0.9);
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            font-variant-numeric: tabular-nums;
+        }
 
         .header-switch {
             display: flex;
@@ -765,12 +777,8 @@
             <div class="header-icon">🐱</div>
             <div class="header-name" id="headerName">羽佳猫咪计时器</div>
         </div>
-        <!-- 截止时间倒计时 + 本地时间 -->
-        <div class="header-deadline" id="headerDeadline">
-            <span class="header-clock" id="headerClock">🕐 --:--</span>
-            <span class="header-deadline-icon">⏰</span>
-            <span class="header-deadline-time" id="headerDeadlineTime">--:--</span>
-        </div>
+        <!-- 本地时间 -->
+        <div class="header-clock" id="headerClock">🕐 --:--</div>
         <a href="yuhan.html" class="header-switch" id="switchLink">🌿 切换羽菡</a>
     </div>
 
@@ -1300,7 +1308,8 @@
         const now = new Date();
         const hours = now.getHours();
         const minutes = now.getMinutes();
-        const timeStr = `${hours}:${String(minutes).padStart(2, '0')}`;
+        const seconds = now.getSeconds();
+        const timeStr = `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         const el = document.getElementById('headerClock');
         if (el) {
             el.textContent = '🕐 ' + timeStr;

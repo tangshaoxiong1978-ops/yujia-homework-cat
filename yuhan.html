@@ -26,6 +26,19 @@
         @keyframes blink-warn { 0%,100% { opacity:1; } 50% { opacity:0.7; } }
         @keyframes blink-danger { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
         .header-deadline-icon { font-size: 14px; }
+        
+        /* 本地时间 */
+        .header-clock {
+            display: flex;
+            align-items: center;
+            padding: 5px 12px;
+            background: rgba(255,255,255,0.9);
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            font-variant-numeric: tabular-nums;
+        }
+        
         .main { padding: 0 16px; }
         .avatar-section { text-align: center; padding: 24px 0 16px; }
         .main-avatar { width: 90px; height: 90px; border-radius: 50%; background: linear-gradient(135deg, #81C784 0%, #4CAF50 100%); display: inline-flex; align-items: center; justify-content: center; font-size: 46px; box-shadow: 0 8px 24px rgba(76,175,80,0.3); margin-bottom: 10px; animation: pulse-forest 3.5s ease-in-out infinite; }
@@ -198,11 +211,8 @@
             <div class="header-icon">🌿</div>
             <div class="header-name" id="headerName">羽菡森林计时器</div>
         </div>
-        <div class="header-deadline" id="headerDeadline">
-            <span class="header-clock" id="headerClock">🕐 --:--</span>
-            <span class="header-deadline-icon">⏰</span>
-            <span id="headerDeadlineTime">--:--</span>
-        </div>
+        <!-- 本地时间 -->
+        <div class="header-clock" id="headerClock">🕐 --:--</div>
         <a href="yujia.html" class="header-switch" id="switchLink">🐱 切换羽佳</a>
     </div>
 
@@ -649,8 +659,13 @@
         const now = new Date();
         const hours = now.getHours();
         const minutes = now.getMinutes();
-        const timeStr = hours + ':' + String(minutes).padStart(2, '0');
+        const seconds = now.getSeconds();
+        const timeStr = hours + ':' + String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
         const el = document.getElementById('headerClock');
+        if (el) {
+            el.textContent = '🕐 ' + timeStr;
+        }
+    }
         if (el) {
             el.textContent = '🕐 ' + timeStr;
         }

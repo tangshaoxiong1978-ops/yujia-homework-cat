@@ -584,8 +584,7 @@
                 const response = await fetch(apiUrl, {
                     headers: {
                         'Authorization': `token ${GITHUB_TOKEN}`,
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Cache-Control': 'no-cache'
+                        'Accept': 'application/vnd.github.v3+json'
                     }
                 });
                 console.log(`[${child}] 响应状态:`, response.status);

@@ -2,7 +2,7 @@
   "child": "yujia",
   "childName": "羽佳",
   "date": "2026-04-03",
-  "lastUpdated": "2026-04-03T11:45:51.458Z",
+  "lastUpdated": "2026-04-03T11:48:25.510Z",
   "homework": [
     {
       "id": 1,
@@ -23,7 +23,7 @@
       "name": "阅读半小时",
       "icon": "📚",
       "time": 30,
-      "status": "waiting"
+      "status": "done"
     },
     {
       "id": 4,
@@ -40,8 +40,14 @@
       "status": "waiting"
     }
   ],
-  "points": 18,
+  "points": 21,
   "pointsLog": [
+    {
+      "amount": 3,
+      "reason": "✅ 完成「阅读半小时」（高效+1）",
+      "time": "2026-04-03T11:48:25.508Z",
+      "total": 21
+    },
     {
       "amount": 3,
       "reason": "✅ 完成「口算题一页」（高效+1）",
@@ -68,9 +74,9 @@
     }
   ],
   "todayStats": {
-    "studyMinutes": 45,
+    "studyMinutes": 48,
     "restMinutes": 0,
-    "efficiency": 73,
+    "efficiency": 82,
     "tasks": [
       {
         "name": "英语一起作业",
@@ -84,6 +90,13 @@
         "time": 20,
         "actual": 1,
         "study": 1,
+        "efficiency": 100
+      },
+      {
+        "name": "阅读半小时",
+        "time": 30,
+        "actual": 3,
+        "study": 3,
         "efficiency": 100
       }
     ]

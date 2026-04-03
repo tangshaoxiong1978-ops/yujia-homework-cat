@@ -577,53 +577,23 @@
         };
         
         // 从GitHub仓库读取JSON数据
-        // 使用 GitHub API 获取数据（和孩子页面一致）
-        const _t = ['ghp_4trSqjSev', 'anCogqd3BDiF', 'mH6fWQcwt0sYUHM'];
-        const GITHUB_TOKEN = _t.join('');
-        const GITHUB_REPO = 'tangshaoxiong1978-ops/yujia-homework-cat';
-        
-        // Base64 解码（兼容 Unicode）
-        function base64Decode(str) {
-            try {
-                // 替换 Base64 特殊字符
-                const base64 = str.replace(/-/g, '+').replace(/_/g, '/');
-                // 解码
-                const decoded = atob(base64);
-                // 处理 Unicode 字符
-                return decodeURIComponent(escape(decoded));
-            } catch (e) {
-                console.error('Base64 解码失败:', e);
-                return null;
-            }
-        }
-        
+        // 使用 GitHub Pages 获取数据（最简单可靠）
         async function fetchFromGitHub(child) {
-            console.log(`[${child}] ========== 开始获取数据 ==========`);
+            console.log(`[${child}] 开始获取数据...`);
             try {
-                const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/data/${child}_data.json`;
-                console.log(`[${child}] 尝试 GitHub API:`, apiUrl);
-                const resp = await fetch(apiUrl, {
-                    headers: {
-                        'Authorization': `token ${GITHUB_TOKEN}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
-                console.log(`[${child}] 响应状态:`, resp.status);
+                // 直接用 GitHub Pages URL，浏览器原生支持
+                const url = `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/data/${child}_data.json`;
+                console.log(`[${child}] URL:`, url);
+                const resp = await fetch(url);
                 if (resp.ok) {
-                    const fileInfo = await resp.json();
-                    const decoded = base64Decode(fileInfo.content);
-                    if (!decoded) {
-                        console.error(`[${child}] Base64 解码失败`);
-                        return null;
-                    }
-                    const content = JSON.parse(decoded);
-                    console.log(`[${child}] ✅ 解析成功! lastUpdated:`, content.lastUpdated);
-                    return content;
+                    const data = await resp.json();
+                    console.log(`[${child}] ✅ 成功! points:`, data.points);
+                    return data;
                 }
+                console.log(`[${child}] 响应:`, resp.status);
             } catch(e) {
-                console.error(`[${child}] GitHub API 异常:`, e.message);
+                console.error(`[${child}] 异常:`, e.message);
             }
-            console.error(`[${child}] 获取失败`);
             return null;
         }
         

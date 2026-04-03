@@ -2,7 +2,7 @@
   "child": "yujia",
   "childName": "羽佳",
   "date": "2026-04-03",
-  "lastUpdated": "2026-04-03T12:22:47.854Z",
+  "lastUpdated": "2026-04-03T14:52:42.987Z",
   "homework": [
     {
       "id": 1,
@@ -37,11 +37,17 @@
       "name": "老师作业",
       "icon": "📝",
       "time": 0,
-      "status": "waiting"
+      "status": "done"
     }
   ],
-  "points": 21,
+  "points": 24,
   "pointsLog": [
+    {
+      "amount": 3,
+      "reason": "✅ 完成「老师作业」（高效+1）",
+      "time": "2026-04-03T14:52:42.986Z",
+      "total": 24
+    },
     {
       "amount": 3,
       "reason": "✅ 完成「阅读半小时」（高效+1）",
@@ -74,9 +80,9 @@
     }
   ],
   "todayStats": {
-    "studyMinutes": 48,
+    "studyMinutes": 50,
     "restMinutes": 0,
-    "efficiency": 82,
+    "efficiency": 86,
     "tasks": [
       {
         "name": "英语一起作业",
@@ -97,6 +103,13 @@
         "time": 30,
         "actual": 3,
         "study": 3,
+        "efficiency": 100
+      },
+      {
+        "name": "老师作业",
+        "time": 0,
+        "actual": 2,
+        "study": 2,
         "efficiency": 100
       }
     ]

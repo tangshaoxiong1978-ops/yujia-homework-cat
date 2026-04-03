@@ -660,6 +660,16 @@
                 saveHomework();
                 localStorage.setItem(`${localKey}_update`, githubData.lastUpdated);
             }
+            // 【关键】同步积分数据从GitHub到本地
+            if (githubData.points !== undefined) {
+                const localPts = localStorage.getItem(POINTS_KEY);
+                if (!localPts || new Date(githubData.lastUpdated) > new Date(localStorage.getItem(`${POINTS_KEY}_update`) || 0)) {
+                    console.log('🔄 同步GitHub积分到本地:', githubData.points);
+                    localStorage.setItem(POINTS_KEY, githubData.points);
+                    localStorage.setItem(POINTS_LOG_KEY, JSON.stringify(githubData.pointsLog || []));
+                    localStorage.setItem(`${POINTS_KEY}_update`, githubData.lastUpdated);
+                }
+            }
         }
         
         parseURLParams();

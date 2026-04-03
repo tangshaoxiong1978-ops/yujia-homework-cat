@@ -521,15 +521,17 @@
         const today = new Date().toISOString().split('T')[0];
         const key = `timer_${CHILD}_${today}`;
         const timerData = JSON.parse(localStorage.getItem(key) || '{}');
-        // 获取积分明细
+        // 【关键】直接从localStorage获取积分确保同步成功率
+        const currentPoints = parseInt(localStorage.getItem(POINTS_KEY) || '0');
         const pointsLog = JSON.parse(localStorage.getItem(POINTS_LOG_KEY) || '[]');
+        console.log('[同步数据] 当前积分:', currentPoints, '积分明细:', pointsLog.length, '条');
         return {
             child: CHILD,
             childName: CHILD_NAME,
             date: today,
             lastUpdated: new Date().toISOString(),
             homework: homework,
-            points: getPoints(),
+            points: currentPoints,
             pointsLog: pointsLog.slice(-20), // 保留最近20条
             todayStats: {
                 studyMinutes: timerData.studyMinutes || 0,

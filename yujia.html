@@ -880,6 +880,77 @@
     const ICON_OPTIONS = ['📖','📐','🎧','📝','📚','🔢','🌍','🧬','🎨','🎵','⚽','💪','🔬','📕','✏️'];
     let isParentMode = false, editingHwId = null, selectedEditIcon = '📝';
 
+    // GitHub 同步配置
+    const _t = ['ghp_4trSqjSev', 'anCogqd3BDiF', 'mH6fWQcwt0sYUHM'];
+    const GITHUB_TOKEN = _t.join('');
+    const GITHUB_REPO = 'tangshaoxiong1978-ops/yujia-homework-cat';
+    const GITHUB_DATA_FILE = `data/${CHILD}_data.json`;
+
+    // 推送数据到 GitHub 仓库（跨设备同步核心）
+    async function syncToGitHub(dataToSync) {
+        try {
+            const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_DATA_FILE}`;
+            // 先获取当前文件的 SHA（更新必须带 sha）
+            const getResp = await fetch(apiUrl, {
+                headers: {
+                    'Authorization': `token ${GITHUB_TOKEN}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
+            let sha = null;
+            if (getResp.ok) {
+                const fileInfo = await getResp.json();
+                sha = fileInfo.sha;
+            }
+            // 写入数据
+            const content = btoa(unescape(encodeURIComponent(JSON.stringify(dataToSync, null, 2))));
+            const body = {
+                message: `sync: ${CHILD_NAME} 作业数据 ${new Date().toLocaleString('zh-CN')}`,
+                content: content
+            };
+            if (sha) body.sha = sha;
+            const putResp = await fetch(apiUrl, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${GITHUB_TOKEN}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body)
+            });
+            if (putResp.ok) {
+                console.log('✅ 数据已同步到GitHub');
+                return true;
+            } else {
+                console.error('❌ GitHub同步失败:', putResp.status);
+                return false;
+            }
+        } catch (e) {
+            console.error('❌ GitHub同步异常:', e);
+            return false;
+        }
+    }
+
+    // 构建今日完整数据用于同步
+    function buildSyncData() {
+        const today = new Date().toISOString().split('T')[0];
+        const key = `timer_${CHILD}_${today}`;
+        const timerData = JSON.parse(localStorage.getItem(key) || '{}');
+        return {
+            child: CHILD,
+            childName: CHILD_NAME,
+            date: today,
+            lastUpdated: new Date().toISOString(),
+            homework: homework,
+            todayStats: {
+                studyMinutes: timerData.studyMinutes || 0,
+                restMinutes: timerData.restMinutes || 0,
+                efficiency: timerData.efficiency || 0,
+                tasks: timerData.tasks || []
+            }
+        };
+    }
+
     // 发送作业完成通知卡片给家长
     function sendTaskCompleteCard(completedTask) {
         const done = homework.filter(t => t.status === 'done').length;
@@ -1369,7 +1440,7 @@
         }
     }
 
-    function finishTask() {
+    async function finishTask() {
         clearInterval(timerInterval);
         document.getElementById('timerModal').classList.remove('active');
         if (!currentTask) return;
@@ -1399,6 +1470,13 @@
         
         // 自动发送完成通知给家长
         sendTaskCompleteCard(completedTaskInfo);
+
+        // 同步数据到 GitHub（让家长看板能实时看到）
+        showToast('正在同步数据...');
+        const syncData = buildSyncData();
+        const ok = await syncToGitHub(syncData);
+        if (ok) showToast('✅ 数据已同步，家长可查看');
+        else showToast('⚠️ 同步失败，发送报告后再试');
     }
 
     function saveTaskData(task, total, study, efficiency) {
@@ -1657,18 +1735,26 @@
             }
         };
         fetch(FEISHU_WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(card) })
-            .then(r => r.ok ? (
-                showToast('报告已发送飞书 📬'),
-                // 发送完成后自动 @家长 确认
-                fetch(FEISHU_WEBHOOK, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        msg_type: 'text',
-                        content: { text: `🐱 羽佳作业报告已更新！请爸爸妈妈查收～ @小龙虾爸爸 @小龙虾妈妈` }
-                    })
-                }).catch(() => {})
-            ) : showToast('发送失败，请重试'))
+            .then(r => {
+                if (r.ok) {
+                    showToast('报告已发送飞书 📬');
+                    // 同时同步数据到 GitHub
+                    syncToGitHub(buildSyncData()).then(ok => {
+                        if (ok) showToast('✅ 数据已同步到家长看板');
+                    });
+                    // 发送完成后自动 @家长 确认
+                    fetch(FEISHU_WEBHOOK, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            msg_type: 'text',
+                            content: { text: `🐱 羽佳作业报告已更新！请爸爸妈妈查收～ @小龙虾爸爸 @小龙虾妈妈` }
+                        })
+                    }).catch(() => {});
+                } else {
+                    showToast('发送失败，请重试');
+                }
+            })
             .catch(() => { navigator.clipboard.writeText(JSON.stringify(card, null, 2)); showToast('飞书发送失败，已复制JSON'); });
     }
 

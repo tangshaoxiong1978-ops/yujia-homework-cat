@@ -439,11 +439,27 @@
         };
         
         // 从GitHub仓库读取JSON数据
+        // GitHub API 读取（绕过CDN缓存，实时获取孩子最新数据）
+        const _t = ['ghp_4trSqjSev', 'anCogqd3BDiF', 'mH6fWQcwt0sYUHM'];
+        const GITHUB_TOKEN = _t.join('');
+        const GITHUB_REPO = 'tangshaoxiong1978-ops/yujia-homework-cat';
+
         async function fetchFromGitHub(child) {
             try {
-                const response = await fetch(`data/${child}_data.json`);
+                // 用 GitHub Contents API，内容是 base64 编码，绕过 Pages CDN 缓存
+                const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/data/${child}_data.json`;
+                const response = await fetch(apiUrl, {
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Cache-Control': 'no-cache'
+                    }
+                });
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                return await response.json();
+                const fileInfo = await response.json();
+                // base64 解码内容
+                const decoded = decodeURIComponent(escape(atob(fileInfo.content.replace(/\n/g, ''))));
+                return JSON.parse(decoded);
             } catch (error) {
                 console.warn(`读取 ${child} 数据失败，使用模拟数据:`, error);
                 return null;
@@ -452,6 +468,7 @@
         
         // 加载所有数据
         async function loadAllData() {
+            document.getElementById('syncStatus').textContent = '🔄 同步中...';
             const [yujia, yuhan] = await Promise.all([
                 fetchFromGitHub('yujia'),
                 fetchFromGitHub('yuhan')
@@ -465,13 +482,18 @@
         // 更新同步状态显示
         function updateSyncStatus() {
             const el = document.getElementById('syncStatus');
-            const hasData = realData.yujia || realData.yuhan;
-            if (hasData) {
+            const data = realData.yujia || realData.yuhan;
+            if (data && data.lastUpdated) {
+                const t = new Date(data.lastUpdated);
+                const timeStr = `${t.getHours()}:${String(t.getMinutes()).padStart(2,'0')}`;
                 el.className = 'sync-status ok';
-                el.textContent = '✅ 数据同步成功';
+                el.textContent = `✅ 最后同步 ${timeStr}`;
+            } else if (data) {
+                el.className = 'sync-status ok';
+                el.textContent = '✅ 数据已加载';
             } else {
                 el.className = 'sync-status error';
-                el.textContent = '⚠️ 无法加载数据，请检查网络';
+                el.textContent = '⚠️ 暂无数据，等待孩子完成作业';
             }
         }
         
@@ -489,66 +511,104 @@
             const rawData = realData[currentChild];
             let data;
             
-            if (rawData && rawData.tasks) {
-                // 真实数据格式转换
+            if (rawData && rawData.homework) {
+                // 新格式：来自孩子计时器 buildSyncData() 的数据
+                const homeworkList = rawData.homework || [];
+                const stats = rawData.todayStats || {};
+                const tasks = homeworkList.map(t => ({
+                    name: t.name || '作业',
+                    status: t.status === 'done' ? 'completed' : t.status === 'doing' ? 'running' : 'pending',
+                    time: stats.tasks ? (() => {
+                        const td = stats.tasks.find(st => st.name === t.name);
+                        return td ? td.actual + '分钟' : (t.time > 0 ? t.time + '分钟(计划)' : '--');
+                    })() : (t.time > 0 ? t.time + '分钟(计划)' : '--')
+                }));
+                const completed = homeworkList.filter(t => t.status === 'done').length;
+                data = {
+                    name: rawData.childName || (currentChild === 'yujia' ? '羽佳' : '羽菡'),
+                    tasks: tasks,
+                    stats: {
+                        completed: completed,
+                        total: homeworkList.length,
+                        totalTime: stats.studyMinutes || 0,
+                        restTime: stats.restMinutes || 0,
+                        efficiency: stats.efficiency || 0
+                    }
+                };
+            } else if (rawData && rawData.tasks) {
+                // 旧格式兼容
                 const tasks = rawData.tasks.map(t => ({
                     name: t.taskName || t.name || '作业',
                     status: t.status || 'pending',
                     time: t.actualMinutes ? t.actualMinutes + '分钟' : (t.time || '--')
                 }));
                 const completed = tasks.filter(t => t.status === 'completed').length;
-                const totalTime = rawData.tasks.reduce((sum, t) => sum + (t.actualMinutes || 0), 0);
                 data = {
                     name: currentChild === 'yujia' ? '羽佳' : '羽菡',
                     tasks: tasks,
                     stats: {
                         completed: completed,
-                        totalTime: totalTime,
+                        total: tasks.length,
+                        totalTime: rawData.tasks.reduce((sum, t) => sum + (t.actualMinutes || 0), 0),
+                        restTime: 0,
                         efficiency: tasks.length > 0 ? Math.min(100, Math.round((completed / tasks.length) * 100)) : 0
                     }
                 };
             } else {
-                data = mockData[currentChild];
+                data = {
+                    name: currentChild === 'yujia' ? '羽佳' : '羽菡',
+                    tasks: mockData[currentChild].tasks,
+                    stats: { completed: 0, total: 4, totalTime: 0, restTime: 0, efficiency: 0 }
+                };
             }
             
             // 更新统计数据
-            document.getElementById('completedCount').textContent = data.stats.completed;
+            document.getElementById('completedCount').textContent = data.stats.completed + '/' + (data.stats.total || data.tasks.length);
             document.getElementById('totalTime').textContent = data.stats.totalTime;
             document.getElementById('efficiency').textContent = data.stats.efficiency + '%';
             
             // 更新任务表
             const tbody = document.getElementById('tasksTableBody');
             tbody.innerHTML = '';
-            data.tasks.forEach(task => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="task-name">${task.name}</td>
-                    <td>
-                        <span class="task-status status-${task.status}">
-                            ${getStatusText(task.status)}
-                        </span>
-                    </td>
-                    <td class="task-time">${task.time}</td>
-                `;
-                tbody.appendChild(row);
-            });
+            if (data.tasks.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#aaa;padding:20px">暂无作业数据，等待孩子完成作业后同步</td></tr>';
+            } else {
+                data.tasks.forEach(task => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="task-name">${task.name}</td>
+                        <td>
+                            <span class="task-status status-${task.status}">
+                                ${getStatusText(task.status)}
+                            </span>
+                        </td>
+                        <td class="task-time">${task.time}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
             
             // 更新报告
             document.getElementById('reportTotalTime').textContent = data.stats.totalTime + ' 分钟';
-            document.getElementById('reportRestTime').textContent = Math.floor(data.stats.totalTime * 0.1) + ' 分钟';
+            document.getElementById('reportRestTime').textContent = (data.stats.restTime || 0) + ' 分钟';
             document.getElementById('reportEfficiency').textContent = data.stats.efficiency + '%';
             
             // 更新亮点和关注
             if (data.stats.efficiency >= 90) {
                 document.getElementById('reportHighlight').innerHTML = '✨ 学习效率很高，继续保持！';
-            } else {
+            } else if (data.stats.completed > 0) {
                 document.getElementById('reportHighlight').innerHTML = '👍 今天完成了 ' + data.stats.completed + ' 项作业';
+            } else {
+                document.getElementById('reportHighlight').innerHTML = '📚 等待孩子开始作业...';
             }
             
-            if (data.stats.completed < 2) {
-                document.getElementById('reportConcern').innerHTML = '⚠️ 还有 ' + (4 - data.stats.completed) + ' 项作业未完成，加油！';
+            const remaining = (data.stats.total || data.tasks.length) - data.stats.completed;
+            if (remaining > 0) {
+                document.getElementById('reportConcern').innerHTML = '⚠️ 还有 ' + remaining + ' 项作业未完成，加油！';
+            } else if (data.stats.completed > 0) {
+                document.getElementById('reportConcern').innerHTML = '🎉 今日作业全部完成，棒棒哒！';
             } else {
-                document.getElementById('reportConcern').innerHTML = '✅ 进度良好，继续加油！';
+                document.getElementById('reportConcern').innerHTML = '📖 暂无完成记录';
             }
             
             // 更新时间

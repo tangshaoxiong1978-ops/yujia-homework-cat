@@ -577,71 +577,36 @@
         };
         
         // 从GitHub仓库读取JSON数据
-        // GitHub API 读取（绕过CDN缓存，实时获取孩子最新数据）
-        const _t = ['ghp_4trSqjSev', 'anCogqd3BDiF', 'mH6fWQcwt0sYUHM'];
-        const GITHUB_TOKEN = _t.join('');
-        const GITHUB_REPO = 'tangshaoxiong1978-ops/yujia-homework-cat';
-        
-        console.log('GitHub Token 长度:', GITHUB_TOKEN.length);
-        console.log('GitHub Token 前10位:', GITHUB_TOKEN.substring(0, 10));
-
-        // 尝试多种方式获取数据
+        // 使用 GitHub Pages 获取数据（最稳定）
         async function fetchFromGitHub(child) {
             console.log(`[${child}] 开始获取数据...`);
             
-            // 方法1: GitHub API (需要token)
-            try {
-                const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/data/${child}_data.json`;
-                console.log(`[${child}] 尝试 GitHub API...`);
-                const response = await fetch(apiUrl, {
-                    headers: {
-                        'Authorization': `token ${GITHUB_TOKEN}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
-                if (response.ok) {
-                    const fileInfo = await response.json();
-                    if (fileInfo.content) {
-                        const decoded = decodeURIComponent(escape(atob(fileInfo.content.replace(/\n/g, ''))));
-                        const data = JSON.parse(decoded);
-                        console.log(`[${child}] GitHub API 成功!`);
-                        return data;
-                    }
-                }
-                console.log(`[${child}] GitHub API 失败，尝试备选方案...`);
-            } catch(e) {
-                console.log(`[${child}] GitHub API 异常:`, e.message);
-            }
-            
-            // 方法2: Raw 文件 (无 CORS 问题)
-            try {
-                const rawUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/main/data/${child}_data.json`;
-                console.log(`[${child}] 尝试 Raw URL:`, rawUrl);
-                const response = await fetch(rawUrl);
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log(`[${child}] Raw URL 成功!`);
-                    return data;
-                }
-            } catch(e) {
-                console.log(`[${child}] Raw URL 异常:`, e.message);
-            }
-            
-            // 方法3: GitHub Pages (最终备选)
+            // GitHub Pages 方式（无 CORS 问题）
             try {
                 const pagesUrl = `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/data/${child}_data.json`;
-                console.log(`[${child}] 尝试 GitHub Pages...`);
+                console.log(`[${child}] 请求:`, pagesUrl);
                 const response = await fetch(pagesUrl);
+                console.log(`[${child}] 状态:`, response.status);
                 if (response.ok) {
                     const data = await response.json();
-                    console.log(`[${child}] GitHub Pages 成功!`);
+                    console.log(`[${child}] 成功! 数据:`, data);
                     return data;
                 }
             } catch(e) {
-                console.log(`[${child}] GitHub Pages 异常:`, e.message);
+                console.error(`[${child}] 异常:`, e.message);
             }
             
-            console.error(`[${child}] 所有方式均失败!`);
+            // 备选: Raw URL
+            try {
+                const rawUrl = `https://raw.githubusercontent.com/tangshaoxiong1978-ops/yujia-homework-cat/main/data/${child}_data.json`;
+                const response = await fetch(rawUrl);
+                if (response.ok) {
+                    return await response.json();
+                }
+            } catch(e) {
+                console.error(`[${child}] Raw也失败:`, e.message);
+            }
+            
             return null;
         }
         

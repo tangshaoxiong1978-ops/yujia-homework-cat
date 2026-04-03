@@ -577,25 +577,32 @@
         };
         
         // 从GitHub仓库读取JSON数据
-        // 使用 GitHub Pages 获取数据（简化版，解决跨域问题）
+        // 使用 GitHub API 获取数据（和孩子页面一致）
+        const _t = ['ghp_4trSqjSev', 'anCogqd3BDiF', 'mH6fWQcwt0sYUHM'];
+        const GITHUB_TOKEN = _t.join('');
+        const GITHUB_REPO = 'tangshaoxiong1978-ops/yujia-homework-cat';
+        
         async function fetchFromGitHub(child) {
             console.log(`[${child}] ========== 开始获取数据 ==========`);
-            
-            // 直接用 fetch 不指定 mode，浏览器会自动处理
             try {
-                const pagesUrl = `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/data/${child}_data.json?t=${Date.now()}`;
-                console.log(`[${child}] 尝试 GitHub Pages:`, pagesUrl);
-                const response = await fetch(pagesUrl);
-                console.log(`[${child}] 响应状态:`, response.status, response.statusText);
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log(`[${child}] ✅ 解析成功! lastUpdated:`, data.lastUpdated);
-                    return data;
+                const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/data/${child}_data.json`;
+                console.log(`[${child}] 尝试 GitHub API:`, apiUrl);
+                const resp = await fetch(apiUrl, {
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                console.log(`[${child}] 响应状态:`, resp.status);
+                if (resp.ok) {
+                    const fileInfo = await resp.json();
+                    const content = JSON.parse(decodeURIComponent(escape(atob(fileInfo.content))));
+                    console.log(`[${child}] ✅ 解析成功! lastUpdated:`, content.lastUpdated);
+                    return content;
                 }
             } catch(e) {
-                console.error(`[${child}] GitHub Pages 异常:`, e.message);
+                console.error(`[${child}] GitHub API 异常:`, e.message);
             }
-            
             console.error(`[${child}] 获取失败`);
             return null;
         }

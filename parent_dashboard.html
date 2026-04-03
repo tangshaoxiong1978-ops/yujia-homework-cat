@@ -499,6 +499,16 @@
                 <button class="points-btn minus" onclick="adjustPoints(-1)">➖ 减分</button>
                 <button class="points-btn detail" onclick="showPointsLog()">📋 明细</button>
             </div>
+
+            <div class="points-export-section" style="margin-top:12px;padding-top:12px;border-top:1px solid #eee;">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <span style="font-size:13px;color:#666;">📅 日期范围：</span>
+                    <input type="date" id="exportStartDate" style="padding:6px;border:1px solid #ddd;border-radius:6px;font-size:13px;">
+                    <span style="color:#999;">至</span>
+                    <input type="date" id="exportEndDate" style="padding:6px;border:1px solid #ddd;border-radius:6px;font-size:13px;">
+                    <button class="points-btn" style="background:#9c27b0;color:white;padding:6px 12px;font-size:12px;" onclick="exportPointsLog()">📥 导出统计表</button>
+                </div>
+            </div>
             
             <div class="points-log-section" id="pointsLogSection" style="display:none;">
                 <h4>积分明细</h4>
@@ -947,6 +957,105 @@
             const section = document.getElementById('pointsLogSection');
             section.style.display = section.style.display === 'none' ? 'block' : 'none';
         }
+        
+        // 导出积分明细统计表（Excel格式）
+        function exportPointsLog() {
+            const rawData = realData[currentChild];
+            const pointsLog = rawData && rawData.pointsLog ? rawData.pointsLog : [];
+            
+            if (pointsLog.length === 0) {
+                alert('暂无积分明细可导出');
+                return;
+            }
+            
+            const startDateInput = document.getElementById('exportStartDate').value;
+            const endDateInput = document.getElementById('exportEndDate').value;
+            
+            // 过滤日期范围
+            let filteredLog = pointsLog;
+            if (startDateInput || endDateInput) {
+                filteredLog = pointsLog.filter(log => {
+                    if (!log.time) return false;
+                    const logDate = new Date(log.time).toISOString().split('T')[0];
+                    if (startDateInput && logDate < startDateInput) return false;
+                    if (endDateInput && logDate > endDateInput) return false;
+                    return true;
+                });
+            }
+            
+            if (filteredLog.length === 0) {
+                alert('指定日期范围内无积分记录');
+                return;
+            }
+            
+            // 统计
+            const stats = {
+                totalEarned: 0,
+                totalSpent: 0,
+                items: filteredLog.length,
+                byReason: {}
+            };
+            
+            filteredLog.forEach(log => {
+                const amount = (log.amount !== undefined) ? log.amount : (log.change || 0);
+                if (amount > 0) stats.totalEarned += amount;
+                else stats.totalSpent += Math.abs(amount);
+                
+                const reason = (log.reason !== undefined) ? log.reason : (log.desc || '其他');
+                if (!stats.byReason[reason]) stats.byReason[reason] = { count: 0, amount: 0 };
+                stats.byReason[reason].count++;
+                stats.byReason[reason].amount += amount;
+            });
+            
+            // 生成CSV内容
+            const childName = currentChild === 'yujia' ? '羽佳' : '羽菡';
+            const today = new Date().toLocaleString('zh-CN');
+            let csv = `积分明细统计表（${childName）\n`;
+            csv += `导出时间：${today}\n`;
+            if (startDateInput || endDateInput) {
+                csv += `日期范围：${startDateInput || '开始'} 至 ${endDateInput || '今天'}\n`;
+            }
+            csv += `\n`;
+            csv += `=== 汇总统计 ===\n`;
+            csv += `总记录条数,${stats.items}\n`;
+            csv += `总获得积分,${stats.totalEarned}\n`;
+            csv += `总扣除积分,${Math.abs(stats.totalSpent)}\n`;
+            csv += `净收益,${stats.totalEarned + stats.totalSpent}\n`;
+            csv += `\n`;
+            csv += `=== 明细记录 ===\n`;
+            csv += `日期,时间,积分变动,变动原因,累计积分\n`;
+            
+            let runningTotal = 0;
+            filteredLog.forEach(log => {
+                const amount = (log.amount !== undefined) ? log.amount : (log.change || 0);
+                runningTotal += amount;
+                const dt = log.time ? new Date(log.time) : new Date();
+                const date = dt.toLocaleDateString('zh-CN');
+                const time = dt.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+                const reason = (log.reason !== undefined) ? log.reason.replace(/,/g, '，') : (log.desc || '其他');
+                csv += `${date},${time},${amount},${reason},${runningTotal}\n`;
+            });
+            
+            // 下载文件
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const filename = `积分明细_${childName}_${new Date().toISOString().split('T')[0]}.csv`;
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert(`✅ 已导出 ${stats.items} 条记录到文件`);
+        }
+        
+        // 初始化日期输入框为当月范围
+        const now = new Date();
+        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+        document.getElementById('exportStartDate').value = firstDay;
+        document.getElementById('exportEndDate').value = now.toISOString().split('T')[0];
         
         // 实时更新（每30秒重新加载数据）
         setInterval(loadAllData, 30000);

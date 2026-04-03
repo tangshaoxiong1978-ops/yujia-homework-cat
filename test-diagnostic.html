@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>诊断页面</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; }
+        .box { border: 1px solid #ccc; padding: 15px; margin: 10px 0; border-radius: 8px; }
+        .success { background: #d4edda; border-color: #28a745; }
+        .error { background: #f8d7da; border-color: #dc3545; }
+        .loading { background: #fff3cd; border-color: #ffc107; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; font-size: 12px; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🔍 诊断测试</h1>
+    
+    <div id="test1" class="box loading">测试1: Fetch请求...</div>
+    <div id="test2" class="box loading">测试2: 数据解析...</div>
+    <div id="test3" class="box loading">测试3: DOM更新...</div>
+    <div id="test4" class="box loading">测试4: 函数调用...</div>
+    
+    <div class="box">
+        <h3>控制台输出:</h3>
+        <pre id="console">等待测试...</pre>
+    </div>
+    
+    <button onclick="runTests()">运行诊断测试</button>
+    
+    <script>
+        function log(msg) {
+            document.getElementById('console').textContent += '\n' + msg;
+        }
+        
+        async function runTests() {
+            log('=== 开始诊断 ===');
+            
+            // 测试1: Fetch
+            try {
+                log('测试1: 正在请求数据...');
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+                
+                const resp = await fetch('https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/data/yujia_data.json', { 
+                    signal: controller.signal 
+                });
+                clearTimeout(timeoutId);
+                
+                if (resp.ok) {
+                    document.getElementById('test1').className = 'box success';
+                    document.getElementById('test1').innerHTML = '✅ 测试1: Fetch成功';
+                    log('✅ Fetch成功: ' + resp.status);
+                } else {
+                    throw new Error('HTTP ' + resp.status);
+                }
+            } catch(e) {
+                document.getElementById('test1').className = 'box error';
+                document.getElementById('test1').innerHTML = '❌ 测试1: ' + e.message;
+                log('❌ Fetch失败: ' + e.message);
+                return;
+            }
+            
+            // 测试2: 解析JSON
+            try {
+                const data = await resp.json();
+                document.getElementById('test2').className = 'box success';
+                document.getElementById('test2').innerHTML = '✅ 测试2: JSON解析成功，积分=' + data.points;
+                log('✅ JSON解析: points=' + data.points);
+            } catch(e) {
+                document.getElementById('test2').className = 'box error';
+                document.getElementById('test2').innerHTML = '❌ 测试2: ' + e.message;
+                return;
+            }
+            
+            // 测试3: DOM更新
+            try {
+                const testEl = document.getElementById('test3');
+                testEl.textContent = '积分: ' + data.points + ', 作业数: ' + (data.homework ? data.homework.length : 0);
+                testEl.className = 'box success';
+                log('✅ DOM更新成功');
+            } catch(e) {
+                document.getElementById('test3').className = 'box error';
+                document.getElementById('test3').innerHTML = '❌ 测试3: ' + e.message;
+                return;
+            }
+            
+            // 测试4: 函数调用
+            try {
+                function testFunc() { return 'OK'; }
+                const result = testFunc();
+                document.getElementById('test4').className = 'box success';
+                document.getElementById('test4').innerHTML = '✅ 测试4: 函数调用成功';
+                log('✅ 函数调用成功');
+            } catch(e) {
+                document.getElementById('test4').className = 'box error';
+                document.getElementById('test4').innerHTML = '❌ 测试4: ' + e.message;
+            }
+            
+            log('=== 诊断完成 ===');
+        }
+        
+        // 自动运行
+        runTests();
+    </script>
+</body>
+</html>

@@ -835,10 +835,13 @@
             const logSection = document.getElementById('pointsLogSection');
             const logList = document.getElementById('pointsLogList');
             const pointsLog = rawData && rawData.pointsLog ? rawData.pointsLog : [];
-            if (pointsLog.length > 0) {
+            console.log('[积分明细] rawData:', rawData, 'pointsLog:', pointsLog);
+            if (pointsLog && pointsLog.length > 0) {
                 logList.innerHTML = pointsLog.map(log => {
-                    const changeVal = log.change ?? log.amount ?? 0; // 兼容 change 或 amount 字段
-                    const reasonText = log.reason || log.desc || '积分变动';
+                    // 兼容不同的字段名
+                    const changeVal = (log.amount !== undefined) ? log.amount : (log.change || 0);
+                    const reasonText = (log.reason !== undefined) ? log.reason : (log.desc || '积分变动');
+                    if (changeVal === undefined || changeVal === null) return '';
                     return `
                     <div class="points-log-item">
                         <span>${reasonText}</span>

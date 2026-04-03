@@ -405,7 +405,7 @@
         <div class="sync-bar">
             <div class="sync-status loading" id="syncStatus">🔄 初始化中...</div>
             <button class="refresh-btn" id="refreshBtn" onclick="manualRefresh()">🔄 手动刷新</button>
-            <button class="refresh-btn" onclick="backupAllData()">💾 备份数据</button>
+            <button class="refresh-btn" onclick="backupAllData(event)">💾 备份数据</button>
         </div>
         
         <!-- 孩子选择 -->
@@ -571,6 +571,9 @@
         const _t = ['ghp_4trSqjSev', 'anCogqd3BDiF', 'mH6fWQcwt0sYUHM'];
         const GITHUB_TOKEN = _t.join('');
         const GITHUB_REPO = 'tangshaoxiong1978-ops/yujia-homework-cat';
+        
+        console.log('GitHub Token 长度:', GITHUB_TOKEN.length);
+        console.log('GitHub Token 前10位:', GITHUB_TOKEN.substring(0, 10));
 
         async function fetchFromGitHub(child) {
             console.log(`[${child}] 开始从GitHub获取数据...`);
@@ -586,9 +589,22 @@
                     }
                 });
                 console.log(`[${child}] 响应状态:`, response.status);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                console.log(`[${child}] 响应状态文本:`, response.statusText);
+                
+                if (!response.ok) {
+                    const errText = await response.text();
+                    console.error(`[${child}] 错误响应:`, errText);
+                    throw new Error(`HTTP ${response.status}: ${errText}`);
+                }
+                
                 const fileInfo = await response.json();
                 console.log(`[${child}] 文件信息:`, fileInfo);
+                
+                if (!fileInfo.content) {
+                    console.warn(`[${child}] 文件内容为空`);
+                    return null;
+                }
+                
                 // base64 解码内容
                 const decoded = decodeURIComponent(escape(atob(fileInfo.content.replace(/\n/g, ''))));
                 const data = JSON.parse(decoded);
@@ -596,6 +612,7 @@
                 return data;
             } catch (error) {
                 console.error(`[${child}] 获取数据失败:`, error);
+                console.error(`[${child}] 错误详情:`, error.message);
                 return null;
             }
         }

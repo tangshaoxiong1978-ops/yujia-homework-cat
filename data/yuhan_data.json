@@ -2,28 +2,28 @@
   "child": "yuhan",
   "childName": "羽菡",
   "date": "2026-04-03",
-  "lastUpdated": "2026-04-03T00:53:48.404Z",
+  "lastUpdated": "2026-04-03T00:54:23.329Z",
   "homework": [
     {
       "id": 1,
       "name": "语文作业",
       "icon": "📖",
       "time": 30,
-      "status": "done"
+      "status": "waiting"
     },
     {
       "id": 2,
       "name": "数学练习",
       "icon": "📐",
       "time": 30,
-      "status": "done"
+      "status": "waiting"
     },
     {
       "id": 3,
       "name": "英语听说",
       "icon": "🎧",
       "time": 20,
-      "status": "done"
+      "status": "waiting"
     },
     {
       "id": 4,
@@ -33,54 +33,12 @@
       "status": "done"
     }
   ],
-  "points": 17,
+  "points": 3,
   "todayStats": {
-    "studyMinutes": 8,
+    "studyMinutes": 1,
     "restMinutes": 0,
     "efficiency": 100,
     "tasks": [
-      {
-        "name": "语文作业",
-        "time": 30,
-        "actual": 1,
-        "study": 1,
-        "efficiency": 100
-      },
-      {
-        "name": "数学练习",
-        "time": 30,
-        "actual": 2,
-        "study": 2,
-        "efficiency": 100
-      },
-      {
-        "name": "语文作业",
-        "time": 30,
-        "actual": 1,
-        "study": 1,
-        "efficiency": 100
-      },
-      {
-        "name": "语文作业",
-        "time": 30,
-        "actual": 1,
-        "study": 1,
-        "efficiency": 100
-      },
-      {
-        "name": "数学练习",
-        "time": 30,
-        "actual": 1,
-        "study": 1,
-        "efficiency": 100
-      },
-      {
-        "name": "英语听说",
-        "time": 20,
-        "actual": 1,
-        "study": 1,
-        "efficiency": 100
-      },
       {
         "name": "学校作业",
         "time": 0,

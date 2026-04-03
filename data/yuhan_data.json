@@ -2,7 +2,7 @@
   "child": "yuhan",
   "childName": "羽菡",
   "date": "2026-04-03",
-  "lastUpdated": "2026-04-03T00:53:26.480Z",
+  "lastUpdated": "2026-04-03T00:53:37.064Z",
   "homework": [
     {
       "id": 1,
@@ -30,12 +30,12 @@
       "name": "学校作业",
       "icon": "📝",
       "time": 0,
-      "status": "waiting"
+      "status": "done"
     }
   ],
-  "points": 9,
+  "points": 12,
   "todayStats": {
-    "studyMinutes": 7,
+    "studyMinutes": 8,
     "restMinutes": 0,
     "efficiency": 100,
     "tasks": [
@@ -77,6 +77,13 @@
       {
         "name": "英语听说",
         "time": 20,
+        "actual": 1,
+        "study": 1,
+        "efficiency": 100
+      },
+      {
+        "name": "学校作业",
+        "time": 0,
         "actual": 1,
         "study": 1,
         "efficiency": 100

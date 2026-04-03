@@ -2,7 +2,7 @@
   "child": "yuhan",
   "childName": "羽菡",
   "date": "2026-04-03",
-  "lastUpdated": "2026-04-03T09:50:59.495Z",
+  "lastUpdated": "2026-04-03T10:31:36.353Z",
   "homework": [
     {
       "id": 1,
@@ -33,12 +33,93 @@
       "status": "done"
     }
   ],
-  "points": 0,
-  "pointsLog": [],
+  "points": 17,
+  "pointsLog": [
+    {
+      "amount": 5,
+      "reason": "🎉 今日所有作业全部完成！",
+      "time": "2026-04-03T00:53:37.865Z",
+      "total": 17
+    },
+    {
+      "amount": 3,
+      "reason": "✅ 完成「学校作业」（高效+1）",
+      "time": "2026-04-03T00:53:37.064Z",
+      "total": 12
+    },
+    {
+      "amount": 3,
+      "reason": "✅ 完成「英语听说」（高效+1）",
+      "time": "2026-04-03T00:53:26.480Z",
+      "total": 9
+    },
+    {
+      "amount": 3,
+      "reason": "✅ 完成「数学练习」（高效+1）",
+      "time": "2026-04-03T00:53:01.326Z",
+      "total": 6
+    },
+    {
+      "amount": 3,
+      "reason": "✅ 完成「语文作业」（高效+1）",
+      "time": "2026-04-03T00:52:45.490Z",
+      "total": 3
+    }
+  ],
   "todayStats": {
-    "studyMinutes": 0,
+    "studyMinutes": 8,
     "restMinutes": 0,
-    "efficiency": 0,
-    "tasks": []
+    "efficiency": 100,
+    "tasks": [
+      {
+        "name": "语文作业",
+        "time": 30,
+        "actual": 1,
+        "study": 1,
+        "efficiency": 100
+      },
+      {
+        "name": "数学练习",
+        "time": 30,
+        "actual": 2,
+        "study": 2,
+        "efficiency": 100
+      },
+      {
+        "name": "语文作业",
+        "time": 30,
+        "actual": 1,
+        "study": 1,
+        "efficiency": 100
+      },
+      {
+        "name": "语文作业",
+        "time": 30,
+        "actual": 1,
+        "study": 1,
+        "efficiency": 100
+      },
+      {
+        "name": "数学练习",
+        "time": 30,
+        "actual": 1,
+        "study": 1,
+        "efficiency": 100
+      },
+      {
+        "name": "英语听说",
+        "time": 20,
+        "actual": 1,
+        "study": 1,
+        "efficiency": 100
+      },
+      {
+        "name": "学校作业",
+        "time": 0,
+        "actual": 1,
+        "study": 1,
+        "efficiency": 100
+      }
+    ]
   }
 }

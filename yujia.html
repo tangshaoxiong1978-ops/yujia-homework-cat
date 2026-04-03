@@ -1988,6 +1988,8 @@
         if (log.length > 100) log.pop();
         localStorage.setItem(POINTS_LOG_KEY, JSON.stringify(log));
         updatePointsDisplay();
+        // 自动同步到GitHub
+        syncToGitHub(buildSyncData());
         return newPts;
     }
 

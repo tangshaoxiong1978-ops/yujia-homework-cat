@@ -635,12 +635,29 @@
                 statusEl.className = 'sync-status loading';
             }
             
+            // 超时保护：10秒后强制更新状态
+            const timeoutId = setTimeout(() => {
+                console.warn('[loadAllData] 请求超时，使用缓存数据');
+                realData.yujia = realData.yujia || mockData.yujia;
+                realData.yuhan = realData.yuhan || mockData.yuhan;
+                if (statusEl) {
+                    statusEl.className = 'sync-status warning';
+                    statusEl.textContent = '⏱️ 请求超时，显示缓存';
+                }
+                updateSyncStatus();
+                updateDashboard();
+            }, 10000);
+            
             try {
                 console.log('[loadAllData] 正在请求数据...');
                 const [yujia, yuhan] = await Promise.all([
                     fetchFromGitHub('yujia'),
                     fetchFromGitHub('yuhan')
                 ]);
+                
+                // 清除超时定时器
+                clearTimeout(timeoutId);
+                
                 console.log('[loadAllData] 请求完成, yujia:', yujia ? '有数据' : 'null', 'yuhan:', yuhan ? '有数据' : 'null');
                 
                 // 如果获取失败，使用 fallback 数据（确保界面能显示）
@@ -653,18 +670,19 @@
                         statusEl.textContent = '⚠️ 网络异常，显示缓存数据';
                     }
                 } else {
-                    realData.yujia = yujia || mockData.yujia;
-                    realData.yuhan = yuhan || mockData.yuhan;
+                    realData.yujia = yujia || realData.yujia || mockData.yujia;
+                    realData.yuhan = yuhan || realData.yuhan || mockData.yuhan;
                     if (statusEl) {
                         statusEl.className = 'sync-status ok';
                         statusEl.textContent = '✅ 数据已加载';
                     }
                 }
             } catch (e) {
+                clearTimeout(timeoutId);
                 console.error('[loadAllData] 异常:', e);
-                // 使用 mock 数据作为 fallback
-                realData.yujia = mockData.yujia;
-                realData.yuhan = mockData.yuhan;
+                // 使用已有数据或 mock 数据作为 fallback
+                realData.yujia = realData.yujia || mockData.yujia;
+                realData.yuhan = realData.yuhan || mockData.yuhan;
                 if (statusEl) {
                     statusEl.className = 'sync-status error';
                     statusEl.textContent = '⚠️ 加载失败，显示默认数据';
@@ -1113,8 +1131,10 @@
         // 实时更新（每30秒重新加载数据）
         setInterval(loadAllData, 30000);
         
-        // 初始化 - 加载真实数据
-        loadAllData();
+        // 初始化 - 加载真实数据（用 async IIFE 确保正确执行）
+        (async () => {
+            await loadAllData();
+        })();
     </script>
 </body>
 </html>

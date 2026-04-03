@@ -258,7 +258,7 @@
                 </div>
             </div>
             <div class="deadline-row">
-                <span>📚</span><span>剩余复习时间</span>
+                <span>📚</span><span>建议复习（每天2h）</span>
                 <span id="zhongkaoStudy" style="font-weight:700;color:#7B1FA2;font-size:15px;"></span>
             </div>
         </div>
@@ -676,6 +676,7 @@
 
     function updateShengdi() {
         const now = new Date(), diff = SHENGDI_DATE - now, days = Math.ceil(diff / 86400000);
+        const hours = Math.floor(diff / 3600000); // 实际剩余小时
         const card = document.getElementById('shengdiCard');
         if (card) {
             if (days < 0) {
@@ -683,13 +684,16 @@
             } else {
                 card.style.display = 'block';
                 document.getElementById('shengdiDays').textContent = days;
-                document.getElementById('shengdiStudy').textContent = `约 ${Math.floor(days * 2)} 小时`;
+                // 显示：实际剩余小时 + 建议复习总小时（按每天2h计算）
+                const suggestedHours = days * 2;
+                document.getElementById('shengdiStudy').textContent = `${hours}小时（建议${suggestedHours}小时）`;
             }
         }
     }
 
     function updateZhongkao() {
         const now = new Date(), diff = ZHONGKAO_DATE - now, days = Math.ceil(diff / 86400000);
+        const hours = Math.floor(diff / 3600000); // 实际剩余小时
         const card = document.getElementById('zhongkaoCard');
         if (card) {
             if (days < 0) {
@@ -697,7 +701,9 @@
             } else {
                 card.style.display = 'block';
                 document.getElementById('zhongkaoDays').textContent = days;
-                document.getElementById('zhongkaoStudy').textContent = `约 ${Math.floor(days * 2)} 小时`;
+                // 显示：实际剩余小时 + 建议复习总小时（按每天2h计算）
+                const suggestedHours = days * 2;
+                document.getElementById('zhongkaoStudy').textContent = `${hours}小时（建议${suggestedHours}小时）`;
             }
         }
     }

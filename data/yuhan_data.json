@@ -2,7 +2,7 @@
   "child": "yuhan",
   "childName": "羽菡",
   "date": "2026-04-03",
-  "lastUpdated": "2026-04-03T09:43:01.683Z",
+  "lastUpdated": "2026-04-03T09:43:44.280Z",
   "homework": [
     {
       "id": 1,
@@ -33,40 +33,12 @@
       "status": "done"
     }
   ],
-  "points": 6,
-  "pointsLog": [
-    {
-      "amount": 3,
-      "reason": "✅ 完成「语文作业」（高效+1）",
-      "time": "2026-04-03T01:55:31.552Z",
-      "total": 6
-    },
-    {
-      "amount": 3,
-      "reason": "✅ 完成「学校作业」（高效+1）",
-      "time": "2026-04-03T00:54:23.328Z",
-      "total": 3
-    }
-  ],
+  "points": 0,
+  "pointsLog": [],
   "todayStats": {
-    "studyMinutes": 2,
+    "studyMinutes": 0,
     "restMinutes": 0,
-    "efficiency": 100,
-    "tasks": [
-      {
-        "name": "学校作业",
-        "time": 0,
-        "actual": 1,
-        "study": 1,
-        "efficiency": 100
-      },
-      {
-        "name": "语文作业",
-        "time": 30,
-        "actual": 1,
-        "study": 1,
-        "efficiency": 100
-      }
-    ]
+    "efficiency": 0,
+    "tasks": []
   }
 }

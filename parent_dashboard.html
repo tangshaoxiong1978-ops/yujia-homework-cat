@@ -579,34 +579,50 @@
         // 从GitHub仓库读取JSON数据
         // 使用 GitHub Pages 获取数据（最稳定）
         async function fetchFromGitHub(child) {
-            console.log(`[${child}] 开始获取数据...`);
+            console.log(`[${child}] ========== 开始获取数据 ==========`);
             
             // GitHub Pages 方式（无 CORS 问题）
             try {
-                const pagesUrl = `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/data/${child}_data.json`;
-                console.log(`[${child}] 请求:`, pagesUrl);
-                const response = await fetch(pagesUrl);
-                console.log(`[${child}] 状态:`, response.status);
+                const pagesUrl = `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/data/${child}_data.json?t=${Date.now()}`;
+                console.log(`[${child}] 尝试 GitHub Pages:`, pagesUrl);
+                const response = await fetch(pagesUrl, {
+                    method: 'GET',
+                    mode: 'cors',
+                    cache: 'no-store'
+                });
+                console.log(`[${child}] 响应状态:`, response.status, response.statusText);
                 if (response.ok) {
-                    const data = await response.json();
-                    console.log(`[${child}] 成功! 数据:`, data);
+                    const text = await response.text();
+                    console.log(`[${child}] 原始响应 (前100字符):`, text.substring(0, 100));
+                    const data = JSON.parse(text);
+                    console.log(`[${child}] ✅ 解析成功! lastUpdated:`, data.lastUpdated);
                     return data;
+                } else {
+                    console.error(`[${child}] GitHub Pages 响应非 OK:`, response.status);
                 }
             } catch(e) {
-                console.error(`[${child}] 异常:`, e.message);
+                console.error(`[${child}] GitHub Pages 异常:`, e.message, e.stack);
             }
             
             // 备选: Raw URL
             try {
-                const rawUrl = `https://raw.githubusercontent.com/tangshaoxiong1978-ops/yujia-homework-cat/main/data/${child}_data.json`;
-                const response = await fetch(rawUrl);
+                const rawUrl = `https://raw.githubusercontent.com/tangshaoxiong1978-ops/yujia-homework-cat/main/data/${child}_data.json?t=${Date.now()}`;
+                console.log(`[${child}] 尝试 Raw URL:`, rawUrl);
+                const response = await fetch(rawUrl, {
+                    method: 'GET',
+                    mode: 'cors',
+                    cache: 'no-store'
+                });
                 if (response.ok) {
-                    return await response.json();
+                    const data = await response.json();
+                    console.log(`[${child}] ✅ Raw 成功!`);
+                    return data;
                 }
             } catch(e) {
                 console.error(`[${child}] Raw也失败:`, e.message);
             }
             
+            console.error(`[${child}] 所有方式均失败`);
             return null;
         }
         
@@ -626,19 +642,34 @@
         // 更新同步状态显示
         function updateSyncStatus() {
             const el = document.getElementById('syncStatus');
-            const data = realData.yujia || realData.yuhan;
             if (!el) return;
+            
+            const yujiaData = realData.yujia;
+            const yuhanData = realData.yuhan;
+            
+            console.log('[syncStatus] yujia:', yujiaData ? '有数据' : '无数据');
+            console.log('[syncStatus] yuhan:', yuhanData ? '有数据' : '无数据');
+            
+            // 如果两个都没数据
+            if (!yujiaData && !yuhanData) {
+                el.className = 'sync-status error';
+                el.textContent = '⚠️ 数据获取失败，请查看控制台或手动刷新';
+                return;
+            }
+            
+            // 使用最新更新的那个数据
+            const data = (yujiaData?.lastUpdated > yuhanData?.lastUpdated) ? yujiaData : yuhanData;
+            
             if (data && data.lastUpdated) {
                 const t = new Date(data.lastUpdated);
-                const timeStr = `${t.getHours()}:${String(t.getMinutes()).padStart(2,'0')}`;
+                // 转换时区
+                const localTime = new Date(t.getTime() + 8 * 60 * 60 * 1000);
+                const timeStr = `${localTime.getHours()}:${String(localTime.getMinutes()).padStart(2,'0')}:${String(localTime.getSeconds()).padStart(2,'0')}`;
                 el.className = 'sync-status ok';
                 el.textContent = `✅ 已同步 ${timeStr}`;
-            } else if (data) {
+            } else {
                 el.className = 'sync-status ok';
                 el.textContent = '✅ 数据已加载';
-            } else {
-                el.className = 'sync-status error';
-                el.textContent = '⚠️ 暂无数据，等待孩子完成作业';
             }
         }
         

@@ -491,6 +491,31 @@
         }
     }
 
+    // 从 GitHub 拉取最新数据（跨设备同步核心）
+    async function loadFromGitHub() {
+        try {
+            const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_DATA_FILE}`;
+            const resp = await fetch(apiUrl, {
+                headers: {
+                    'Authorization': `token ${GITHUB_TOKEN}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
+            if (resp.ok) {
+                const fileInfo = await resp.json();
+                const content = JSON.parse(decodeURIComponent(escape(atob(fileInfo.content))));
+                console.log('✅ 从GitHub拉取数据成功', content);
+                return content;
+            } else {
+                console.log('ℹ️ GitHub无数据（或首次同步），使用本地数据');
+                return null;
+            }
+        } catch (e) {
+            console.warn('⚠️ GitHub拉取失败，使用本地数据:', e);
+            return null;
+        }
+    }
+
     // 构建今日完整数据用于同步
     function buildSyncData() {
         const today = new Date().toISOString().split('T')[0];
@@ -610,12 +635,38 @@
         lastWarningLevel = diff < 30*60000 ? 2 : diff < 60*60000 ? 1 : 0;
     }
 
-    function init() {
-        updateDate(); updateShengdi(); updateZhongkao(); loadHomework(); parseURLParams();
+    // ========== 初始化（核心：先GitHub后本地）==========
+    let githubData = null; // 缓存GitHub数据
+
+    async function init() {
+        updateDate(); updateShengdi(); updateZhongkao();
+        
+        // 【关键】先从GitHub拉取最新数据
+        githubData = await loadFromGitHub();
+        
+        // 再加载本地数据
+        loadHomework();
+        
+        // 如果GitHub有新数据且比本地新，用GitHub数据
+        if (githubData && githubData.lastUpdated) {
+            const localKey = `hw_${CHILD}`;
+            const localTime = localStorage.getItem(`${localKey}_update`);
+            if (!localTime || new Date(githubData.lastUpdated) > new Date(localTime)) {
+                console.log('🔄 用GitHub新数据覆盖本地');
+                homework = githubData.homework || homework;
+                saveHomework();
+                localStorage.setItem(`${localKey}_update`, githubData.lastUpdated);
+            }
+        }
+        
+        parseURLParams();
         renderHomeworkList(); updateStats(); updateDeadlineWithWarning();
         updatePointsDisplay();
         initParentMode();
         setInterval(() => { updateDeadlineWithWarning(); updateShengdi(); updateZhongkao(); }, 30000);
+        
+        // 页面打开时自动同步到GitHub（确保最新数据上传）
+        syncToGitHub(buildSyncData());
     }
 
     function updateDate() {

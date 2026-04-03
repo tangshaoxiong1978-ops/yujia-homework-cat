@@ -717,10 +717,17 @@
         }
         
         parseURLParams();
-        renderHomeworkList(); updateStats(); updateDeadlineWithWarning(); updateLocalTime();
+        renderHomeworkList();
+        
+        // 先更新时间显示（确保第一时间显示）
+        updateLocalTime();
+        updateStats(); updateDeadlineWithWarning();
         updatePointsDisplay();
         initParentMode();
-        setInterval(() => { updateDeadlineWithWarning(); updateShengdi(); updateZhongkao(); updateLocalTime(); }, 30000);
+        
+        // 实时时间每秒更新，倒计时/会考/中考每30秒更新
+        setInterval(() => { updateLocalTime(); }, 1000);
+        setInterval(() => { updateDeadlineWithWarning(); updateShengdi(); updateZhongkao(); }, 30000);
         
         // 页面打开时自动同步到GitHub（确保最新数据上传）
         syncToGitHub(buildSyncData());

@@ -1390,12 +1390,17 @@
         // 解析URL参数（来自OpenClaw布置作业）
         parseURLParams();
         renderHomeworkList();
-        updateStats();
+        
+        // 先更新时间显示（确保第一时间显示）
+        updateLocalTime();
         updateDeadlineWithWarning();
-        updateLocalTime(); // 更新本地时间
+        updateStats();
         updatePointsDisplay();
         initParentMode();
-        setInterval(() => { updateDeadlineWithWarning(); updateStats(); updateLocalTime(); }, 30000);
+        
+        // 实时时间每秒更新，倒计时每30秒更新
+        setInterval(() => { updateLocalTime(); }, 1000);
+        setInterval(() => { updateDeadlineWithWarning(); updateStats(); }, 30000);
         
         // 页面打开时自动同步到GitHub（确保最新数据上传）
         syncToGitHub(buildSyncData());

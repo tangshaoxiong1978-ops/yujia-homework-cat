@@ -836,13 +836,16 @@
             const logList = document.getElementById('pointsLogList');
             const pointsLog = rawData && rawData.pointsLog ? rawData.pointsLog : [];
             if (pointsLog.length > 0) {
-                logList.innerHTML = pointsLog.map(log => `
+                logList.innerHTML = pointsLog.map(log => {
+                    const changeVal = log.change ?? log.amount ?? 0; // 兼容 change 或 amount 字段
+                    const reasonText = log.reason || log.desc || '积分变动';
+                    return `
                     <div class="points-log-item">
-                        <span>${log.reason || '积分变动'}</span>
-                        <span class="${log.change > 0 ? 'plus' : 'minus'}">${log.change > 0 ? '+' : ''}${log.change}</span>
+                        <span>${reasonText}</span>
+                        <span class="${changeVal > 0 ? 'plus' : 'minus'}">${changeVal > 0 ? '+' : ''}${changeVal}</span>
                         <span class="time">${log.time ? new Date(log.time).toLocaleString('zh-CN') : ''}</span>
                     </div>
-                `).join('');
+                `}).join('');
             } else {
                 logList.innerHTML = '<div style="color:#888;text-align:center;padding:10px">暂无明细</div>';
             }

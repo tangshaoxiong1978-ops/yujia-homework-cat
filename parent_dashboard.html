@@ -585,45 +585,64 @@
         console.log('GitHub Token 长度:', GITHUB_TOKEN.length);
         console.log('GitHub Token 前10位:', GITHUB_TOKEN.substring(0, 10));
 
+        // 尝试多种方式获取数据
         async function fetchFromGitHub(child) {
-            console.log(`[${child}] 开始从GitHub获取数据...`);
+            console.log(`[${child}] 开始获取数据...`);
+            
+            // 方法1: GitHub API (需要token)
             try {
-                // 用 GitHub Contents API，内容是 base64 编码，绕过 Pages CDN 缓存
                 const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/data/${child}_data.json`;
-                console.log(`[${child}] API URL:`, apiUrl);
+                console.log(`[${child}] 尝试 GitHub API...`);
                 const response = await fetch(apiUrl, {
                     headers: {
                         'Authorization': `token ${GITHUB_TOKEN}`,
                         'Accept': 'application/vnd.github.v3+json'
                     }
                 });
-                console.log(`[${child}] 响应状态:`, response.status);
-                console.log(`[${child}] 响应状态文本:`, response.statusText);
-                
-                if (!response.ok) {
-                    const errText = await response.text();
-                    console.error(`[${child}] 错误响应:`, errText);
-                    throw new Error(`HTTP ${response.status}: ${errText}`);
+                if (response.ok) {
+                    const fileInfo = await response.json();
+                    if (fileInfo.content) {
+                        const decoded = decodeURIComponent(escape(atob(fileInfo.content.replace(/\n/g, ''))));
+                        const data = JSON.parse(decoded);
+                        console.log(`[${child}] GitHub API 成功!`);
+                        return data;
+                    }
                 }
-                
-                const fileInfo = await response.json();
-                console.log(`[${child}] 文件信息:`, fileInfo);
-                
-                if (!fileInfo.content) {
-                    console.warn(`[${child}] 文件内容为空`);
-                    return null;
-                }
-                
-                // base64 解码内容
-                const decoded = decodeURIComponent(escape(atob(fileInfo.content.replace(/\n/g, ''))));
-                const data = JSON.parse(decoded);
-                console.log(`[${child}] 解析后的数据:`, data);
-                return data;
-            } catch (error) {
-                console.error(`[${child}] 获取数据失败:`, error);
-                console.error(`[${child}] 错误详情:`, error.message);
-                return null;
+                console.log(`[${child}] GitHub API 失败，尝试备选方案...`);
+            } catch(e) {
+                console.log(`[${child}] GitHub API 异常:`, e.message);
             }
+            
+            // 方法2: Raw 文件 (无 CORS 问题)
+            try {
+                const rawUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/main/data/${child}_data.json`;
+                console.log(`[${child}] 尝试 Raw URL:`, rawUrl);
+                const response = await fetch(rawUrl);
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log(`[${child}] Raw URL 成功!`);
+                    return data;
+                }
+            } catch(e) {
+                console.log(`[${child}] Raw URL 异常:`, e.message);
+            }
+            
+            // 方法3: GitHub Pages (最终备选)
+            try {
+                const pagesUrl = `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/data/${child}_data.json`;
+                console.log(`[${child}] 尝试 GitHub Pages...`);
+                const response = await fetch(pagesUrl);
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log(`[${child}] GitHub Pages 成功!`);
+                    return data;
+                }
+            } catch(e) {
+                console.log(`[${child}] GitHub Pages 异常:`, e.message);
+            }
+            
+            console.error(`[${child}] 所有方式均失败!`);
+            return null;
         }
         
         // 加载所有数据

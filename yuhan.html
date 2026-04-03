@@ -616,8 +616,11 @@
 
     let lastWarningLevel = 0;
     function updateDeadlineWithWarning() {
-        const now = new Date(), [h,m] = DEADLINE.split(':').map(Number);
-        const deadline = new Date(now.setHours(h, m, 0));
+        const now = new Date();
+        const [h, m] = DEADLINE.split(':').map(Number);
+        // 创建一个副本，避免修改原对象
+        const deadline = new Date(now);
+        deadline.setHours(h, m, 0, 0);
         const diff = deadline - now;
         const el = document.getElementById('deadlineTime'), rem = document.getElementById('deadlineRemaining');
         const hdr = document.getElementById('headerDeadline'), hdrTime = document.getElementById('headerDeadlineTime');

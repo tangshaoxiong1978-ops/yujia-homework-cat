@@ -721,7 +721,10 @@
         // 模拟数据（当无法获取真实数据时的fallback）
         const mockData = {
             yujia: {
-                name: '羽佳',
+                child: 'yujia',
+                childName: '羽佳',
+                points: 0,
+                pointsLog: [],
                 tasks: [
                     { name: '橙果APP打卡', status: 'pending', time: '--' },
                     { name: '英语一起作业', status: 'pending', time: '--' },
@@ -731,7 +734,10 @@
                 stats: { completed: 0, totalTime: 0, efficiency: 0 }
             },
             yuhan: {
-                name: '羽菡',
+                child: 'yuhan',
+                childName: '羽菡',
+                points: 0,
+                pointsLog: [],
                 tasks: [
                     { name: '数学练习', status: 'pending', time: '--' },
                     { name: '英语作文', status: 'pending', time: '--' },

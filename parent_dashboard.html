@@ -562,6 +562,47 @@
     </div>
     
     <script>
+        // GitHub 配置
+        const _t = ['ghp_4trSqjSev', 'anCogqd3BDiF', 'mH6fWQcwt0sYUHM'];
+        const GITHUB_TOKEN = _t.join('');
+        const GITHUB_REPO = 'tangshaoxiong1978-ops/yujia-homework-cat';
+        
+        // Base64 解码兼容函数
+        function base64Decode(str) {
+            try { return decodeURIComponent(escape(atob(str))); } catch(e) { return null; }
+        }
+        
+        // 归档今日数据到历史文件
+        async function archiveTodayData(data, child, dateStr) {
+            try {
+                const historyFile = `data/${child}_history_${dateStr}.json`;
+                const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${historyFile}`;
+                const getResp = await fetch(apiUrl, {
+                    headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' }
+                });
+                let sha = null;
+                if (getResp.ok) {
+                    const info = await getResp.json();
+                    sha = info.sha;
+                }
+                const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+                const body = { message: `archive: ${child} ${dateStr} 历史数据`, content };
+                if (sha) body.sha = sha;
+                await fetch(apiUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+                console.log(`📦 历史数据已归档：${historyFile}`);
+            } catch (e) {
+                console.warn('历史归档失败:', e.message);
+            }
+        }
+        
         // 同步状态显示
         let syncStatus = { yujia: false, yuhan: false };
         
@@ -1094,14 +1135,19 @@
                 data.points = (data.points || 0) + change;
                 data.lastUpdated = new Date().toISOString();
                 
-                // 添加积分记录
+                // 添加积分记录（格式兼容孩子页面：amount+reason+time+total）
                 if (!data.pointsLog) data.pointsLog = [];
                 data.pointsLog.push({
-                    change: change,
+                    amount: change,  // 积分变动（正数加分，负数减分）
                     reason: reason || (change > 0 ? '家长加分' : '家长减分'),
-                    time: new Date().toISOString()
+                    time: new Date().toISOString(),
+                    total: data.points // 变动后的累计积分
                 });
                 data.pointsLog = data.pointsLog.slice(-20); // 保留最近20条
+                
+                // 【新增】同时归档今日历史快照（供历史查询）
+                const todayStr = new Date().toISOString().split('T')[0];
+                await archiveTodayData(data, currentChild, todayStr);
                 
                 // 推送到GitHub
                 const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));

@@ -809,13 +809,13 @@
             
             // 超时保护：10秒后强制更新状态
             const timeoutId = setTimeout(() => {
-                console.warn('[loadAllData] 请求超时，使用缓存数据');
-                // 使用缓存或mock
-                realData.yujia = realData.yujia || cachedYujia || mockData.yujia;
-                realData.yuhan = realData.yuhan || cachedYuhan || mockData.yuhan;
+                console.warn('[loadAllData] 请求超时，保留已有数据');
+                // 超时时只更新状态，不覆盖已有数据
+                if (!realData.yujia) realData.yujia = cachedYujia || mockData.yujia;
+                if (!realData.yuhan) realData.yuhan = cachedYuhan || mockData.yuhan;
                 if (statusEl) {
                     statusEl.className = 'sync-status warning';
-                    statusEl.textContent = '⏱️ 请求超时，显示缓存';
+                    statusEl.textContent = '⏱️ 请求超时，保持当前数据';
                 }
                 updateSyncStatus();
                 updateDashboard();
@@ -848,24 +848,24 @@
                         statusEl.textContent = '✅ 数据已加载';
                     }
                 } else {
-                    // GitHub获取失败，使用缓存
-                    console.warn('[loadAllData] GitHub获取失败，使用缓存');
-                    realData.yujia = cachedYujia || mockData.yujia;
-                    realData.yuhan = cachedYuhan || mockData.yuhan;
+                    // GitHub获取失败，但realData可能已经有最新数据，不覆盖
+                    console.warn('[loadAllData] GitHub获取失败，保留已有数据');
+                    if (!realData.yujia) realData.yujia = cachedYujia || mockData.yujia;
+                    if (!realData.yuhan) realData.yuhan = cachedYuhan || mockData.yuhan;
                     if (statusEl) {
                         statusEl.className = 'sync-status warning';
-                        statusEl.textContent = '⚠️ 网络异常，显示缓存数据';
+                        statusEl.textContent = '⚠️ 网络异常，保持当前数据';
                     }
                 }
             } catch (e) {
                 clearTimeout(timeoutId);
                 console.error('[loadAllData] 异常:', e);
-                // 使用缓存或mock数据
-                realData.yujia = cachedYujia || mockData.yujia;
-                realData.yuhan = cachedYuhan || mockData.yuhan;
+                // 异常时也保留已有数据，只在完全没有数据时才用缓存
+                if (!realData.yujia) realData.yujia = cachedYujia || mockData.yujia;
+                if (!realData.yuhan) realData.yuhan = cachedYuhan || mockData.yuhan;
                 if (statusEl) {
                     statusEl.className = 'sync-status error';
-                    statusEl.textContent = '⚠️ 加载失败，显示默认数据';
+                    statusEl.textContent = '⚠️ 加载失败，保持当前数据';
                 }
             }
             

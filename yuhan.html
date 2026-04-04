@@ -620,25 +620,56 @@
     }
 
     // 构建今日完整数据用于同步
-    function buildSyncData() {
+    async function buildSyncData() {
         const today = new Date().toISOString().split('T')[0];
         const key = `timer_${CHILD}_${today}`;
         const timerData = JSON.parse(localStorage.getItem(key) || '{}');
-        // 【关键】直接从localStorage获取积分确保同步成功率
-        const currentPoints = parseInt(localStorage.getItem(POINTS_KEY) || '0');
-        const pointsLog = JSON.parse(localStorage.getItem(getPointsLogKey()) || '[]');
-        // 计算今日积分（从明细累加）
+        // 【关键】从localStorage获取本地积分
+        let localPoints = parseInt(localStorage.getItem(POINTS_KEY) || '0');
+        let pointsLog = JSON.parse(localStorage.getItem(getPointsLogKey()) || '[]');
+        
+        // 【新增】合并GitHub上的家长加减分记录，避免覆盖
+        try {
+            const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/data/${CHILD}_data.json`;
+            const resp = await fetch(url, { method: 'HEAD' });
+            if (resp.ok) {
+                const getResp = await fetch(url);
+                if (getResp.ok) {
+                    const ghData = await getResp.json();
+                    const decoded = atob(ghData.content);
+                    const ghParsed = JSON.parse(decoded);
+                    const ghPoints = ghParsed.points || 0;
+                    const ghPointsLog = ghParsed.pointsLog || [];
+                    
+                    if (ghPoints > localPoints) {
+                        console.log('[同步] 发现家长加分，合并积分:', localPoints, '->', ghPoints);
+                        localPoints = ghPoints;
+                        const localLogMap = new Map(pointsLog.map(l => [l.time, l]));
+                        ghPointsLog.forEach(l => {
+                            if (!localLogMap.has(l.time)) {
+                                pointsLog.push(l);
+                            }
+                        });
+                        pointsLog.sort((a, b) => new Date(b.time) - new Date(a.time));
+                    }
+                }
+            }
+        } catch(e) {
+            console.log('[同步] 合并GitHub积分跳过:', e.message);
+        }
+        
         const todayPoints = pointsLog.reduce((sum, entry) => sum + (entry.amount || 0), 0);
-        console.log('[同步数据] 累计积分:', currentPoints, '今日积分:', todayPoints, '明细:', pointsLog.length, '条');
+        console.log('[同步数据] 累计积分:', localPoints, '今日积分:', todayPoints, '明细:', pointsLog.length, '条');
+        
         return {
             child: CHILD,
             childName: CHILD_NAME,
             date: today,
             lastUpdated: new Date().toISOString(),
             homework: homework,
-            points: currentPoints,
+            points: localPoints,
             todayPoints: todayPoints,
-            pointsLog: pointsLog.slice(-20), // 保留最近20条（今日明细）
+            pointsLog: pointsLog.slice(-20),
             todayStats: {
                 studyMinutes: timerData.studyMinutes || 0,
                 restMinutes: timerData.restMinutes || 0,
@@ -858,7 +889,7 @@
         }, 30000);
         
         // 页面打开时自动同步到GitHub（确保最新数据上传）
-        syncToGitHub(buildSyncData());
+        (async () => { syncToGitHub(await buildSyncData()); })();
     }
 
     function updateDate() {

@@ -1,0 +1,66 @@
+{
+  "child": "yujia",
+  "childName": "羽佳",
+  "date": "2026-04-04",
+  "lastUpdated": "2026-04-04T04:29:55.820Z",
+  "homework": [
+    {
+      "id": 1,
+      "name": "橙果APP打卡",
+      "icon": "📱",
+      "time": 15,
+      "status": "done"
+    },
+    {
+      "id": 2,
+      "name": "英语一起作业",
+      "icon": "🎧",
+      "time": 20,
+      "status": "waiting"
+    },
+    {
+      "id": 3,
+      "name": "阅读半小时",
+      "icon": "📚",
+      "time": 30,
+      "status": "waiting"
+    },
+    {
+      "id": 4,
+      "name": "口算题一页",
+      "icon": "🔢",
+      "time": 20,
+      "status": "waiting"
+    },
+    {
+      "id": 5,
+      "name": "老师作业",
+      "icon": "📝",
+      "time": 0,
+      "status": "waiting"
+    }
+  ],
+  "points": 30,
+  "pointsLog": [
+    {
+      "amount": 3,
+      "reason": "✅ 完成「橙果APP打卡」（高效+1）",
+      "time": "2026-04-04T04:29:55.818Z",
+      "total": 30
+    }
+  ],
+  "todayStats": {
+    "studyMinutes": 1,
+    "restMinutes": 0,
+    "efficiency": 100,
+    "tasks": [
+      {
+        "name": "橙果APP打卡",
+        "time": 15,
+        "actual": 1,
+        "study": 1,
+        "efficiency": 100
+      }
+    ]
+  }
+}

@@ -2,7 +2,7 @@
   "child": "yujia",
   "childName": "羽佳",
   "date": "2026-04-04",
-  "lastUpdated": "2026-04-04T06:21:03.217Z",
+  "lastUpdated": "2026-04-04T06:31:09.420Z",
   "homework": [
     {
       "id": 1,
@@ -45,6 +45,13 @@
       "icon": "📝",
       "time": 1,
       "status": "done"
+    },
+    {
+      "id": 1775283952777,
+      "name": "预习课",
+      "icon": "📝",
+      "time": 20,
+      "status": "waiting"
     }
   ],
   "points": 34,

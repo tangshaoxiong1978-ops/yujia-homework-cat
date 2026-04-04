@@ -614,7 +614,9 @@
         // 【关键】直接从localStorage获取积分确保同步成功率
         const currentPoints = parseInt(localStorage.getItem(POINTS_KEY) || '0');
         const pointsLog = JSON.parse(localStorage.getItem(getPointsLogKey()) || '[]');
-        console.log('[同步数据] 当前积分:', currentPoints, '积分明细:', pointsLog.length, '条');
+        // 计算今日积分（从明细累加）
+        const todayPoints = pointsLog.reduce((sum, entry) => sum + (entry.amount || 0), 0);
+        console.log('[同步数据] 累计积分:', currentPoints, '今日积分:', todayPoints, '明细:', pointsLog.length, '条');
         return {
             child: CHILD,
             childName: CHILD_NAME,
@@ -622,6 +624,7 @@
             lastUpdated: new Date().toISOString(),
             homework: homework,
             points: currentPoints,
+            todayPoints: todayPoints,
             pointsLog: pointsLog.slice(-20), // 保留最近20条（今日明细）
             todayStats: {
                 studyMinutes: timerData.studyMinutes || 0,
@@ -1473,11 +1476,23 @@
     function getPoints() { return parseInt(localStorage.getItem(POINTS_KEY) || '0'); }
 
     function updatePointsDisplay() {
-        const pts = getPoints();
+        const today = new Date().toISOString().split('T')[0];
+        
+        // 【修复】优先从 GitHub 数据读取今日积分，没有就用本地计算
+        let pts = 0;
+        if (githubData && githubData.date === today && githubData.todayPoints !== undefined) {
+            pts = githubData.todayPoints;
+            console.log('📊 从GitHub读取今日积分:', pts);
+        } else {
+            // 回退到从本地明细计算今日积分
+            const pointsLog = JSON.parse(localStorage.getItem(getPointsLogKey()) || '[]');
+            pts = pointsLog.reduce((sum, entry) => sum + (entry.amount || 0), 0);
+        }
+        
         document.getElementById('pointsDisplay').textContent = pts;
-        const sub = pts >= 100 ? '🏆 积分超多！快去兑换奖励！' :
-                    pts >= 50 ? '⭐ 积分收集中，继续加油！' :
-                    pts >= 20 ? '🌟 不错！保持努力！' : '完成作业赢取积分！';
+        const sub = pts >= 20 ? '🏆 今日积分超高！继续加油！' :
+                    pts >= 10 ? '⭐ 今日不错！保持下去！' :
+                    pts >= 5 ? '🌟 开个好头！继续加油！' : '完成作业赢取积分！';
         document.getElementById('pointsSub').textContent = sub;
     }
 

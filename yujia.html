@@ -2134,11 +2134,45 @@
         if (!dateInput.value) dateInput.value = todayStr;
         const selectedDate = dateInput.value || todayStr;
 
-        const logKey = getPointsLogKey(selectedDate);
-        const log = JSON.parse(localStorage.getItem(logKey) || '[]');
         const list = document.getElementById('pointsLogList');
         const isToday = selectedDate === todayStr;
         const dateLabel = isToday ? '今天' : selectedDate;
+
+        // 先从 localStorage 获取当日数据
+        const logKey = getPointsLogKey(selectedDate);
+        let log = JSON.parse(localStorage.getItem(logKey) || '[]');
+
+        // 如果是非今天且本地没有数据，尝试从 GitHub 加载历史归档
+        if (!isToday && log.length === 0) {
+            list.innerHTML = `<div style="text-align:center;color:#888;padding:20px 0">📥 正在加载 ${dateLabel} 积分数据...</div>`;
+            document.getElementById('pointsLogOverlay').classList.add('active');
+
+            const historyUrl = `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/data/${CHILD}_history_${selectedDate}.json`;
+            fetch(historyUrl)
+                .then(res => res.ok ? res.json() : null)
+                .then(data => {
+                    if (data && data.pointsLog && data.pointsLog.length > 0) {
+                        // 保存到本地并显示
+                        localStorage.setItem(logKey, JSON.stringify(data.pointsLog));
+                        renderPointsLog(data.pointsLog, dateLabel, isToday);
+                    } else {
+                        list.innerHTML = `<div style="text-align:center;color:#aaa;padding:30px 0">${dateLabel}暂无积分记录</div>`;
+                    }
+                })
+                .catch(() => {
+                    list.innerHTML = `<div style="text-align:center;color:#aaa;padding:30px 0">${dateLabel}暂无积分记录</div>`;
+                });
+            return;
+        }
+
+        // 渲染积分明细
+        renderPointsLog(log, dateLabel, isToday);
+        document.getElementById('pointsLogOverlay').classList.add('active');
+    }
+
+    // 渲染积分明细列表
+    function renderPointsLog(log, dateLabel, isToday) {
+        const list = document.getElementById('pointsLogList');
         if (log.length === 0) {
             list.innerHTML = `<div style="text-align:center;color:#aaa;padding:30px 0">${dateLabel}暂无积分记录${isToday ? '，完成作业来赚积分！🐱' : ''}</div>`;
         } else {
@@ -2154,7 +2188,6 @@
                 </div>`;
             }).join('');
         }
-        document.getElementById('pointsLogOverlay').classList.add('active');
     }
 
     function closePointsLog() {

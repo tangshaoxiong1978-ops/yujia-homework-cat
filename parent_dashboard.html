@@ -508,9 +508,18 @@
                 <button class="points-btn detail" onclick="showPointsLog()">📋 明细</button>
             </div>
 
+            <!-- 积分历史查询 -->
+            <div style="margin-top:12px;padding-top:12px;border-top:1px solid #eee;">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <span style="font-size:13px;color:#666;">📅 查看历史：</span>
+                    <input type="date" id="pointsHistoryDate" style="padding:6px;border:1px solid #ddd;border-radius:6px;font-size:13px;">
+                    <button class="points-btn" style="background:#2196F3;color:white;padding:6px 12px;font-size:12px;" onclick="loadPointsHistory()">查询</button>
+                </div>
+            </div>
+
             <div class="points-export-section" style="margin-top:12px;padding-top:12px;border-top:1px solid #eee;">
                 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                    <span style="font-size:13px;color:#666;">📅 日期范围：</span>
+                    <span style="font-size:13px;color:#666;">📅 导出范围：</span>
                     <input type="date" id="exportStartDate" style="padding:6px;border:1px solid #ddd;border-radius:6px;font-size:13px;">
                     <span style="color:#999;">至</span>
                     <input type="date" id="exportEndDate" style="padding:6px;border:1px solid #ddd;border-radius:6px;font-size:13px;">
@@ -1106,6 +1115,53 @@
         function showPointsLog() {
             const section = document.getElementById('pointsLogSection');
             section.style.display = section.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // 加载指定日期的历史积分数据
+        async function loadPointsHistory() {
+            const dateInput = document.getElementById('pointsHistoryDate');
+            const selectedDate = dateInput.value;
+            if (!selectedDate) {
+                alert('请选择要查看的日期');
+                return;
+            }
+            
+            const childName = currentChild === 'yujia' ? '羽佳' : '羽菡';
+            const historyUrl = `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/data/${currentChild}_history_${selectedDate}.json`;
+            
+            try {
+                document.getElementById('currentPoints').textContent = '⏳ 加载中...';
+                document.getElementById('pointsLogList').innerHTML = '<div style="text-align:center;color:#888;padding:20px 0">📥 正在加载历史积分...</div>';
+                document.getElementById('pointsLogSection').style.display = 'block';
+                
+                const resp = await fetch(historyUrl);
+                if (!resp.ok) throw new Error('无历史数据');
+                
+                const data = await resp.json();
+                const points = data.points != null ? data.points : 0;
+                document.getElementById('currentPoints').textContent = points;
+                
+                const logList = document.getElementById('pointsLogList');
+                if (data.pointsLog && data.pointsLog.length > 0) {
+                    logList.innerHTML = data.pointsLog.map(log => {
+                        const d = new Date(log.time);
+                        const timeStr = `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
+                        return `<div class="points-log-item">
+                            <div>
+                                <div class="points-log-desc">${log.reason || '积分变动'}</div>
+                                <div class="points-log-date">${timeStr} · 累计 ${log.total} 分</div>
+                            </div>
+                            <div class="points-log-amount" style="color:#4CAF50;">+${log.amount}</div>
+                        </div>`;
+                    }).join('');
+                } else {
+                    logList.innerHTML = '<div style="text-align:center;color:#aaa;padding:20px 0">该日期暂无积分记录</div>';
+                }
+            } catch(e) {
+                document.getElementById('currentPoints').textContent = '0';
+                document.getElementById('pointsLogList').innerHTML = `<div style="text-align:center;color:#f66;padding:20px 0">❌ ${selectedDate} 无历史积分数据</div>`;
+                document.getElementById('pointsLogSection').style.display = 'block';
+            }
         }
         
         // 导出积分明细统计表（Excel格式）

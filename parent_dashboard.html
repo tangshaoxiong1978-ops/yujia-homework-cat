@@ -983,10 +983,13 @@
             const today = new Date().toISOString().split('T')[0];
             const isToday = viewDateStr === today;
             
+            console.log('[updateDashboard] currentChild:', currentChild, 'viewDateStr:', viewDateStr, 'today:', today, 'isToday:', isToday);
+            
             // 选择数据源：今天用实时数据，历史日期用归档缓存
             let rawData;
             if (isToday) {
                 rawData = realData[currentChild];
+                console.log('[updateDashboard] realData[currentChild]:', rawData ? '有数据' : 'null', 'points:', rawData?.points);
                 // 今天的数据需检查date字段，若是昨天的数据则作业状态清零显示
                 if (rawData && rawData.date && rawData.date !== today) {
                     // GitHub上还是昨天的数据——作业显示"等待同步"
@@ -995,6 +998,7 @@
             } else {
                 rawData = historyCache[`${currentChild}_${viewDateStr}`] || null;
             }
+            console.log('[updateDashboard] rawData.points:', rawData?.points, 'rawData.pointsLog:', rawData?.pointsLog?.length);
             
             if (rawData && rawData.homework) {
                 // 新格式：来自孩子计时器 buildSyncData() 的数据
@@ -1122,13 +1126,14 @@
             
             // 更新积分卡片
             const currentPts = rawData && rawData.points != null ? rawData.points : 0;
+            console.log('[积分卡片] currentPts:', currentPts, 'element:', document.getElementById('currentPoints') ? '存在' : '不存在');
             document.getElementById('currentPoints').textContent = currentPts;
             
             // 更新积分明细
             const logSection = document.getElementById('pointsLogSection');
             const logList = document.getElementById('pointsLogList');
             const pointsLog = rawData && rawData.pointsLog ? rawData.pointsLog : [];
-            console.log('[积分明细] rawData:', rawData, 'pointsLog:', pointsLog);
+            console.log('[积分明细] pointsLog:', pointsLog);
             if (pointsLog && pointsLog.length > 0) {
                 logList.innerHTML = pointsLog.map(log => {
                     // 兼容不同的字段名

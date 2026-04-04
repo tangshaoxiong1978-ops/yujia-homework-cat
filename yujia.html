@@ -1434,7 +1434,8 @@
         // 再尝试从GitHub拉取最新数据
         try {
             githubData = await loadFromGitHub();
-            // 【修复】GitHub数据加载后刷新统计显示
+            // 【修复】GitHub数据加载后刷新积分和统计显示
+            updatePointsDisplay();
             updateStats();
         } catch(e) {
             console.log('GitHub获取失败，使用本地数据');

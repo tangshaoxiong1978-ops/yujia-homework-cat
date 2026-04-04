@@ -317,6 +317,17 @@
                     <div class="stat-item"><div class="stat-value" id="restMinutes">0</div><div class="stat-label">休息分钟</div></div>
                     <div class="stat-item"><div class="stat-value" id="efficiency">0%</div><div class="stat-label">学习效率</div></div>
                 </div>
+                <!-- 超时统计行 -->
+                <div class="stats-row" style="margin-top:8px;">
+                    <div class="stat-item" style="flex:1;">
+                        <div class="stat-value" id="overMinutes" style="color:#ff7043;">0</div>
+                        <div class="stat-label">超时分钟</div>
+                    </div>
+                    <div class="stat-item" style="flex:1;">
+                        <div class="stat-value" id="overTasks">0</div>
+                        <div class="stat-label">超时次数</div>
+                    </div>
+                </div>
             </div>
             <div class="tab-content" id="contentWeek">
                 <div class="stat-grid">
@@ -999,6 +1010,13 @@
         document.getElementById('studyMinutes').textContent = data.studyMinutes || 0;
         document.getElementById('restMinutes').textContent = data.restMinutes || 0;
         document.getElementById('efficiency').textContent = (data.efficiency || 0) + '%';
+        
+        // 计算超时统计
+        const tasks = data.tasks || [];
+        const overTasks = tasks.filter(t => t.overTime > 0);
+        const overMinutes = overTasks.reduce((sum, t) => sum + t.overTime, 0);
+        document.getElementById('overMinutes').textContent = overMinutes;
+        document.getElementById('overTasks').textContent = overTasks.length;
     }
 
     function updateDeadline() {
@@ -1050,15 +1068,18 @@
         if (!currentTask) return;
         const elapsed = Math.floor((Date.now() - startTime - pausedTime) / 1000);
         const totalMin = Math.ceil(elapsed / 60);
-        const eff = currentTask.time > 0 ? Math.min(Math.round((currentTask.time / totalMin) * 100), 100) : 100;
-        saveTaskData(currentTask, totalMin, totalMin, eff);
+        const restMin = Math.ceil(pausedTime / 1000 / 60);
+        const studyMin = totalMin - restMin;
+        const eff = currentTask.time > 0 ? Math.min(Math.round((currentTask.time / studyMin) * 100), 100) : 100;
+        saveTaskData(currentTask, totalMin, studyMin, restMin, eff);
         const isEarly = currentTask.time > 0 && totalMin < currentTask.time - 3;
         const isLate = currentTask.time > 0 && totalMin > currentTask.time + 5;
         document.getElementById('completeEmoji').textContent = isEarly ? '🎉' : isLate ? '💪' : '👍';
         document.getElementById('completeTitle').textContent = isEarly ? '太棒了！' : isLate ? '坚持完成！' : '完成！';
         document.getElementById('completeTotal').textContent = totalMin + '分钟';
         document.getElementById('completeExpected').textContent = currentTask.time > 0 ? currentTask.time + '分钟' : '自主';
-        document.getElementById('completeStudy').textContent = totalMin + '分钟';
+        document.getElementById('completeStudy').textContent = studyMin + '分钟';
+        document.getElementById('completeRest').textContent = (restMin || 0) + '分钟';
         document.getElementById('completeEfficiency').textContent = eff + '%';
         document.getElementById('completeFeedback').textContent = isEarly ? praises[Math.floor(Math.random()*praises.length)] : isLate ? encouragements[Math.floor(Math.random()*encouragements.length)] : '准时完成，继续保持！👍';
         document.getElementById('completeModal').classList.add('active');
@@ -1156,17 +1177,19 @@
         }).then(r => r.ok ? showToast('已完成通知已发送 📨') : showToast('发送失败 ❌')).catch(() => showToast('发送失败 ❌'));
     }
 
-    function saveTaskData(task, total, study, eff) {
+    function saveTaskData(task, total, study, rest, eff) {
         const today = new Date().toISOString().split('T')[0], key = `timer_${CHILD}_${today}`;
         const data = JSON.parse(localStorage.getItem(key) || '{}');
         data.studyMinutes = (data.studyMinutes || 0) + study;
-        data.restMinutes = (data.restMinutes || 0);
+        data.restMinutes = (data.restMinutes || 0) + rest;
         // 加权平均效率
         const prevTasks = data.tasks || [];
         const prevEffs = prevTasks.map(t => t.efficiency).filter(Boolean);
         const allEffs = [...prevEffs, eff];
         data.efficiency = Math.round(allEffs.reduce((a, b) => a + b, 0) / allEffs.length);
-        data.tasks = prevTasks.concat({ name: task.name, time: task.time, actual: total, study, efficiency: eff });
+        // 记录超时信息
+        const overTime = task.time > 0 && total > task.time ? total - task.time : 0;
+        data.tasks = prevTasks.concat({ name: task.name, time: task.time, actual: total, study: study, rest: rest, overTime: overTime, efficiency: eff });
         localStorage.setItem(key, JSON.stringify(data));
     }
 

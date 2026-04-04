@@ -442,6 +442,15 @@
                     <div class="stat-value" id="efficiency">0%</div>
                     <div class="stat-label">学习效率</div>
                 </div>
+                <!-- 超时统计 -->
+                <div class="stat-box red">
+                    <div class="stat-value" id="overTime" style="color:#e64a19;">0</div>
+                    <div class="stat-label">超时分钟</div>
+                </div>
+                <div class="stat-box purple">
+                    <div class="stat-value" id="overCount">0</div>
+                    <div class="stat-label">超时次数</div>
+                </div>
             </div>
             
             <table class="tasks-table">
@@ -942,6 +951,13 @@
             document.getElementById('completedCount').textContent = data.stats.completed + '/' + (data.stats.total || data.tasks.length);
             document.getElementById('totalTime').textContent = data.stats.totalTime;
             document.getElementById('efficiency').textContent = data.stats.efficiency + '%';
+            
+            // 超时统计（从todayStats.tasks计算）
+            const tasks = rawData.todayStats?.tasks || [];
+            const overTasks = tasks.filter(t => t.overTime > 0);
+            const overMinutes = overTasks.reduce((sum, t) => sum + t.overTime, 0);
+            document.getElementById('overTime').textContent = overMinutes;
+            document.getElementById('overCount').textContent = overTasks.length;
             
             // 更新任务表
             const tbody = document.getElementById('tasksTableBody');

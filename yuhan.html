@@ -500,6 +500,17 @@
     const GITHUB_REPO = 'tangshaoxiong1978-ops/yujia-homework-cat';
     const GITHUB_DATA_FILE = `data/${CHILD}_data.json`;
 
+    // Base64 解码兼容函数（处理中文编码）
+    function base64Decode(content) {
+        try {
+            const decoded = atob(content);
+            return decodeURIComponent(escape(decoded));
+        } catch (e) {
+            console.error('Base64解码失败:', e);
+            return null;
+        }
+    }
+
     // 推送数据到 GitHub 仓库（跨设备同步核心）
      async function syncToGitHub(dataToSync) {
          try {
@@ -591,28 +602,31 @@
 
 
     // 从 GitHub 拉取最新数据（跨设备同步核心）
-    // 改用 GitHub Pages，因为部分环境无法访问 GitHub API
+    // 改用 GitHub API 避免延迟，与家长看板保持一致
     async function loadFromGitHub() {
         try {
-            // 使用 GitHub Pages URL（静态文件），无需 token
-            const url = 'https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/data/yuhan_data.json';
-            console.log('📡 使用 GitHub Pages URL:', url);
-            
-            // 添加5秒超时
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000);
-            
-            const resp = await fetch(url, { signal: controller.signal });
-            clearTimeout(timeoutId);
-            
+            // 使用 GitHub API（带token），实时读取，避免 Pages 缓存延迟
+            const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_DATA_FILE}`;
+            console.log('📡 使用 GitHub API URL:', url);
+
+            const resp = await fetch(url, {
+                headers: {
+                    'Authorization': `token ${GITHUB_TOKEN}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
+
             if (resp.ok) {
-                const data = await resp.json();
-                console.log('✅ 从GitHub拉取数据成功, points:', data.points);
-                return data;
-            } else {
-                console.log('ℹ️ GitHub无数据（或首次同步），使用本地数据');
-                return null;
+                const fileInfo = await resp.json();
+                const decoded = base64Decode(fileInfo.content);
+                if (decoded) {
+                    const data = JSON.parse(decoded);
+                    console.log('✅ 从GitHub拉取数据成功, points:', data.points);
+                    return data;
+                }
             }
+            console.log('ℹ️ GitHub无数据（或首次同步），使用本地数据');
+            return null;
         } catch (e) {
             console.warn('⚠️ GitHub拉取失败，使用本地数据:', e.message);
             return null;

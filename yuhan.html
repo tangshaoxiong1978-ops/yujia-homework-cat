@@ -862,29 +862,24 @@
         setInterval(() => { updateLocalTime(); }, 1000);
         setInterval(() => { updateDeadlineWithWarning(); updateShengdi(); updateZhongkao(); }, 30000);
         
-        // 【新增】定时刷新GitHub数据（每30秒检查一次家长是否有新操作）
+        // 【修复】定时刷新GitHub数据（每30秒检查一次家长是否有新操作）
         setInterval(async () => {
             try {
                 const newData = await loadFromGitHub();
-                if (newData && newData.lastUpdated) {
-                    // 检查是否有新数据
-                    const localTime = localStorage.getItem(`${POINTS_KEY}_update`) || '0';
-                    if (new Date(newData.lastUpdated) > new Date(localTime)) {
-                        console.log('🔄 检测到GitHub数据更新，刷新积分显示');
-                        // 同步积分数据
-                        if (newData.points !== undefined) {
-                            localStorage.setItem(POINTS_KEY, newData.points);
-                            if (newData.pointsLog && newData.pointsLog.length > 0) {
-                                const dataDate = newData.date || new Date().toISOString().split('T')[0];
-                                localStorage.setItem(getPointsLogKey(dataDate), JSON.stringify(newData.pointsLog));
-                            }
-                            localStorage.setItem(`${POINTS_KEY}_update`, newData.lastUpdated);
-                        }
-                        updatePointsDisplay();
+                if (newData && newData.points !== undefined) {
+                    console.log('🔄 刷新检查：GitHub积分=', newData.points, '本地积分=', getPoints());
+                    // 强制同步：GitHub的积分优先（家长的调整）
+                    localStorage.setItem(POINTS_KEY, newData.points);
+                    if (newData.pointsLog && newData.pointsLog.length > 0) {
+                        const dataDate = newData.date || new Date().toISOString().split('T')[0];
+                        localStorage.setItem(getPointsLogKey(dataDate), JSON.stringify(newData.pointsLog));
                     }
+                    localStorage.setItem(`${POINTS_KEY}_update`, newData.lastUpdated || new Date().toISOString());
+                    updatePointsDisplay();  // 强制刷新显示
+                    console.log('✅ 积分已同步更新');
                 }
             } catch(e) {
-                // 静默失败，不影响主流程
+                console.log('定时刷新跳过:', e.message);
             }
         }, 30000);
         

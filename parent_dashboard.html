@@ -1405,10 +1405,13 @@
         }, 30000);
         
         // 初始化 - 根据查看的日期决定加载实时数据还是历史数据
+        console.log('[初始化] 开始执行...');
         (async () => {
             const today = new Date().toISOString().split('T')[0];
+            console.log('[初始化] today=', today, 'viewDateStr=', viewDateStr);
             if (viewDateStr === today) {
                 // 查看今天 → 加载实时数据
+                console.log('[初始化] 调用 loadAllData()');
                 await loadAllData();
             } else {
                 // 查看历史日期 → 加载历史归档数据
@@ -1416,6 +1419,7 @@
                 await loadHistoryData(viewDateStr);
                 updateDashboard();
             }
+            console.log('[初始化] 完成');
         })();
     </script>
 </body>

@@ -693,17 +693,25 @@
             console.log('GitHub获取失败，使用本地数据');
         }
         
-        // 如果GitHub有新数据且比本地新，用GitHub数据
+        // 如果GitHub有新数据，处理同步
         if (githubData && githubData.lastUpdated) {
-            const localKey = `hw_${CHILD}`;
-            const localTime = localStorage.getItem(`${localKey}_update`);
-            if (!localTime || new Date(githubData.lastUpdated) > new Date(localTime)) {
-                console.log('🔄 用GitHub新数据覆盖本地');
-                homework = githubData.homework || homework;
-                saveHomework();
-                localStorage.setItem(`${localKey}_update`, githubData.lastUpdated);
+            const today = new Date().toISOString().split('T')[0];
+            const todayKey = getTodayKey();
+            const localTime = localStorage.getItem(`${todayKey}_update`);
+
+            // 【核心修复】只有GitHub数据是今天的，才同步作业状态
+            if (githubData.date === today) {
+                if (!localTime || new Date(githubData.lastUpdated) > new Date(localTime)) {
+                    console.log('🔄 同天GitHub数据，同步作业状态');
+                    homework = githubData.homework || homework;
+                    saveHomework();
+                    localStorage.setItem(`${todayKey}_update`, githubData.lastUpdated);
+                }
+            } else {
+                console.log('📅 GitHub数据是昨天的（' + githubData.date + '），跳过作业状态同步');
             }
-            // 同步积分数据
+
+            // 积分数据：可以跨天保留
             if (githubData.points !== undefined) {
                 const localPts = localStorage.getItem(POINTS_KEY);
                 if (!localPts || new Date(githubData.lastUpdated) > new Date(localStorage.getItem(`${POINTS_KEY}_update`) || 0)) {
@@ -794,8 +802,20 @@
         }
     }
 
-    function loadHomework() { homework = JSON.parse(localStorage.getItem(`hw_${CHILD}`)) || JSON.parse(JSON.stringify(DEFAULT_HOMEWORK)); }
-    function saveHomework() { localStorage.setItem(`hw_${CHILD}`, JSON.stringify(homework)); }
+    function getTodayKey() {
+        const today = new Date().toISOString().split('T')[0];
+        return `hw_${CHILD}_${today}`;
+    }
+    function loadHomework() {
+        const saved = localStorage.getItem(getTodayKey());
+        if (saved) {
+            homework = JSON.parse(saved);
+        } else {
+            homework = JSON.parse(JSON.stringify(DEFAULT_HOMEWORK));
+            console.log('📅 新的一天，作业列表已重置');
+        }
+    }
+    function saveHomework() { localStorage.setItem(getTodayKey(), JSON.stringify(homework)); }
 
     function renderHomeworkList() {
         if (isParentMode) return;

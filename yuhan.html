@@ -422,12 +422,26 @@
     <!-- 积分历史弹窗 -->
     <div class="points-log-overlay" id="pointsLogOverlay" onclick="closePointsLog()">
         <div class="points-log-sheet" onclick="event.stopPropagation()">
-            <div class="points-log-title">🌿 积分明细</div>
+            <div class="points-log-title">📊 每日学习详情</div>
             <div style="display:flex;align-items:center;gap:8px;margin:8px 0 12px;padding:0 4px;">
                 <span style="font-size:13px;color:#888;">📅 查看日期：</span>
                 <input type="date" id="pointsLogDate" style="flex:1;padding:6px 10px;border:1.5px solid #81c784;border-radius:10px;font-size:13px;color:#555;outline:none;" onchange="openPointsLog()">
             </div>
-            <div id="pointsLogList"></div>
+            <!-- 累计总积分显示（固定在顶部） -->
+            <div id="totalPointsDisplay" style="background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border-radius:12px;padding:12px;margin-bottom:12px;text-align:center;box-shadow:0 2px 8px rgba(76,175,80,0.2);">
+                <div style="font-size:12px;color:#2e7d32;">累计总积分</div>
+                <div id="totalPointsValue" style="font-size:28px;font-weight:900;color:#2e7d32;line-height:1.2;">0</div>
+            </div>
+            <!-- 当日作业完成情况 -->
+            <div style="margin-bottom:12px;">
+                <div style="font-size:13px;color:#666;margin-bottom:8px;">📝 当日作业</div>
+                <div id="homeworkStatusList" style="font-size:12px;color:#888;text-align:center;padding:10px;">选择日期后自动加载...</div>
+            </div>
+            <!-- 积分明细 -->
+            <div style="margin-bottom:8px;">
+                <div style="font-size:13px;color:#666;margin-bottom:8px;">⭐ 积分明细</div>
+                <div id="pointsLogList"></div>
+            </div>
             <button class="points-log-close" onclick="closePointsLog()">关闭</button>
         </div>
     </div>
@@ -1431,39 +1445,105 @@
         if (!dateInput.value) dateInput.value = todayStr;
         const selectedDate = dateInput.value || todayStr;
 
-        const list = document.getElementById('pointsLogList');
         const isToday = selectedDate === todayStr;
         const dateLabel = isToday ? '今天' : selectedDate;
+
+        // 更新弹窗标题显示日期
+        document.querySelector('.points-log-title').textContent = `📊 ${dateLabel}学习详情`;
 
         // 先从 localStorage 获取当日数据
         const logKey = getPointsLogKey(selectedDate);
         let log = JSON.parse(localStorage.getItem(logKey) || '[]');
+        const ptsKey = `points_${CHILD}`;
+        let totalPoints = parseInt(localStorage.getItem(ptsKey) || '0');
+
+        // 获取作业状态
+        const hwKey = `hw_${CHILD}_${selectedDate}`;
+        let homeworkData = JSON.parse(localStorage.getItem(hwKey) || '[]');
 
         // 如果是非今天且本地没有数据，尝试从 GitHub 加载历史归档
         if (!isToday && log.length === 0) {
-            list.innerHTML = `<div style="text-align:center;color:#888;padding:20px 0">📥 正在加载 ${dateLabel} 积分数据...</div>`;
+            document.getElementById('homeworkStatusList').innerHTML = '<div style="padding:10px;">📥 正在加载...</div>';
+            document.getElementById('pointsLogList').innerHTML = '<div style="text-align:center;color:#888;padding:20px 0">📥 正在加载历史数据...</div>';
             document.getElementById('pointsLogOverlay').classList.add('active');
 
             const historyUrl = `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/data/${CHILD}_history_${selectedDate}.json`;
             fetch(historyUrl)
                 .then(res => res.ok ? res.json() : null)
                 .then(data => {
-                    if (data && data.pointsLog && data.pointsLog.length > 0) {
-                        localStorage.setItem(logKey, JSON.stringify(data.pointsLog));
-                        renderPointsLog(data.pointsLog, dateLabel, isToday);
+                    if (data) {
+                        // 显示累计总积分
+                        const pts = data.points != null ? data.points : 0;
+                        document.getElementById('totalPointsValue').textContent = pts;
+                        // 保存到本地
+                        if (data.pointsLog && data.pointsLog.length > 0) {
+                            localStorage.setItem(logKey, JSON.stringify(data.pointsLog));
+                        }
+                        // 显示作业完成情况
+                        if (data.homework && data.homework.length > 0) {
+                            const doneCount = data.homework.filter(t => t.status === 'done').length;
+                            const totalCount = data.homework.length;
+                            const hwHtml = data.homework.map(t => {
+                                const statusIcon = t.status === 'done' ? '✅' : '⏳';
+                                const statusColor = t.status === 'done' ? '#4CAF50' : '#999';
+                                return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f5f5f5;">
+                                    <span>${t.icon || '📝'} ${t.name}</span>
+                                    <span style="color:${statusColor};">${statusIcon} ${t.status === 'done' ? '已完成' : '未完成'}</span>
+                                </div>`;
+                            }).join('');
+                            document.getElementById('homeworkStatusList').innerHTML = `
+                                <div style="margin-bottom:8px;color:#666;">完成：${doneCount}/${totalCount}</div>
+                                ${hwHtml}`;
+                        } else {
+                            document.getElementById('homeworkStatusList').innerHTML = '<div style="color:#aaa;padding:10px;">暂无作业记录</div>';
+                        }
+                        // 显示积分明细
+                        if (data.pointsLog && data.pointsLog.length > 0) {
+                            renderPointsLog(data.pointsLog, dateLabel, isToday);
+                        } else {
+                            document.getElementById('pointsLogList').innerHTML = '<div style="text-align:center;color:#aaa;padding:20px 0">暂无积分记录</div>';
+                        }
                     } else {
-                        list.innerHTML = `<div style="text-align:center;color:#aaa;padding:30px 0">${dateLabel}暂无积分记录</div>`;
+                        showNoData(dateLabel);
                     }
                 })
                 .catch(() => {
-                    list.innerHTML = `<div style="text-align:center;color:#aaa;padding:30px 0">${dateLabel}暂无积分记录</div>`;
+                    showNoData(dateLabel);
                 });
             return;
+        }
+
+        // 今天是本地数据，显示所有信息
+        document.getElementById('totalPointsValue').textContent = totalPoints;
+        
+        // 显示作业
+        if (homeworkData.length > 0) {
+            const doneCount = homeworkData.filter(t => t.status === 'done').length;
+            const totalCount = homeworkData.length;
+            const hwHtml = homeworkData.map(t => {
+                const statusIcon = t.status === 'done' ? '✅' : '⏳';
+                const statusColor = t.status === 'done' ? '#4CAF50' : '#999';
+                return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f5f5f5;">
+                    <span>${t.icon || '📝'} ${t.name}</span>
+                    <span style="color:${statusColor};">${statusIcon} ${t.status === 'done' ? '已完成' : '未完成'}</span>
+                </div>`;
+            }).join('');
+            document.getElementById('homeworkStatusList').innerHTML = `
+                <div style="margin-bottom:8px;color:#666;">完成：${doneCount}/${totalCount}</div>
+                ${hwHtml}`;
+        } else {
+            document.getElementById('homeworkStatusList').innerHTML = '<div style="color:#aaa;padding:10px;">暂无作业（点击"明细"布置作业）</div>';
         }
 
         // 渲染积分明细
         renderPointsLog(log, dateLabel, isToday);
         document.getElementById('pointsLogOverlay').classList.add('active');
+    }
+
+    function showNoData(dateLabel) {
+        document.getElementById('totalPointsValue').textContent = '0';
+        document.getElementById('homeworkStatusList').innerHTML = `<div style="color:#aaa;padding:10px;">${dateLabel}暂无数据</div>`;
+        document.getElementById('pointsLogList').innerHTML = `<div style="text-align:center;color:#aaa;padding:20px 0">${dateLabel}暂无记录</div>`;
     }
 
     // 渲染积分明细列表

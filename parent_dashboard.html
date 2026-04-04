@@ -1273,9 +1273,18 @@
             if (viewDateStr === today) loadAllData();
         }, 30000);
         
-        // 初始化 - 加载真实数据（用 async IIFE 确保正确执行）
+        // 初始化 - 根据查看的日期决定加载实时数据还是历史数据
         (async () => {
-            await loadAllData();
+            const today = new Date().toISOString().split('T')[0];
+            if (viewDateStr === today) {
+                // 查看今天 → 加载实时数据
+                await loadAllData();
+            } else {
+                // 查看历史日期 → 加载历史归档数据
+                updateDateLabel();
+                await loadHistoryData(viewDateStr);
+                updateDashboard();
+            }
         })();
     </script>
 </body>

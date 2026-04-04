@@ -722,7 +722,10 @@
                 
                 // 使用 AbortController 添加5秒超时
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 5000);
+                const timeoutId = setTimeout(() => {
+                    controller.abort();
+                    console.log(`[${child}] 请求超时`);
+                }, 5000);
                 
                 const resp = await fetch(url, { signal: controller.signal });
                 clearTimeout(timeoutId);
@@ -732,9 +735,23 @@
                     console.log(`[${child}] ✅ 成功! points:`, data.points);
                     return data;
                 }
-                console.log(`[${child}] 响应:`, resp.status);
+                console.log(`[${child}] 响应失败:`, resp.status, resp.statusText);
+                // 显示错误详情
+                const statusEl = document.getElementById('syncStatus');
+                if (statusEl) statusEl.textContent = `⚠️ 数据获取失败: HTTP ${resp.status}`;
             } catch(e) {
-                console.error(`[${child}] 异常:`, e.message);
+                console.error(`[${child}] 异常:`, e.message, e.name);
+                // 显示具体错误
+                const statusEl = document.getElementById('syncStatus');
+                if (statusEl) {
+                    if (e.name === 'AbortError') {
+                        statusEl.textContent = '⏱️ 请求超时，请检查网络';
+                    } else if (e.message.includes('Failed to fetch') || e.message.includes('network')) {
+                        statusEl.textContent = '🌐 网络错误，请检查网络连接';
+                    } else {
+                        statusEl.textContent = `⚠️ 错误: ${e.message}`;
+                    }
+                }
             }
             return null;
         }

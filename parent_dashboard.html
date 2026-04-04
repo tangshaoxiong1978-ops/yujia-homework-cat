@@ -572,33 +572,44 @@
             try { return decodeURIComponent(escape(atob(str))); } catch(e) { return null; }
         }
         
-        // 归档今日数据到历史文件
+        // 归档今日数据到历史文件（带重试）
         async function archiveTodayData(data, child, dateStr) {
-            try {
-                const historyFile = `data/${child}_history_${dateStr}.json`;
-                const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${historyFile}`;
-                const getResp = await fetch(apiUrl, {
-                    headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' }
-                });
-                let sha = null;
-                if (getResp.ok) {
-                    const info = await getResp.json();
-                    sha = info.sha;
+            const maxRetries = 3;
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    const historyFile = `data/${child}_history_${dateStr}.json`;
+                    const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${historyFile}`;
+                    const getResp = await fetch(apiUrl, {
+                        headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' }
+                    });
+                    let sha = null;
+                    if (getResp.ok) {
+                        const info = await getResp.json();
+                        sha = info.sha;
+                    }
+                    const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+                    const body = { message: `archive: ${child} ${dateStr} 历史数据`, content };
+                    if (sha) body.sha = sha;
+                    const putResp = await fetch(apiUrl, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `token ${GITHUB_TOKEN}`,
+                            'Accept': 'application/vnd.github.v3+json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(body)
+                    });
+                    if (putResp.ok) {
+                        console.log(`📦 历史数据已归档：${historyFile}`);
+                        return true;
+                    }
+                } catch (e) {
+                    console.warn(`归档尝试${attempt}异常:`, e.message);
                 }
-                const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
-                const body = { message: `archive: ${child} ${dateStr} 历史数据`, content };
-                if (sha) body.sha = sha;
-                await fetch(apiUrl, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${GITHUB_TOKEN}`,
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(body)
-                });
-                console.log(`📦 历史数据已归档：${historyFile}`);
-            } catch (e) {
+                if (attempt < maxRetries) await new Promise(r => setTimeout(r, 1000));
+            }
+            return false;
+        }
                 console.warn('历史归档失败:', e.message);
             }
         }

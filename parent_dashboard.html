@@ -1233,7 +1233,11 @@
                 
                 if (putResp.ok) {
                     alert(`✅ ${change > 0 ? '加分' : '减分'}成功！当前积分：${data.points}`);
-                    loadAllData(); // 刷新显示
+                    // 【关键修复】立即更新本地缓存并刷新显示
+                    realData[currentChild] = data;
+                    saveToCache(currentChild, data);
+                    updateSyncStatus();
+                    updateDashboard();
                 } else {
                     alert('❌ 同步失败，请重试');
                 }

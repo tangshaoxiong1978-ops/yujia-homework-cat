@@ -802,8 +802,13 @@
             // 积分数据：总分跨天累积保留；明细只写入对应日期的key
             if (githubData.points !== undefined) {
                 const localPts = localStorage.getItem(POINTS_KEY);
-                if (!localPts || new Date(githubData.lastUpdated) > new Date(localStorage.getItem(`${POINTS_KEY}_update`) || 0)) {
-                    console.log('🔄 同步积分:', githubData.points);
+                const localPtsNum = parseInt(localPts || '0');
+                // 【关键修复】当GitHub积分与本地不同时，强制同步（家长加分/减分后需要更新）
+                const githubUpdated = new Date(githubData.lastUpdated);
+                const localUpdated = new Date(localStorage.getItem(`${POINTS_KEY}_update`) || 0);
+                
+                if (!localPts || githubData.points !== localPtsNum || githubUpdated > localUpdated) {
+                    console.log('🔄 同步积分:', githubData.points, '(本地:', localPtsNum, ')');
                     localStorage.setItem(POINTS_KEY, githubData.points);
                     const dataDate = githubData.date || today;
                     const targetLogKey = getPointsLogKey(dataDate);

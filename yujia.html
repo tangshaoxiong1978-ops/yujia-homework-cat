@@ -837,13 +837,16 @@
             <div class="points-icon">⭐</div>
             <div class="points-info">
                 <div class="points-label">🐱 羽佳积分</div>
-                <div class="points-value" id="pointsDisplay">0</div>
+                <div style="display:flex;align-items:baseline;gap:8px;">
+                    <span class="points-value" id="pointsDisplay">0</span>
+                    <span style="font-size:12px;color:#888;">今日</span>
+                </div>
                 <div class="points-sub" id="pointsSub">完成作业赢取积分！</div>
             </div>
             <button class="points-history-btn" onclick="openPointsLog()">明细</button>
         </div>
-        <!-- 累计总积分（固定在顶部显示） -->
-        <div id="totalPointsFixed" style="background:linear-gradient(135deg,#fff8e1,#ffecb3);border-radius:12px;padding:10px 16px;margin:8px 0 12px;text-align:center;box-shadow:0 2px 6px rgba(255,193,7,0.25);display:none;">
+        <!-- 累计总积分 -->
+        <div id="totalPointsFixed" style="background:linear-gradient(135deg,#fff8e1,#ffecb3);border-radius:12px;padding:10px 16px;margin:8px 0 12px;text-align:center;box-shadow:0 2px 6px rgba(255,193,7,0.25);">
             <span style="font-size:13px;color:#856404;">🏆 累计总积分：</span>
             <span id="totalPointsFixedValue" style="font-size:22px;font-weight:900;color:#e65100;">0</span>
         </div>
@@ -2187,22 +2190,27 @@
     function updatePointsDisplay() {
         const today = new Date().toISOString().split('T')[0];
         
-        // 【修复】优先从 GitHub 数据读取今日积分，没有就用本地计算
-        let pts = 0;
+        // 今日积分：优先从 GitHub 读取，没有就用本地计算
+        let todayPts = 0;
         if (githubData && githubData.date === today && githubData.todayPoints !== undefined) {
-            pts = githubData.todayPoints;
-            console.log('📊 从GitHub读取今日积分:', pts);
+            todayPts = githubData.todayPoints;
         } else {
-            // 回退到从本地明细计算今日积分
             const pointsLog = JSON.parse(localStorage.getItem(getPointsLogKey()) || '[]');
-            pts = pointsLog.reduce((sum, entry) => sum + (entry.amount || 0), 0);
+            todayPts = pointsLog.reduce((sum, entry) => sum + (entry.amount || 0), 0);
         }
         
-        document.getElementById('pointsDisplay').textContent = pts;
-        const sub = pts >= 20 ? '🏆 今日积分超高！继续加油！' :
-                    pts >= 10 ? '⭐ 今日不错！保持下去！' :
-                    pts >= 5 ? '🌟 开个好头！继续加油！' : '完成作业赢取积分！';
+        // 累计积分：直接从本地读取（跨天累积）
+        const totalPts = getPoints();
+        
+        // 更新今日积分显示
+        document.getElementById('pointsDisplay').textContent = todayPts;
+        const sub = todayPts >= 20 ? '🏆 今日积分超高！继续加油！' :
+                    todayPts >= 10 ? '⭐ 今日不错！保持下去！' :
+                    todayPts >= 5 ? '🌟 开个好头！继续加油！' : '完成作业赢取积分！';
         document.getElementById('pointsSub').textContent = sub;
+        
+        // 更新累计积分显示
+        document.getElementById('totalPointsFixedValue').textContent = totalPts;
     }
 
     function openPointsLog() {

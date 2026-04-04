@@ -1684,7 +1684,7 @@
         let data = {};
         if (githubData && githubData.date === today && githubData.todayStats) {
             data = githubData.todayStats;
-            console.log('📊 从GitHub读取统计: studyMinutes=', data.studyMinutes, 'restMinutes=', data.restMinutes, 'efficiency=', data.efficiency);
+            console.log('📊 从GitHub读取统计: studyMinutes=', data.studyMinutes, 'restMinutes=', data.restMinutes, 'efficiency=', data.efficiency, 'tasks=', data.tasks?.length);
         } else {
             // 回退到 localStorage
             const key = `timer_${CHILD}_${today}`;
@@ -1695,10 +1695,10 @@
         document.getElementById('restMinutes').textContent = data.restMinutes || 0;
         document.getElementById('efficiency').textContent = (data.efficiency || 0) + '%';
         
-        // 计算超时统计
+        // 计算超时统计（兼容没有overTime字段的旧数据）
         const tasks = data.tasks || [];
-        const overTasks = tasks.filter(t => t.overTime > 0);
-        const overMinutes = overTasks.reduce((sum, t) => sum + t.overTime, 0);
+        const overTasks = tasks.filter(t => (t.overTime || 0) > 0);
+        const overMinutes = overTasks.reduce((sum, t) => sum + (t.overTime || 0), 0);
         document.getElementById('overMinutes').textContent = overMinutes;
         document.getElementById('overTasks').textContent = overTasks.length;
     }

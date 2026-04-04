@@ -1006,7 +1006,18 @@
 
     function updateStats() {
         const today = new Date().toISOString().split('T')[0];
-        const data = JSON.parse(localStorage.getItem(`timer_${CHILD}_${today}`) || '{}');
+        
+        // 【修复】优先从 GitHub 数据读取统计（跨设备同步），没有就用本地
+        let data = {};
+        if (githubData && githubData.date === today && githubData.todayStats) {
+            data = githubData.todayStats;
+            console.log('📊 从GitHub读取统计: studyMinutes=', data.studyMinutes, 'restMinutes=', data.restMinutes, 'efficiency=', data.efficiency);
+        } else {
+            // 回退到 localStorage
+            const key = `timer_${CHILD}_${today}`;
+            data = JSON.parse(localStorage.getItem(key) || '{}');
+        }
+        
         document.getElementById('studyMinutes').textContent = data.studyMinutes || 0;
         document.getElementById('restMinutes').textContent = data.restMinutes || 0;
         document.getElementById('efficiency').textContent = (data.efficiency || 0) + '%';

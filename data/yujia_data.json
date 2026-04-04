@@ -2,7 +2,7 @@
   "child": "yujia",
   "childName": "羽佳",
   "date": "2026-04-04",
-  "lastUpdated": "2026-04-04T04:51:54.125Z",
+  "lastUpdated": "2026-04-04T06:21:03.217Z",
   "homework": [
     {
       "id": 1,
@@ -16,7 +16,7 @@
       "name": "英语一起作业",
       "icon": "🎧",
       "time": 20,
-      "status": "waiting"
+      "status": "done"
     },
     {
       "id": 3,
@@ -47,8 +47,14 @@
       "status": "done"
     }
   ],
-  "points": 32,
+  "points": 34,
   "pointsLog": [
+    {
+      "amount": 2,
+      "reason": "✅ 完成「英语一起作业」",
+      "time": "2026-04-04T06:21:03.216Z",
+      "total": 34
+    },
     {
       "amount": 2,
       "reason": "✅ 完成「测试」",
@@ -63,16 +69,25 @@
     }
   ],
   "todayStats": {
-    "studyMinutes": 3,
+    "studyMinutes": 46,
     "restMinutes": 0,
-    "efficiency": 33,
+    "efficiency": 72,
     "tasks": [
       {
-        "name": "测试",
-        "time": 1,
-        "actual": 3,
-        "study": 3,
-        "efficiency": 33
+        "name": "橙果APP打卡",
+        "time": 15,
+        "actual": 1,
+        "study": 1,
+        "efficiency": 100
+      },
+      {
+        "name": "英语一起作业",
+        "time": 20,
+        "actual": 45,
+        "study": 45,
+        "rest": 0,
+        "overTime": 25,
+        "efficiency": 44
       }
     ]
   }

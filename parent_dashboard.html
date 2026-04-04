@@ -1407,19 +1407,33 @@
         // 初始化 - 根据查看的日期决定加载实时数据还是历史数据
         console.log('[初始化] 开始执行...');
         (async () => {
-            const today = new Date().toISOString().split('T')[0];
-            console.log('[初始化] today=', today, 'viewDateStr=', viewDateStr);
-            if (viewDateStr === today) {
-                // 查看今天 → 加载实时数据
-                console.log('[初始化] 调用 loadAllData()');
-                await loadAllData();
-            } else {
-                // 查看历史日期 → 加载历史归档数据
-                updateDateLabel();
-                await loadHistoryData(viewDateStr);
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                console.log('[初始化] today=', today, 'viewDateStr=', viewDateStr);
+                if (viewDateStr === today) {
+                    // 查看今天 → 加载实时数据
+                    console.log('[初始化] 调用 loadAllData()');
+                    await loadAllData();
+                } else {
+                    // 查看历史日期 → 加载历史归档数据
+                    updateDateLabel();
+                    await loadHistoryData(viewDateStr);
+                    updateDashboard();
+                }
+                console.log('[初始化] 完成');
+            } catch (e) {
+                console.error('[初始化] 异常:', e);
+                const statusEl = document.getElementById('syncStatus');
+                if (statusEl) {
+                    statusEl.textContent = '❌ 初始化异常: ' + e.message;
+                    statusEl.className = 'sync-status error';
+                }
+                // 即使异常也尝试渲染
+                realData.yujia = loadFromCache('yujia') || mockData.yujia;
+                realData.yuhan = loadFromCache('yuhan') || mockData.yuhan;
+                updateSyncStatus();
                 updateDashboard();
             }
-            console.log('[初始化] 完成');
         })();
     </script>
 </body>

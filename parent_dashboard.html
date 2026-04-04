@@ -413,12 +413,20 @@
             <button class="child-btn active" onclick="selectChild('yujia', event)">👧 羽佳</button>
             <button class="child-btn" onclick="selectChild('yuhan', event)">👧 羽菡</button>
         </div>
+
+        <!-- 日期选择器 -->
+        <div id="dateSelectorBar" style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:#fff;border-radius:12px;margin-bottom:12px;box-shadow:0 1px 6px rgba(0,0,0,0.06);">
+            <span style="font-size:13px;color:#888;white-space:nowrap;">📅 查看日期：</span>
+            <input type="date" id="viewDate" style="flex:1;padding:7px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;color:#333;outline:none;" onchange="onDateChange()">
+            <button onclick="setViewDate('today')" style="padding:7px 14px;background:#4CAF50;color:white;border:none;border-radius:10px;font-size:13px;cursor:pointer;white-space:nowrap;">今天</button>
+            <button onclick="setViewDate('yesterday')" style="padding:7px 14px;background:#9e9e9e;color:white;border:none;border-radius:10px;font-size:13px;cursor:pointer;white-space:nowrap;">昨天</button>
+        </div>
         
         <!-- 实时进度 -->
         <div class="realtime-card">
             <div class="card-title">
                 <span class="live-indicator"></span>
-                📊 今日实时进度
+                📊 <span id="dashboardDateLabel">今日</span>实时进度
             </div>
             
             <div class="progress-grid">
@@ -545,6 +553,66 @@
             dailyReport: true,
             overtime: true
         };
+
+        // 当前查看日期（默认今天）
+        let viewDateStr = new Date().toISOString().split('T')[0];
+        // 历史数据缓存 { 'yujia_2026-04-04': data, ... }
+        let historyCache = {};
+        
+        // 初始化日期选择器
+        function initDatePicker() {
+            const input = document.getElementById('viewDate');
+            if (input) input.value = viewDateStr;
+        }
+
+        function setViewDate(preset) {
+            const d = new Date();
+            if (preset === 'yesterday') d.setDate(d.getDate() - 1);
+            viewDateStr = d.toISOString().split('T')[0];
+            const input = document.getElementById('viewDate');
+            if (input) input.value = viewDateStr;
+            onDateChange();
+        }
+
+        function onDateChange() {
+            const input = document.getElementById('viewDate');
+            viewDateStr = input ? input.value : new Date().toISOString().split('T')[0];
+            updateDateLabel();
+            updateDashboard();
+            // 如果选的是历史日期，尝试从GitHub拉取历史数据
+            const today = new Date().toISOString().split('T')[0];
+            if (viewDateStr !== today) loadHistoryData(viewDateStr);
+        }
+
+        function updateDateLabel() {
+            const today = new Date().toISOString().split('T')[0];
+            const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+            const el = document.getElementById('dashboardDateLabel');
+            if (!el) return;
+            if (viewDateStr === today) el.textContent = '今日';
+            else if (viewDateStr === yesterday) el.textContent = '昨日';
+            else el.textContent = viewDateStr;
+        }
+
+        async function loadHistoryData(dateStr) {
+            // 尝试从GitHub拉取历史归档数据
+            for (const child of ['yujia', 'yuhan']) {
+                const cacheKey = `${child}_${dateStr}`;
+                if (historyCache[cacheKey]) continue; // 已缓存
+                try {
+                    const url = `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/data/${child}_history_${dateStr}.json`;
+                    const controller = new AbortController();
+                    setTimeout(() => controller.abort(), 4000);
+                    const resp = await fetch(url, { signal: controller.signal });
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        historyCache[cacheKey] = data;
+                        console.log(`[历史] ${child} ${dateStr} 加载成功`);
+                        updateDashboard();
+                    }
+                } catch(e) { /* 无历史归档，正常 */ }
+            }
+        }
         
         // 真实数据存储
         let realData = {
@@ -784,8 +852,21 @@
 
         // 更新看板
         function updateDashboard() {
-            // 优先使用真实数据，回退到模拟数据
-            const rawData = realData[currentChild];
+            const today = new Date().toISOString().split('T')[0];
+            const isToday = viewDateStr === today;
+            
+            // 选择数据源：今天用实时数据，历史日期用归档缓存
+            let rawData;
+            if (isToday) {
+                rawData = realData[currentChild];
+                // 今天的数据需检查date字段，若是昨天的数据则作业状态清零显示
+                if (rawData && rawData.date && rawData.date !== today) {
+                    // GitHub上还是昨天的数据——作业显示"等待同步"
+                    rawData = { ...rawData, homework: (rawData.homework || []).map(t => ({...t, status: 'waiting'})) };
+                }
+            } else {
+                rawData = historyCache[`${currentChild}_${viewDateStr}`] || null;
+            }
             
             if (rawData && rawData.homework) {
                 // 新格式：来自孩子计时器 buildSyncData() 的数据
@@ -831,11 +912,21 @@
                     }
                 };
             } else {
-                data = {
-                    name: currentChild === 'yujia' ? '羽佳' : '羽菡',
-                    tasks: mockData[currentChild].tasks,
-                    stats: { completed: 0, total: 4, totalTime: 0, restTime: 0, efficiency: 0 }
-                };
+                // 无数据：判断是今天还是历史日期
+                if (!isToday) {
+                    data = {
+                        name: currentChild === 'yujia' ? '羽佳' : '羽菡',
+                        tasks: [],
+                        stats: { completed: 0, total: 0, totalTime: 0, restTime: 0, efficiency: 0 },
+                        _noHistory: true
+                    };
+                } else {
+                    data = {
+                        name: currentChild === 'yujia' ? '羽佳' : '羽菡',
+                        tasks: mockData[currentChild].tasks,
+                        stats: { completed: 0, total: 4, totalTime: 0, restTime: 0, efficiency: 0 }
+                    };
+                }
             }
             
             // 更新统计数据
@@ -847,7 +938,10 @@
             const tbody = document.getElementById('tasksTableBody');
             tbody.innerHTML = '';
             if (data.tasks.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#aaa;padding:20px">暂无作业数据，等待孩子完成作业后同步</td></tr>';
+                const msg = data._noHistory
+                    ? `📅 ${viewDateStr} 暂无归档数据（历史数据需在孩子页面完成作业后才会归档）`
+                    : '暂无作业数据，等待孩子完成作业后同步';
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:#aaa;padding:20px">${msg}</td></tr>`;
             } else {
                 data.tasks.forEach(task => {
                     const row = document.createElement('tr');
@@ -870,12 +964,13 @@
             document.getElementById('reportEfficiency').textContent = data.stats.efficiency + '%';
             
             // 更新亮点和关注
+            const dayLabel = isToday ? '今天' : viewDateStr;
             if (data.stats.efficiency >= 90) {
-                document.getElementById('reportHighlight').innerHTML = '✨ 学习效率很高，继续保持！';
+                document.getElementById('reportHighlight').innerHTML = `✨ ${dayLabel}学习效率很高，继续保持！`;
             } else if (data.stats.completed > 0) {
-                document.getElementById('reportHighlight').innerHTML = '👍 今天完成了 ' + data.stats.completed + ' 项作业';
+                document.getElementById('reportHighlight').innerHTML = `👍 ${dayLabel}完成了 ${data.stats.completed} 项作业`;
             } else {
-                document.getElementById('reportHighlight').innerHTML = '⏳ 今日暂无完成记录';
+                document.getElementById('reportHighlight').innerHTML = data._noHistory ? `📅 ${viewDateStr} 无记录` : `⏳ ${dayLabel}暂无完成记录`;
             }
 
             // 更新积分徽章
@@ -1112,8 +1207,15 @@
         document.getElementById('exportStartDate').value = firstDay;
         document.getElementById('exportEndDate').value = now.toISOString().split('T')[0];
         
-        // 实时更新（每30秒重新加载数据）
-        setInterval(loadAllData, 30000);
+        // 初始化日期选择器
+        initDatePicker();
+        updateDateLabel();
+        
+        // 实时更新（每30秒重新加载数据；只在查看今天时自动刷新）
+        setInterval(() => {
+            const today = new Date().toISOString().split('T')[0];
+            if (viewDateStr === today) loadAllData();
+        }, 30000);
         
         // 初始化 - 加载真实数据（用 async IIFE 确保正确执行）
         (async () => {

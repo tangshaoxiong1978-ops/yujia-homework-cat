@@ -423,6 +423,10 @@
     <div class="points-log-overlay" id="pointsLogOverlay" onclick="closePointsLog()">
         <div class="points-log-sheet" onclick="event.stopPropagation()">
             <div class="points-log-title">🌿 积分明细</div>
+            <div style="display:flex;align-items:center;gap:8px;margin:8px 0 12px;padding:0 4px;">
+                <span style="font-size:13px;color:#888;">📅 查看日期：</span>
+                <input type="date" id="pointsLogDate" style="flex:1;padding:6px 10px;border:1.5px solid #81c784;border-radius:10px;font-size:13px;color:#555;outline:none;" onchange="openPointsLog()">
+            </div>
             <div id="pointsLogList"></div>
             <button class="points-log-close" onclick="closePointsLog()">关闭</button>
         </div>
@@ -466,47 +470,82 @@
     const GITHUB_DATA_FILE = `data/${CHILD}_data.json`;
 
     // 推送数据到 GitHub 仓库（跨设备同步核心）
-    async function syncToGitHub(dataToSync) {
-        try {
-            const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_DATA_FILE}`;
-            const getResp = await fetch(apiUrl, {
-                headers: {
-                    'Authorization': `token ${GITHUB_TOKEN}`,
-                    'Accept': 'application/vnd.github.v3+json'
-                }
-            });
-            let sha = null;
-            if (getResp.ok) {
-                const fileInfo = await getResp.json();
-                sha = fileInfo.sha;
-            }
-            const content = btoa(unescape(encodeURIComponent(JSON.stringify(dataToSync, null, 2))));
-            const body = {
-                message: `sync: ${CHILD_NAME} 作业数据 ${new Date().toLocaleString('zh-CN')}`,
-                content: content
-            };
-            if (sha) body.sha = sha;
-            const putResp = await fetch(apiUrl, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `token ${GITHUB_TOKEN}`,
-                    'Accept': 'application/vnd.github.v3+json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(body)
-            });
-            if (putResp.ok) {
-                console.log('✅ 数据已同步到GitHub');
-                return true;
-            } else {
-                console.error('❌ GitHub同步失败:', putResp.status);
-                return false;
-            }
-        } catch (e) {
-            console.error('❌ GitHub同步异常:', e);
-            return false;
-        }
-    }
+     async function syncToGitHub(dataToSync) {
+         try {
+             const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_DATA_FILE}`;
+             const getResp = await fetch(apiUrl, {
+                 headers: {
+                     'Authorization': `token ${GITHUB_TOKEN}`,
+                     'Accept': 'application/vnd.github.v3+json'
+                 }
+             });
+             let sha = null;
+             if (getResp.ok) {
+                 const fileInfo = await getResp.json();
+                 sha = fileInfo.sha;
+             }
+             const content = btoa(unescape(encodeURIComponent(JSON.stringify(dataToSync, null, 2))));
+             const body = {
+                 message: `sync: ${CHILD_NAME} 作业数据 ${new Date().toLocaleString('zh-CN')}`,
+                 content: content
+             };
+             if (sha) body.sha = sha;
+             const putResp = await fetch(apiUrl, {
+                 method: 'PUT',
+                 headers: {
+                     'Authorization': `token ${GITHUB_TOKEN}`,
+                     'Accept': 'application/vnd.github.v3+json',
+                     'Content-Type': 'application/json'
+                 },
+                 body: JSON.stringify(body)
+             });
+             if (putResp.ok) {
+                 console.log('✅ 数据已同步到GitHub');
+                 // 同时写入历史归档（异步，不阻塞）
+                 archiveTodayData(dataToSync).catch(() => {});
+                 return true;
+             } else {
+                 console.error('❌ GitHub同步失败:', putResp.status);
+                 return false;
+             }
+         } catch (e) {
+             console.error('❌ GitHub同步异常:', e);
+             return false;
+         }
+     }
+
+     // 将今日数据归档到 data/yuhan_history_YYYY-MM-DD.json（家长看板历史查询用）
+     async function archiveTodayData(dataToSync) {
+         try {
+             const dateStr = dataToSync.date || new Date().toISOString().split('T')[0];
+             const historyFile = `data/${CHILD}_history_${dateStr}.json`;
+             const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${historyFile}`;
+             const getResp = await fetch(apiUrl, {
+                 headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' }
+             });
+             let sha = null;
+             if (getResp.ok) {
+                 const info = await getResp.json();
+                 sha = info.sha;
+             }
+             const content = btoa(unescape(encodeURIComponent(JSON.stringify(dataToSync, null, 2))));
+             const body = { message: `archive: ${CHILD_NAME} ${dateStr} 历史数据`, content };
+             if (sha) body.sha = sha;
+             await fetch(apiUrl, {
+                 method: 'PUT',
+                 headers: {
+                     'Authorization': `token ${GITHUB_TOKEN}`,
+                     'Accept': 'application/vnd.github.v3+json',
+                     'Content-Type': 'application/json'
+                 },
+                 body: JSON.stringify(body)
+             });
+             console.log(`📦 历史数据已归档：${historyFile}`);
+         } catch (e) {
+             console.warn('历史归档失败（不影响主功能）:', e.message);
+         }
+     }
+
 
     // 从 GitHub 拉取最新数据（跨设备同步核心）
     // 改用 GitHub Pages，因为部分环境无法访问 GitHub API
@@ -544,7 +583,7 @@
         const timerData = JSON.parse(localStorage.getItem(key) || '{}');
         // 【关键】直接从localStorage获取积分确保同步成功率
         const currentPoints = parseInt(localStorage.getItem(POINTS_KEY) || '0');
-        const pointsLog = JSON.parse(localStorage.getItem(POINTS_LOG_KEY) || '[]');
+        const pointsLog = JSON.parse(localStorage.getItem(getPointsLogKey()) || '[]');
         console.log('[同步数据] 当前积分:', currentPoints, '积分明细:', pointsLog.length, '条');
         return {
             child: CHILD,
@@ -553,7 +592,7 @@
             lastUpdated: new Date().toISOString(),
             homework: homework,
             points: currentPoints,
-            pointsLog: pointsLog.slice(-20), // 保留最近20条
+            pointsLog: pointsLog.slice(-20), // 保留最近20条（今日明细）
             todayStats: {
                 studyMinutes: timerData.studyMinutes || 0,
                 restMinutes: timerData.restMinutes || 0,
@@ -711,13 +750,17 @@
                 console.log('📅 GitHub数据是昨天的（' + githubData.date + '），跳过作业状态同步');
             }
 
-            // 积分数据：可以跨天保留
+            // 积分数据：总分跨天累积保留；明细只写入对应日期的key
             if (githubData.points !== undefined) {
                 const localPts = localStorage.getItem(POINTS_KEY);
                 if (!localPts || new Date(githubData.lastUpdated) > new Date(localStorage.getItem(`${POINTS_KEY}_update`) || 0)) {
                     console.log('🔄 同步积分:', githubData.points);
                     localStorage.setItem(POINTS_KEY, githubData.points);
-                    localStorage.setItem(POINTS_LOG_KEY, JSON.stringify(githubData.pointsLog || []));
+                    const dataDate = githubData.date || today;
+                    const targetLogKey = getPointsLogKey(dataDate);
+                    if (githubData.pointsLog && githubData.pointsLog.length > 0) {
+                        localStorage.setItem(targetLogKey, JSON.stringify(githubData.pointsLog));
+                    }
                     localStorage.setItem(`${POINTS_KEY}_update`, githubData.lastUpdated);
                 }
             }
@@ -1350,16 +1393,21 @@
 
     // ===== 积分系统 =====
     const POINTS_KEY = `points_${CHILD}`;
-    const POINTS_LOG_KEY = `points_log_${CHILD}`;
+    // 积分明细按日期存储，每天独立记录（积分总分跨天累积不重置）
+    function getPointsLogKey(dateStr) {
+        const d = dateStr || new Date().toISOString().split('T')[0];
+        return `points_log_${CHILD}_${d}`;
+    }
     const ALL_DONE_KEY = `all_done_${CHILD}`;
 
     function addPoints(amount, reason) {
         const pts = getPoints() + amount;
         localStorage.setItem(POINTS_KEY, pts);
-        const log = JSON.parse(localStorage.getItem(POINTS_LOG_KEY) || '[]');
+        const todayLogKey = getPointsLogKey();
+        const log = JSON.parse(localStorage.getItem(todayLogKey) || '[]');
         log.unshift({ amount, reason, time: new Date().toISOString(), total: pts });
         if (log.length > 100) log.pop();
-        localStorage.setItem(POINTS_LOG_KEY, JSON.stringify(log));
+        localStorage.setItem(todayLogKey, JSON.stringify(log));
         updatePointsDisplay();
         // 自动同步到GitHub
         syncToGitHub(buildSyncData());
@@ -1378,10 +1426,18 @@
     }
 
     function openPointsLog() {
-        const log = JSON.parse(localStorage.getItem(POINTS_LOG_KEY) || '[]');
+        const todayStr = new Date().toISOString().split('T')[0];
+        const dateInput = document.getElementById('pointsLogDate');
+        if (!dateInput.value) dateInput.value = todayStr;
+        const selectedDate = dateInput.value || todayStr;
+
+        const logKey = getPointsLogKey(selectedDate);
+        const log = JSON.parse(localStorage.getItem(logKey) || '[]');
         const list = document.getElementById('pointsLogList');
+        const isToday = selectedDate === todayStr;
+        const dateLabel = isToday ? '今天' : selectedDate;
         if (log.length === 0) {
-            list.innerHTML = '<div style="text-align:center;color:#aaa;padding:30px 0">暂无积分记录，完成作业来赚积分！🌿</div>';
+            list.innerHTML = `<div style="text-align:center;color:#aaa;padding:30px 0">${dateLabel}暂无积分记录${isToday ? '，完成作业来赚积分！🌿' : ''}</div>`;
         } else {
             list.innerHTML = log.map(item => {
                 const d = new Date(item.time);

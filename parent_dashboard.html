@@ -1065,7 +1065,7 @@
             // 生成CSV内容
             const childName = currentChild === 'yujia' ? '羽佳' : '羽菡';
             const today = new Date().toLocaleString('zh-CN');
-            let csv = `积分明细统计表（${childName）\n`;
+            let csv = `积分明细统计表（${childName}）\n`;
             csv += `导出时间：${today}\n`;
             if (startDateInput || endDateInput) {
                 csv += `日期范围：${startDateInput || '开始'} 至 ${endDateInput || '今天'}\n`;

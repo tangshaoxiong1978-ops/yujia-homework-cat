@@ -1656,8 +1656,14 @@
             if (githubData.date === today) {
                 if (!localTime || new Date(githubData.lastUpdated) > new Date(localTime)) {
                     console.log('🔄 同天GitHub数据，同步作业状态');
-                    homework = githubData.homework || homework;
-                    saveHomework();
+                    // 【修复】只有GitHub的作业不为空，才覆盖本地作业
+                    if (githubData.homework && githubData.homework.length > 0) {
+                        homework = githubData.homework;
+                        saveHomework();
+                        renderHomeworkList(); // 【新增】同步后重新渲染
+                    } else {
+                        console.log('⚠️ GitHub作业为空，保留本地作业列表');
+                    }
                     localStorage.setItem(`${todayKey}_update`, githubData.lastUpdated);
                 }
             } else {
@@ -1888,10 +1894,11 @@
         const saved = localStorage.getItem(todayKey);
         if (saved) {
             homework = JSON.parse(saved);
+            console.log('[loadHomework] 从localStorage加载作业:', homework.length, '项');
         } else {
             // 新的一天：清理昨天的数据key，重置为默认作业列表
             homework = JSON.parse(JSON.stringify(DEFAULT_HOMEWORK));
-            console.log('📅 新的一天，作业列表已重置');
+            console.log('📅 新的一天，作业列表已重置为默认项:', homework.length, '项');
         }
     }
 

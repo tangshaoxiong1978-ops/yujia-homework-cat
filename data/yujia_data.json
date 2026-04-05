@@ -1,1 +1,19 @@
-{}
+{
+  "child": "yujia",
+  "childName": "羽佳",
+  "date": "2026-04-05",
+  "lastUpdated": "2026-04-05T23:59:00.000Z",
+  "homework": [],
+  "points": 130,
+  "todayPoints": 10,
+  "pointsLog": [
+    {"amount": 5, "reason": "完成数学练习", "time": "2026-04-05T09:00:00.000Z"},
+    {"amount": 5, "reason": "完成语文阅读", "time": "2026-04-05T14:30:00.000Z"}
+  ],
+  "todayStats": {
+    "studyMinutes": 0,
+    "restMinutes": 0,
+    "efficiency": 0,
+    "tasks": []
+  }
+}

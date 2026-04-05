@@ -1,1 +1,19 @@
-{}
+{
+  "child": "yuhan",
+  "childName": "羽菡",
+  "date": "2026-04-05",
+  "lastUpdated": "2026-04-05T23:59:00.000Z",
+  "homework": [],
+  "points": 105,
+  "todayPoints": 10,
+  "pointsLog": [
+    {"amount": 5, "reason": "完成口算练习", "time": "2026-04-05T09:30:00.000Z"},
+    {"amount": 5, "reason": "完成拼音作业", "time": "2026-04-05T15:00:00.000Z"}
+  ],
+  "todayStats": {
+    "studyMinutes": 0,
+    "restMinutes": 0,
+    "efficiency": 0,
+    "tasks": []
+  }
+}

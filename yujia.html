@@ -1256,8 +1256,8 @@
                             if (!localLogMap.has(l.time)) pointsLog.push(l);
                         });
                         pointsLog.sort((a, b) => new Date(b.time) - new Date(a.time));
-                        // 重新从合并后的日志计算积分（确保家长加减分都被计入）
-                        localPoints = pointsLog.reduce((sum, l) => sum + (l.amount || 0), 0);
+                        // 【修复】累计积分保持本地值，不从今日日志重新计算
+                        // 今日日志只影响今天积分，不应该覆盖累计总积分
                     }
                 }
             }

@@ -1045,6 +1045,19 @@
             console.log('[selectChild] yujia数据:', realData.yujia ? 'points='+realData.yujia.points : 'null');
             console.log('[selectChild] yuhan数据:', realData.yuhan ? 'points='+realData.yuhan.points : 'null');
             updateDashboard();
+
+            // 【修复】如果当前显示周期统计标签，需要重新计算对应孩子的数据
+            const weekTab = document.getElementById('tabParentWeek');
+            const monthTab = document.getElementById('tabParentMonth');
+            if (weekTab && weekTab.classList.contains('active')) {
+                console.log('[selectChild] 重新加载本周统计');
+                renderParentWeekStats();
+            }
+            if (monthTab && monthTab.classList.contains('active')) {
+                console.log('[selectChild] 重新加载本月统计');
+                renderParentMonthStats();
+            }
+
             console.log('[selectChild] 仪表板更新完成');
         }
         

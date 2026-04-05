@@ -392,6 +392,28 @@
         .points-log-item .time { color: #888; font-size: 12px; }
         .points-log-item .plus { color: #4CAF50; }
         .points-log-item .minus { color: #f44336; }
+
+        /* 标签页样式 */
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            background: rgba(255,255,255,0.6);
+            color: #999;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+        }
+        .tab-content {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -474,7 +496,7 @@
         <!-- 每日报告 -->
         <div class="daily-report">
             <div class="card-title">📋 每日学习报告</div>
-            
+
             <div class="report-section">
                 <h3>📈 学习统计</h3>
                 <div class="report-item">
@@ -490,18 +512,101 @@
                     <span class="report-value" id="reportEfficiency">0%</span>
                 </div>
             </div>
-            
+
             <div class="report-section">
                 <h3>⭐ 亮点</h3>
                 <div id="reportHighlight">暂无数据</div>
             </div>
-            
+
             <div class="report-section">
                 <h3>⚠️ 需要关注</h3>
                 <div id="reportConcern">暂无数据</div>
             </div>
         </div>
-        
+
+        <!-- 本周/本月统计 -->
+        <div class="daily-report">
+            <div class="card-title">📊 周期学习统计</div>
+
+            <!-- 标签页切换 -->
+            <div style="display:flex;gap:10px;margin-bottom:20px;">
+                <button id="tabParentWeek" class="tab-btn" onclick="switchParentTab('week')">📆 本周</button>
+                <button id="tabParentMonth" class="tab-btn" onclick="switchParentTab('month')">📊 本月</button>
+            </div>
+
+            <!-- 本周统计 -->
+            <div id="contentParentWeek" class="tab-content">
+                <div class="progress-grid" style="grid-template-columns: repeat(4, 1fr);">
+                    <div class="stat-box">
+                        <div class="stat-value" id="parentWeekTotalMin">0</div>
+                        <div class="stat-label">总学习分钟</div>
+                    </div>
+                    <div class="stat-box green">
+                        <div class="stat-value" id="parentWeekRestMin">0</div>
+                        <div class="stat-label">总休息分钟</div>
+                    </div>
+                    <div class="stat-box blue">
+                        <div class="stat-value" id="parentWeekAvgEff">0%</div>
+                        <div class="stat-label">平均效率</div>
+                    </div>
+                    <div class="stat-box orange">
+                        <div class="stat-value" id="parentWeekOverMin">0</div>
+                        <div class="stat-label">超时分钟</div>
+                    </div>
+                </div>
+                <div class="progress-grid" style="grid-template-columns: repeat(3, 1fr);margin-top:15px;">
+                    <div class="stat-box">
+                        <div class="stat-value" id="parentWeekTasks">0</div>
+                        <div class="stat-label">完成作业数</div>
+                    </div>
+                    <div class="stat-box green">
+                        <div class="stat-value" id="parentWeekDays">0</div>
+                        <div class="stat-label">学习天数</div>
+                    </div>
+                    <div class="stat-box orange">
+                        <div class="stat-value" id="parentWeekOverTasks">0</div>
+                        <div class="stat-label">超时次数</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 本月统计 -->
+            <div id="contentParentMonth" class="tab-content" style="display:none;">
+                <div class="progress-grid" style="grid-template-columns: repeat(4, 1fr);">
+                    <div class="stat-box">
+                        <div class="stat-value" id="parentMonthTotalMin">0</div>
+                        <div class="stat-label">总学习分钟</div>
+                    </div>
+                    <div class="stat-box green">
+                        <div class="stat-value" id="parentMonthRestMin">0</div>
+                        <div class="stat-label">总休息分钟</div>
+                    </div>
+                    <div class="stat-box blue">
+                        <div class="stat-value" id="parentMonthAvgEff">0%</div>
+                        <div class="stat-label">平均效率</div>
+                    </div>
+                    <div class="stat-box orange">
+                        <div class="stat-value" id="parentMonthOverMin">0</div>
+                        <div class="stat-label">超时分钟</div>
+                    </div>
+                </div>
+                <div class="progress-grid" style="grid-template-columns: repeat(3, 1fr);margin-top:15px;">
+                    <div class="stat-box">
+                        <div class="stat-value" id="parentMonthTasks">0</div>
+                        <div class="stat-label">完成作业数</div>
+                    </div>
+                    <div class="stat-box green">
+                        <div class="stat-value" id="parentMonthBest">--</div>
+                        <div class="stat-label">最高效率日</div>
+                    </div>
+                    <div class="stat-box orange">
+                        <div class="stat-value" id="parentMonthOverTasks">0</div>
+                        <div class="stat-label">超时次数</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- 积分管理卡片 -->
         <div class="points-card">
             <div class="card-title">⭐ 积分管理</div>
@@ -1402,7 +1507,125 @@
             
             alert(`✅ 已导出 ${stats.items} 条记录到文件`);
         }
-        
+
+        // 家长看板标签页切换
+        function switchParentTab(tab) {
+            document.querySelectorAll('#contentParentWeek, #contentParentMonth').forEach(c => c.style.display = 'none');
+            document.querySelectorAll('#tabParentWeek, #tabParentMonth').forEach(b => b.classList.remove('active'));
+            document.getElementById('contentParent' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block';
+            document.getElementById('tabParent' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+            if (tab === 'week') renderParentWeekStats();
+            if (tab === 'month') renderParentMonthStats();
+        }
+
+        // 家长看板本周统计（从GitHub历史数据计算）
+        async function renderParentWeekStats() {
+            const days = ['日','一','二','三','四','五','六'];
+            const now = new Date(), today = now.getDay();
+            let totalMin = 0, totalRestMin = 0, taskCount = 0, studyDays = 0;
+            let totalPlanned = 0, totalStudy = 0, overMin = 0, overCount = 0;
+
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(now);
+                d.setDate(d.getDate() - today + i);
+                const dateStr = d.toISOString().split('T')[0];
+                const child = currentChild === 'yujia' ? 'yujia' : 'yuhan';
+                const historyFile = `data/${child}_history_${dateStr}.json`;
+                try {
+                    const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${historyFile}`;
+                    const resp = await fetch(apiUrl, {
+                        headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' }
+                    });
+                    if (resp.ok) {
+                        const info = await resp.json();
+                        const content = atob(info.content);
+                        const data = JSON.parse(decodeURIComponent(escape(content)));
+                        totalMin += (data.timerData?.studyMinutes || 0);
+                        totalRestMin += (data.timerData?.restMinutes || 0);
+                        if (data.timerData?.studyMinutes > 0) studyDays++;
+                        const tasks = data.timerData?.tasks || [];
+                        tasks.forEach(t => {
+                            totalPlanned += (t.time || 0);
+                            totalStudy += (t.study || 0);
+                            if (t.overTime > 0) {
+                                overMin += t.overTime;
+                                overCount++;
+                            }
+                        });
+                        taskCount += tasks.length;
+                    }
+                } catch(e) {
+                    console.log(`[本周统计] ${dateStr} 无历史数据`);
+                }
+            }
+
+            const weightedEff = totalStudy > 0 ? Math.min(Math.round((totalPlanned / totalStudy) * 100), 100) : 0;
+            document.getElementById('parentWeekTotalMin').textContent = totalMin;
+            document.getElementById('parentWeekRestMin').textContent = totalRestMin;
+            document.getElementById('parentWeekAvgEff').textContent = weightedEff + '%';
+            document.getElementById('parentWeekOverMin').textContent = overMin;
+            document.getElementById('parentWeekTasks').textContent = taskCount;
+            document.getElementById('parentWeekDays').textContent = studyDays;
+            document.getElementById('parentWeekOverTasks').textContent = overCount;
+        }
+
+        // 家长看板本月统计
+        async function renderParentMonthStats() {
+            const now = new Date();
+            let totalMin = 0, totalRestMin = 0, taskCount = 0;
+            let totalPlanned = 0, totalStudy = 0, overMin = 0, overCount = 0;
+            let bestDay = '--', bestEff = 0;
+            const child = currentChild === 'yujia' ? 'yujia' : 'yuhan';
+
+            for (let d = 1; d <= 31; d++) {
+                const dt = new Date(now.getFullYear(), now.getMonth(), d);
+                if (dt > now) break;
+                const dateStr = dt.toISOString().split('T')[0];
+                const historyFile = `data/${child}_history_${dateStr}.json`;
+                try {
+                    const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${historyFile}`;
+                    const resp = await fetch(apiUrl, {
+                        headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' }
+                    });
+                    if (resp.ok) {
+                        const info = await resp.json();
+                        const content = atob(info.content);
+                        const data = JSON.parse(decodeURIComponent(escape(content)));
+                        totalMin += (data.timerData?.studyMinutes || 0);
+                        totalRestMin += (data.timerData?.restMinutes || 0);
+                        const tasks = data.timerData?.tasks || [];
+                        tasks.forEach(t => {
+                            totalPlanned += (t.time || 0);
+                            totalStudy += (t.study || 0);
+                            if (t.overTime > 0) {
+                                overMin += t.overTime;
+                                overCount++;
+                            }
+                        });
+                        taskCount += tasks.length;
+                        // 最高效率日
+                        if (tasks.length > 0) {
+                            const dayPlanned = tasks.reduce((sum, t) => sum + (t.time || 0), 0);
+                            const dayStudy = tasks.reduce((sum, t) => sum + (t.study || 0), 0);
+                            const dayEff = dayStudy > 0 ? Math.min(Math.round((dayPlanned / dayStudy) * 100), 100) : 0;
+                            if (dayEff > bestEff) { bestEff = dayEff; bestDay = `${now.getMonth()+1}/${d}`; }
+                        }
+                    }
+                } catch(e) {
+                    // 无历史数据
+                }
+            }
+
+            const weightedEff = totalStudy > 0 ? Math.min(Math.round((totalPlanned / totalStudy) * 100), 100) : 0;
+            document.getElementById('parentMonthTotalMin').textContent = totalMin;
+            document.getElementById('parentMonthRestMin').textContent = totalRestMin;
+            document.getElementById('parentMonthAvgEff').textContent = weightedEff + '%';
+            document.getElementById('parentMonthOverMin').textContent = overMin;
+            document.getElementById('parentMonthTasks').textContent = taskCount;
+            document.getElementById('parentMonthBest').textContent = bestDay;
+            document.getElementById('parentMonthOverTasks').textContent = overCount;
+        }
+
         // 初始化日期输入框为当月范围
         const now = new Date();
         const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];

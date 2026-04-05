@@ -1416,12 +1416,15 @@
                     logList.innerHTML = data.pointsLog.map(log => {
                         const d = new Date(log.time);
                         const timeStr = `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
+                        const amount = log.amount !== undefined ? log.amount : (log.change || 0);
+                        const colorClass = amount >= 0 ? 'plus' : 'minus';
+                        const color = amount >= 0 ? '#4CAF50' : '#f44336';
                         return `<div class="points-log-item">
                             <div>
                                 <div class="points-log-desc">${log.reason || '积分变动'}</div>
-                                <div class="points-log-date">${timeStr} · 累计 ${log.total} 分</div>
+                                <div class="points-log-date">${timeStr}</div>
                             </div>
-                            <div class="points-log-amount" style="color:#4CAF50;">+${log.amount}</div>
+                            <div class="points-log-amount" style="color:${color};">${amount >= 0 ? '+' : ''}${amount}</div>
                         </div>`;
                     }).join('');
                 } else {

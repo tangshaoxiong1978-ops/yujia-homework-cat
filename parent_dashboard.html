@@ -116,7 +116,17 @@
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             color: white;
         }
-        
+
+        .stat-box.red {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+        }
+
+        .stat-box.purple {
+            background: linear-gradient(135deg, #a55eea 0%, #8854d0 100%);
+            color: white;
+        }
+
         .stat-value {
             font-size: 32px;
             font-weight: bold;
@@ -1540,19 +1550,20 @@
                         const info = await resp.json();
                         const content = atob(info.content);
                         const data = JSON.parse(decodeURIComponent(escape(content)));
-                        totalMin += (data.timerData?.studyMinutes || 0);
-                        totalRestMin += (data.timerData?.restMinutes || 0);
-                        if (data.timerData?.studyMinutes > 0) studyDays++;
-                        const tasks = data.timerData?.tasks || [];
+                        // 修正：使用 todayStats 而不是 timerData
+                        totalMin += (data.todayStats?.studyMinutes || 0);
+                        totalRestMin += (data.todayStats?.restMinutes || 0);
+                        if (data.todayStats?.studyMinutes > 0) studyDays++;
+                        const tasks = data.todayStats?.tasks || [];
                         tasks.forEach(t => {
                             totalPlanned += (t.time || 0);
-                            totalStudy += (t.study || 0);
+                            totalStudy += (t.actual || 0);
                             if (t.overTime > 0) {
                                 overMin += t.overTime;
                                 overCount++;
                             }
                         });
-                        taskCount += tasks.length;
+                        taskCount += tasks.filter(t => t.status === 'done').length;
                     }
                 } catch(e) {
                     console.log(`[本周统计] ${dateStr} 无历史数据`);
@@ -1591,22 +1602,23 @@
                         const info = await resp.json();
                         const content = atob(info.content);
                         const data = JSON.parse(decodeURIComponent(escape(content)));
-                        totalMin += (data.timerData?.studyMinutes || 0);
-                        totalRestMin += (data.timerData?.restMinutes || 0);
-                        const tasks = data.timerData?.tasks || [];
+                        // 修正：使用 todayStats 而不是 timerData
+                        totalMin += (data.todayStats?.studyMinutes || 0);
+                        totalRestMin += (data.todayStats?.restMinutes || 0);
+                        const tasks = data.todayStats?.tasks || [];
                         tasks.forEach(t => {
                             totalPlanned += (t.time || 0);
-                            totalStudy += (t.study || 0);
+                            totalStudy += (t.actual || 0);
                             if (t.overTime > 0) {
                                 overMin += t.overTime;
                                 overCount++;
                             }
                         });
-                        taskCount += tasks.length;
+                        taskCount += tasks.filter(t => t.status === 'done').length;
                         // 最高效率日
                         if (tasks.length > 0) {
                             const dayPlanned = tasks.reduce((sum, t) => sum + (t.time || 0), 0);
-                            const dayStudy = tasks.reduce((sum, t) => sum + (t.study || 0), 0);
+                            const dayStudy = tasks.reduce((sum, t) => sum + (t.actual || 0), 0);
                             const dayEff = dayStudy > 0 ? Math.min(Math.round((dayPlanned / dayStudy) * 100), 100) : 0;
                             if (dayEff > bestEff) { bestEff = dayEff; bestDay = `${now.getMonth()+1}/${d}`; }
                         }

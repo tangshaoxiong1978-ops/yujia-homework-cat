@@ -1,1 +1,27 @@
-{}
+{
+  "child": "yuhan",
+  "childName": "羽菡",
+  "date": "2026-04-04",
+  "lastUpdated": "2026-04-04T23:59:00.000Z",
+  "homework": [
+    {"id": 1, "name": "拼音练习", "icon": "📝", "time": 15, "status": "done"},
+    {"id": 2, "name": "数学计算", "icon": "🔢", "time": 25, "status": "done"},
+    {"id": 3, "name": "亲子阅读", "icon": "📖", "time": 20, "status": "done"}
+  ],
+  "points": 95,
+  "todayPoints": 8,
+  "pointsLog": [
+    {"amount": 4, "reason": "完成拼音练习", "time": "2026-04-04T08:30:00.000Z", "total": 91},
+    {"amount": 4, "reason": "完成数学计算", "time": "2026-04-04T10:00:00.000Z", "total": 95}
+  ],
+  "todayStats": {
+    "studyMinutes": 60,
+    "restMinutes": 8,
+    "efficiency": 88,
+    "tasks": [
+      {"name": "拼音练习", "time": 15, "actual": 18, "study": 15, "rest": 3, "overTime": 3, "efficiency": 83},
+      {"name": "数学计算", "time": 25, "actual": 28, "study": 25, "rest": 3, "overTime": 3, "efficiency": 89},
+      {"name": "亲子阅读", "time": 20, "actual": 17, "study": 20, "rest": 3, "overTime": 0, "efficiency": 100}
+    ]
+  }
+}

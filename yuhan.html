@@ -3,29 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>羽菡森林计时器 🌿</title>
+    <title>羽菡猫咪计时器 🐱</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            background: linear-gradient(135deg, #f0f9f0 0%, #e8f5e9 50%, #f1f8e9 100%);
+            background: linear-gradient(135deg, #fff0f3 0%, #ffe4ec 50%, #fff5f7 100%);
             min-height: 100vh;
             padding-bottom: 40px;
+            position: relative;
+            overflow-x: hidden;
         }
-        body::before { content: '🍃'; position: fixed; top: 80px; right: 18px; font-size: 28px; opacity: 0.25; animation: sway 4s ease-in-out infinite; }
-        body::after { content: '🌲'; position: fixed; top: 150px; left: 12px; font-size: 22px; opacity: 0.2; animation: sway 5s ease-in-out infinite 1.5s; }
-        @keyframes sway { 0%,100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg) translateX(5px); } }
-        .header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; background: rgba(255,255,255,0.82); backdrop-filter: blur(10px); box-shadow: 0 2px 16px rgba(76,175,80,0.12); position: sticky; top: 0; z-index: 100; }
-        .header-title { display: flex; align-items: center; gap: 10px; }
-        .header-icon { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #81C784 0%, #4CAF50 100%); display: flex; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 4px 12px rgba(76,175,80,0.3); }
-        .header-name { font-size: 18px; font-weight: 700; color: #2E7D32; }
-        .header-switch { display: flex; align-items: center; gap: 6px; padding: 6px 14px; background: linear-gradient(135deg, #F8BBD9 0%, #F48FB1 100%); border-radius: 20px; font-size: 13px; font-weight: 600; color: #880E4F; text-decoration: none; }
-        .header-deadline { display: flex; align-items: center; gap: 6px; padding: 5px 12px; background: rgba(76,175,80,0.1); border-radius: 20px; font-size: 13px; font-weight: 600; color: #4CAF50; transition: all 0.3s; }
-        .header-deadline.warning { background: rgba(255,193,7,0.15); color: #e67e22; animation: blink-warn 1s ease-in-out infinite; }
-        .header-deadline.danger { background: rgba(231,76,60,0.15); color: #e74c3c; animation: blink-danger 0.6s ease-in-out infinite; }
-        @keyframes blink-warn { 0%,100% { opacity:1; } 50% { opacity:0.7; } }
-        @keyframes blink-danger { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
+
+        /* 浮动装饰 */
+        body::before {
+            content: '✨';
+            position: fixed;
+            top: 60px;
+            right: 20px;
+            font-size: 32px;
+            opacity: 0.3;
+            animation: float 3s ease-in-out infinite;
+        }
+        body::after {
+            content: '🐾';
+            position: fixed;
+            top: 120px;
+            left: 15px;
+            font-size: 24px;
+            opacity: 0.25;
+            animation: float 4s ease-in-out infinite 1s;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* 顶部 */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 16px rgba(255,107,157,0.15);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FF8FB3 0%, #FF6B9D 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 4px 12px rgba(255,107,157,0.3);
+        }
+
+        .header-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #E91E63;
+        }
+
+        /* 截止时间醒目倒计时 */
+        .header-deadline {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            background: rgba(255,107,157,0.1);
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #FF6B9D;
+            transition: all 0.3s;
+        }
+        .header-deadline.warning {
+            background: rgba(255,193,7,0.15);
+            color: #e67e22;
+            animation: blink-warn 1s ease-in-out infinite;
+        }
+        .header-deadline.danger {
+            background: rgba(231,76,60,0.15);
+            color: #e74c3c;
+            animation: blink-danger 0.6s ease-in-out infinite;
+        }
+        @keyframes blink-warn { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
+        @keyframes blink-danger { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
         .header-deadline-icon { font-size: 14px; }
+        .header-deadline-time { font-variant-numeric: tabular-nums; }
         
         /* 本地时间 */
         .header-clock {
@@ -33,127 +112,548 @@
             align-items: center;
             gap: 4px;
             padding: 5px 12px;
-            background: rgba(76,175,80,0.1);
+            background: rgba(255,107,157,0.1);
             border-radius: 20px;
             font-size: 14px;
             font-weight: 600;
-            color: #4CAF50;
+            color: #FF6B9D;
             font-variant-numeric: tabular-nums;
         }
         .header-clock img {
             width: 16px;
             height: 16px;
         }
-        
+
+        .header-switch {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: linear-gradient(135deg, #C8E6C9 0%, #81C784 100%);
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #2E7D32;
+            text-decoration: none;
+        }
+
+        /* 主内容 */
         .main { padding: 0 16px; }
-        .avatar-section { text-align: center; padding: 24px 0 16px; }
-        .main-avatar { width: 90px; height: 90px; border-radius: 50%; background: linear-gradient(135deg, #81C784 0%, #4CAF50 100%); display: inline-flex; align-items: center; justify-content: center; font-size: 46px; box-shadow: 0 8px 24px rgba(76,175,80,0.3); margin-bottom: 10px; animation: pulse-forest 3.5s ease-in-out infinite; }
-        @keyframes pulse-forest { 0%,100% { box-shadow: 0 8px 24px rgba(76,175,80,0.3); } 50% { box-shadow: 0 8px 32px rgba(76,175,80,0.45); } }
-        .greeting { font-size: 20px; font-weight: 700; color: #2E7D32; margin-bottom: 4px; }
-        .date-display { font-size: 14px; color: #999; }
-        .card { background: rgba(255,255,255,0.9); border-radius: 20px; padding: 18px; margin-bottom: 14px; box-shadow: 0 4px 20px rgba(76,175,80,0.08); }
-        .progress-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-        .progress-title { font-size: 15px; font-weight: 600; color: #555; display: flex; align-items: center; gap: 6px; }
-        .progress-count { font-size: 18px; font-weight: 800; color: #4CAF50; }
-        .progress-bar { height: 10px; background: #e8f5e9; border-radius: 5px; overflow: hidden; margin-bottom: 14px; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #81C784, #4CAF50); border-radius: 5px; transition: width 0.5s ease; }
-        .stats-row { display: flex; justify-content: space-around; }
+
+        /* 头像区 */
+        .avatar-section {
+            text-align: center;
+            padding: 24px 0 16px;
+        }
+
+        .main-avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FF8FB3 0%, #FF6B9D 100%);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 46px;
+            box-shadow: 0 8px 24px rgba(255,107,157,0.35);
+            margin-bottom: 10px;
+            animation: pulse-soft 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-soft {
+            0%, 100% { box-shadow: 0 8px 24px rgba(255,107,157,0.35); }
+            50% { box-shadow: 0 8px 32px rgba(255,107,157,0.5); }
+        }
+
+        .greeting {
+            font-size: 20px;
+            font-weight: 700;
+            color: #E91E63;
+            margin-bottom: 4px;
+        }
+
+        .date-display {
+            font-size: 14px;
+            color: #999;
+        }
+
+        /* 进度卡 */
+        .card {
+            background: rgba(255,255,255,0.9);
+            border-radius: 20px;
+            padding: 18px;
+            margin-bottom: 14px;
+            box-shadow: 0 4px 20px rgba(255,107,157,0.1);
+        }
+
+        .progress-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .progress-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .progress-count {
+            font-size: 18px;
+            font-weight: 800;
+            color: #FF6B9D;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: #fce4ec;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 14px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FF8FB3, #FF6B9D);
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-around;
+        }
+
         .stat-item { text-align: center; }
-        .stat-value { font-size: 26px; font-weight: 800; color: #4CAF50; }
-        .stat-label { font-size: 12px; color: #aaa; margin-top: 2px; }
-        .deadline-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; font-size: 14px; color: #888; }
-        .deadline-time { font-size: 24px; font-weight: 800; color: #4CAF50; }
+
+        .stat-value {
+            font-size: 26px;
+            font-weight: 800;
+            color: #FF6B9D;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 2px;
+        }
+
+        /* 截止时间 */
+        .deadline-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 14px;
+            font-size: 14px;
+            color: #888;
+        }
+
+        .deadline-time {
+            font-size: 24px;
+            font-weight: 800;
+            color: #FF6B9D;
+        }
+
         .deadline-time.overdue { color: #e74c3c; }
-        .shengdi-card { background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%); border-radius: 16px; padding: 14px; margin-bottom: 14px; border-left: 4px solid #FFA000; display: flex; align-items: center; gap: 12px; }
-        .shengdi-icon { font-size: 32px; }
-        .shengdi-info { flex: 1; }
-        .shengdi-title { font-size: 14px; font-weight: 700; color: #E65100; margin-bottom: 2px; }
-        .shengdi-count { font-size: 22px; font-weight: 800; color: #FF6D00; }
-        .shengdi-label { font-size: 12px; color: #888; }
-        .zhongkao-card { background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%); border-radius: 16px; padding: 14px; margin-bottom: 12px; border-left: 4px solid #7B1FA2; display: flex; align-items: center; gap: 12px; }
-        .zhongkao-icon { font-size: 32px; }
-        .zhongkao-info { flex: 1; }
-        .zhongkao-title { font-size: 14px; font-weight: 700; color: #6A1B9A; margin-bottom: 2px; }
-        .zhongkao-count { font-size: 22px; font-weight: 800; color: #7B1FA2; }
-        .zhongkao-label { font-size: 12px; color: #888; }
-        .assigned-alert { background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); border-radius: 16px; padding: 14px; margin-bottom: 14px; border-left: 4px solid #FF9800; display: flex; align-items: center; gap: 10px; }
-        .assigned-alert-text { flex: 1; }
-        .assigned-alert-title { font-size: 14px; font-weight: 700; color: #E65100; margin-bottom: 2px; }
-        .assigned-alert-desc { font-size: 13px; color: #777; }
-        .assigned-alert-action { padding: 8px 16px; background: linear-gradient(135deg, #FFB74D 0%, #FF9800 100%); color: white; border: none; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; }
-        .section-title { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; color: #555; margin-bottom: 12px; }
-        .homework-item { background: rgba(255,255,255,0.92); border-radius: 16px; padding: 16px; margin-bottom: 10px; box-shadow: 0 3px 14px rgba(76,175,80,0.06); transition: transform 0.2s; }
+
+        /* 预作业提示（来自家长布置） */
+        .assigned-alert {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border-radius: 16px;
+            padding: 14px;
+            margin-bottom: 14px;
+            border-left: 4px solid #FF9800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .assigned-alert-icon { font-size: 24px; }
+
+        .assigned-alert-text {
+            flex: 1;
+        }
+
+        .assigned-alert-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #E65100;
+            margin-bottom: 2px;
+        }
+
+        .assigned-alert-desc {
+            font-size: 13px;
+            color: #777;
+        }
+
+        .assigned-alert-action {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #FFB74D 0%, #FF9800 100%);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* 作业列表 */
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #555;
+            margin-bottom: 12px;
+        }
+
+        .homework-item {
+            background: rgba(255,255,255,0.92);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 14px rgba(255,107,157,0.08);
+            transition: transform 0.2s;
+        }
+
         .homework-item:hover { transform: translateY(-1px); }
-        .homework-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-        .homework-info { display: flex; align-items: center; gap: 10px; }
-        .homework-icon { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #81C784 0%, #4CAF50 100%); display: flex; align-items: center; justify-content: center; font-size: 18px; }
-        .homework-name { font-size: 16px; font-weight: 600; color: #333; }
-        .homework-time { font-size: 13px; color: #aaa; }
-        .homework-status { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-        .status-waiting { background: #e8f5e9; color: #388e3c; }
+
+        .homework-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .homework-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .homework-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #FF8FB3 0%, #FF6B9D 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .homework-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .homework-time {
+            font-size: 13px;
+            color: #aaa;
+        }
+
+        .homework-status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-waiting { background: #fce4ec; color: #e91e63; }
         .status-doing { background: #e3f2fd; color: #1976d2; }
         .status-done { background: #e8f5e9; color: #4caf50; }
-        .start-btn { width: 100%; padding: 13px; background: linear-gradient(135deg, #81C784 0%, #4CAF50 100%); color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
-        .start-btn:hover { transform: scale(1.02); box-shadow: 0 4px 16px rgba(76,175,80,0.35); }
-        .start-btn:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
-        .add-form { display: flex; gap: 8px; margin-top: 8px; }
-        .add-input { flex: 1; padding: 12px 14px; border: 2px solid #e8f5e9; border-radius: 12px; font-size: 14px; outline: none; }
-        .add-input:focus { border-color: #4CAF50; }
-        .time-input { width: 72px; padding: 12px; border: 2px solid #e8f5e9; border-radius: 12px; font-size: 14px; text-align: center; outline: none; }
-        .time-input:focus { border-color: #4CAF50; }
-        .add-btn { padding: 12px 20px; background: linear-gradient(135deg, #81C784 0%, #4CAF50 100%); color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; }
-        .report-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #FFB74D 0%, #FF9800 100%); color: white; border: none; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 16px rgba(255,152,0,0.3); margin-top: 8px; }
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+
+        .start-btn {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, #FF8FB3 0%, #FF6B9D 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .start-btn:hover { transform: scale(1.02); box-shadow: 0 4px 16px rgba(255,107,157,0.4); }
+        .start-btn:disabled { background: #ddd; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* 添加作业 */
+        .add-form {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .add-input {
+            flex: 1;
+            padding: 12px 14px;
+            border: 2px solid #fce4ec;
+            border-radius: 12px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .add-input:focus { border-color: #FF6B9D; }
+
+        .time-input {
+            width: 72px;
+            padding: 12px;
+            border: 2px solid #fce4ec;
+            border-radius: 12px;
+            font-size: 14px;
+            text-align: center;
+            outline: none;
+        }
+
+        .time-input:focus { border-color: #FF6B9D; }
+
+        .add-btn {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #FF8FB3 0%, #FF6B9D 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* 底部报告按钮 */
+        .report-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #FFB74D 0%, #FF9800 100%);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 16px rgba(255,152,0,0.3);
+            margin-top: 8px;
+        }
+
+        /* 计时弹窗 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
         .modal-overlay.active { display: flex; }
-        .modal { background: white; border-radius: 24px; padding: 28px 24px; width: 90%; max-width: 340px; text-align: center; }
-        .modal-icon { font-size: 64px; margin-bottom: 8px; }
-        .modal-task { font-size: 17px; font-weight: 700; color: #333; margin-bottom: 6px; }
-        .modal-sub { font-size: 13px; color: #aaa; margin-bottom: 20px; }
-        .timer-display { font-size: 52px; font-weight: 800; color: #4CAF50; font-variant-numeric: tabular-nums; margin-bottom: 6px; }
+
+        .modal {
+            background: white;
+            border-radius: 24px;
+            padding: 28px 24px;
+            width: 90%;
+            max-width: 340px;
+            text-align: center;
+        }
+
+        .modal-cat {
+            font-size: 64px;
+            margin-bottom: 8px;
+        }
+
+        .modal-task {
+            font-size: 17px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 6px;
+        }
+
+        .modal-sub {
+            font-size: 13px;
+            color: #aaa;
+            margin-bottom: 20px;
+        }
+
+        .timer-display {
+            font-size: 52px;
+            font-weight: 800;
+            color: #FF6B9D;
+            font-variant-numeric: tabular-nums;
+            margin-bottom: 6px;
+        }
+
         .timer-display.overtime { color: #e74c3c; }
-        .timer-compare { font-size: 14px; color: #999; margin-bottom: 20px; }
+
+        .timer-compare {
+            font-size: 14px;
+            color: #999;
+            margin-bottom: 20px;
+        }
+
         .timer-compare.early { color: #27ae60; }
         .timer-compare.late { color: #e74c3c; }
-        .timer-controls { display: flex; gap: 10px; justify-content: center; }
-        .timer-btn { padding: 12px 28px; border-radius: 30px; border: none; font-size: 15px; font-weight: 700; cursor: pointer; }
-        .btn-primary { background: linear-gradient(135deg, #81C784, #4CAF50); color: white; }
+
+        .timer-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .timer-btn {
+            padding: 12px 28px;
+            border-radius: 30px;
+            border: none;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-primary { background: linear-gradient(135deg, #FF8FB3, #FF6B9D); color: white; }
         .btn-secondary { background: #f5f5f5; color: #555; }
+        .btn-danger { background: #e74c3c; color: white; }
         .btn-success { background: #27ae60; color: white; }
+
+        /* 完成弹窗 */
         .complete-emoji { font-size: 72px; margin-bottom: 8px; }
         .complete-title { font-size: 22px; font-weight: 800; color: #333; margin-bottom: 16px; }
-        .complete-stats { background: #f1f8e9; border-radius: 16px; padding: 16px; margin-bottom: 16px; }
-        .stat-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+        .complete-stats {
+            background: #fff5f7;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
         .stat-row:last-child { margin-bottom: 0; }
         .stat-row-label { color: #888; }
         .stat-row-value { font-weight: 700; color: #333; }
-        .complete-feedback { font-size: 15px; color: #4CAF50; font-weight: 700; margin-bottom: 16px; }
+        .complete-feedback { font-size: 15px; color: #FF6B9D; font-weight: 700; margin-bottom: 16px; }
+
+        /* 数据管理 */
         .data-actions { display: flex; gap: 8px; margin-bottom: 12px; }
-        .data-btn { flex: 1; padding: 12px 8px; border-radius: 12px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .data-btn {
+            flex: 1;
+            padding: 12px 8px;
+            border-radius: 12px;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
         .data-btn.export { background: #e3f2fd; color: #1565c0; }
         .data-btn.import { background: #e8f5e9; color: #2e7d32; }
-        .data-btn.reset { background: #ffebee; color: #c62828; }
+        .data-btn.reset { background: #fce4ec; color: #c62828; }
         .data-btn-icon { font-size: 20px; }
+
         #fileInput { display: none; }
-        .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(0,0,0,0.8); color: white; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: 600; z-index: 2000; opacity: 0; transition: all 0.3s; pointer-events: none; }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 2000;
+            opacity: 0;
+            transition: all 0.3s;
+            pointer-events: none;
+        }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-        .tab-nav { display: flex; gap: 6px; margin-bottom: 14px; }
-        .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 12px; font-size: 13px; font-weight: 600; cursor: pointer; background: rgba(255,255,255,0.6); color: #999; transition: all 0.2s; }
-        .tab-btn.active { background: linear-gradient(135deg, #81C784, #4CAF50); color: white; box-shadow: 0 3px 10px rgba(76,175,80,0.3); }
+
+        /* Tab 导航 */
+        .tab-nav {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            background: rgba(255,255,255,0.6);
+            color: #999;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #FF8FB3 0%, #FF6B9D 100%);
+            color: white;
+            box-shadow: 0 3px 10px rgba(255,107,157,0.3);
+        }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-        .stat-card { background: rgba(255,255,255,0.7); border-radius: 14px; padding: 14px; text-align: center; }
+
+        /* 统计卡片 */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.7);
+            border-radius: 14px;
+            padding: 14px;
+            text-align: center;
+        }
         .stat-card-icon { font-size: 24px; margin-bottom: 4px; }
-        .stat-card-value { font-size: 22px; font-weight: 800; color: #4CAF50; }
+        .stat-card-value { font-size: 22px; font-weight: 800; color: #FF6B9D; }
         .stat-card-label { font-size: 12px; color: #aaa; margin-top: 2px; }
-        .week-chart { display: flex; align-items: flex-end; justify-content: space-between; height: 80px; gap: 6px; padding: 10px 0; }
+        .week-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            height: 80px;
+            gap: 6px;
+            padding: 10px 0;
+        }
         .week-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-        .week-bar { width: 100%; background: linear-gradient(to top, #81C784, #4CAF50); border-radius: 6px 6px 0 0; min-height: 4px; transition: height 0.3s; }
+        .week-bar {
+            width: 100%;
+            background: linear-gradient(to top, #FF8FB3, #FF6B9D);
+            border-radius: 6px 6px 0 0;
+            min-height: 4px;
+            transition: height 0.3s;
+        }
         .week-bar-label { font-size: 11px; color: #aaa; }
         .week-bar-value { font-size: 10px; color: #999; }
         /* 家长模式样式 */
-        body.parent-mode { background: linear-gradient(135deg, #f0f4f8 0%, #e8eaf6 50%, #f3e5f5 100%); }
-        .parent-banner { background: linear-gradient(135deg, #7986CB 0%, #5C6BC0 100%); border-radius: 16px; padding: 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; }
+        body.parent-mode { background: linear-gradient(135deg, #f0f0f5 0%, #e8eaf6 50%, #fce4ec 100%); }
+        .parent-banner { background: linear-gradient(135deg, #FF8FB3 0%, #FF6B9D 100%); border-radius: 16px; padding: 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; }
         .parent-banner-icon { font-size: 36px; }
         .parent-banner-text { flex: 1; }
         .parent-banner-title { font-size: 16px; font-weight: 700; color: white; margin-bottom: 2px; }
@@ -161,33 +661,62 @@
         .parent-banner-back { padding: 8px 16px; background: rgba(255,255,255,0.25); color: white; border: 1px solid rgba(255,255,255,0.4); border-radius: 20px; font-size: 13px; font-weight: 600; text-decoration: none; cursor: pointer; }
         .parent-banner-back:hover { background: rgba(255,255,255,0.35); }
         .homework-actions { display: flex; gap: 6px; margin-top: 8px; }
-        .action-edit { flex: 1; padding: 9px; background: #e3f2fd; color: #1565c0; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .action-edit { flex: 1; padding: 9px; background: #fce4ec; color: #c2185b; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; }
         .action-delete { flex: 1; padding: 9px; background: #ffebee; color: #c62828; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; }
-        .action-start { flex: 1; }
         /* 编辑弹窗 */
         .edit-form { text-align: left; }
         .edit-form label { font-size: 13px; font-weight: 600; color: #555; margin-bottom: 4px; display: block; }
-        .edit-form input { width: 100%; padding: 12px 14px; border: 2px solid #e3f2fd; border-radius: 12px; font-size: 14px; outline: none; margin-bottom: 12px; }
-        .edit-form input:focus { border-color: #5C6BC0; }
+        .edit-form input { width: 100%; padding: 12px 14px; border: 2px solid #fce4ec; border-radius: 12px; font-size: 14px; outline: none; margin-bottom: 12px; }
+        .edit-form input:focus { border-color: #FF6B9D; }
         .edit-icon-select { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
         .edit-icon-option { width: 44px; height: 44px; border-radius: 10px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; border: 2px solid transparent; }
-        .edit-icon-option.selected { border-color: #5C6BC0; background: #e8eaf6; }
+        .edit-icon-option.selected { border-color: #FF6B9D; background: #fce4ec; }
         .edit-form-actions { display: flex; gap: 8px; }
-        .edit-save { flex: 1; padding: 12px; background: linear-gradient(135deg, #7986CB, #5C6BC0); color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; }
+        .edit-save { flex: 1; padding: 12px; background: linear-gradient(135deg, #FF8FB3, #FF6B9D); color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; }
         .edit-cancel { flex: 1; padding: 12px; background: #f5f5f5; color: #555; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; }
-        .add-homework-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #7986CB 0%, #5C6BC0 100%); color: white; border: none; border-radius: 14px; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; }
-        .add-homework-btn:hover { box-shadow: 0 4px 16px rgba(92,107,192,0.35); }
+        .add-homework-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #FF8FB3 0%, #FF6B9D 100%); color: white; border: none; border-radius: 14px; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; }
+        .add-homework-btn:hover { box-shadow: 0 4px 16px rgba(255,107,157,0.35); }
 
         /* ===== 积分系统 ===== */
-        .points-card { background: linear-gradient(135deg, #f3fff3 0%, #c8f7c5 100%); border-radius: 20px; padding: 16px 18px; margin-bottom: 14px; box-shadow: 0 4px 16px rgba(76,175,80,0.12); display: flex; align-items: center; gap: 14px; }
+        .points-card {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
+            border-radius: 20px;
+            padding: 16px 18px;
+            margin-bottom: 14px;
+            box-shadow: 0 4px 16px rgba(255,193,7,0.2);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
         .points-icon { font-size: 36px; }
         .points-info { flex: 1; }
-        .points-label { font-size: 13px; color: #2e7d32; font-weight: 600; }
-        .points-value { font-size: 28px; font-weight: 900; color: #2e7d32; line-height: 1.1; }
+        .points-label { font-size: 13px; color: #856404; font-weight: 600; }
+        .points-value { font-size: 28px; font-weight: 900; color: #e67e00; line-height: 1.1; }
         .points-sub { font-size: 12px; color: #aaa; margin-top: 2px; }
-        .points-history-btn { padding: 8px 14px; background: linear-gradient(135deg, #66BB6A, #43A047); color: white; border: none; border-radius: 16px; font-size: 12px; font-weight: 700; cursor: pointer; }
+        .points-history-btn {
+            padding: 8px 14px;
+            background: linear-gradient(135deg, #ffc107, #ff9800);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
         /* ===== 彩蛋全屏弹窗 ===== */
-        .egg-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(76,175,80,0.96) 0%, rgba(129,199,132,0.97) 100%); z-index: 5000; align-items: center; justify-content: center; flex-direction: column; text-align: center; overflow: hidden; }
+        .egg-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, rgba(255,107,157,0.96) 0%, rgba(255,143,179,0.97) 100%);
+            z-index: 5000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+            overflow: hidden;
+        }
         .egg-overlay.active { display: flex; }
         .egg-fireworks { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
         .egg-content { position: relative; z-index: 1; padding: 30px; }
@@ -197,29 +726,66 @@
         .egg-subtitle { font-size: 18px; color: rgba(255,255,255,0.9); margin-bottom: 20px; }
         .egg-points { font-size: 44px; font-weight: 900; color: #fff200; text-shadow: 0 2px 12px rgba(0,0,0,0.2); margin-bottom: 6px; }
         .egg-points-label { font-size: 16px; color: rgba(255,255,255,0.85); margin-bottom: 28px; }
-        .egg-close-btn { padding: 14px 40px; background: white; color: #4CAF50; border: none; border-radius: 30px; font-size: 17px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+        .egg-close-btn {
+            padding: 14px 40px;
+            background: white;
+            color: #FF6B9D;
+            border: none;
+            border-radius: 30px;
+            font-size: 17px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .confetti-piece {
+            position: absolute;
+            width: 10px; height: 10px;
+            border-radius: 2px;
+            animation: confetti-fall linear forwards;
+        }
+        @keyframes confetti-fall {
+            0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+        }
+
         /* ===== 积分历史弹窗 ===== */
-        .points-log-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 3000; align-items: flex-end; justify-content: center; }
+        .points-log-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 3000;
+            align-items: flex-end;
+            justify-content: center;
+        }
         .points-log-overlay.active { display: flex; }
-        .points-log-sheet { background: white; border-radius: 24px 24px 0 0; padding: 24px 20px; width: 100%; max-height: 70vh; overflow-y: auto; }
+        .points-log-sheet {
+            background: white;
+            border-radius: 24px 24px 0 0;
+            padding: 24px 20px;
+            width: 100%;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
         .points-log-title { font-size: 18px; font-weight: 800; color: #333; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
         .points-log-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f5f5f5; }
         .points-log-item:last-child { border-bottom: none; }
         .points-log-desc { font-size: 14px; color: #333; }
         .points-log-date { font-size: 12px; color: #aaa; margin-top: 2px; }
-        .points-log-amount { font-size: 18px; font-weight: 800; color: #2e7d32; }
+        .points-log-amount { font-size: 18px; font-weight: 800; color: #e67e00; }
         .points-log-close { width: 100%; padding: 14px; background: #f5f5f5; color: #555; border: none; border-radius: 14px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 12px; }
     </style>
 </head>
 <body>
+    <!-- 顶部 -->
     <div class="header">
         <div class="header-title">
-            <div class="header-icon">🌿</div>
-            <div class="header-name" id="headerName">羽菡森林计时器</div>
+            <div class="header-icon">🐱</div>
+            <div class="header-name" id="headerName">羽佳猫咪计时器</div>
         </div>
         <!-- 本地时间 -->
-        <div class="header-clock" id="headerClock"><img src="https://img.icons8.com/ios-filled/24/4CAF50/clock.png" alt="时间"> --:--:--</div>
-        <a href="yujia.html" class="header-switch" id="switchLink">🐱 切换羽佳</a>
+        <div class="header-clock" id="headerClock"><img src="https://img.icons8.com/ios-filled/24/FF6B9D/clock.png" alt="时间"> --:--:--</div>
+        <a href="yuhan.html" class="header-switch" id="switchLink">🌿 切换羽菡</a>
     </div>
 
     <!-- 家长模式 Banner -->
@@ -230,78 +796,56 @@
                 <div class="parent-banner-title">👨‍👧 家长版 · 作业管理</div>
                 <div class="parent-banner-desc">可添加、编辑、删除作业（不影响计时）</div>
             </div>
-            <a href="yuhan.html" class="parent-banner-back" id="backToChild">返回孩子版</a>
+            <a href="yujia.html" class="parent-banner-back" id="backToChild">返回孩子版</a>
         </div>
     </div>
 
+    <!-- 主内容 -->
     <div class="main">
+        <!-- 头像 -->
         <div class="avatar-section">
-            <div class="main-avatar">🌿</div>
-            <div class="greeting">🌿 羽菡加油！稳步前行！🌿</div>
+            <div class="main-avatar">🐱</div>
+            <div class="greeting">🐱 羽佳加油！今天也很棒！🐱</div>
             <div class="date-display" id="dateDisplay"></div>
         </div>
 
+        <!-- 截止时间 -->
         <div class="card">
             <div class="deadline-row">
-                <span>⏰</span><span>今日截止</span>
-                <span class="deadline-time" id="deadlineTime">23:00</span>
+                <span>⏰</span>
+                <span>今日截止</span>
+                <span class="deadline-time" id="deadlineTime">22:30</span>
             </div>
             <div class="deadline-row" style="margin-bottom:0">
-                <span id="deadlineRemaining" style="color:#4CAF50;font-weight:700;font-size:15px;"></span>
+                <span id="deadlineRemaining" style="color:#FF6B9D;font-weight:700;font-size:15px;"></span>
             </div>
         </div>
 
-        <div class="card" id="shengdiCard">
-            <div class="shengdi-card">
-                <div class="shengdi-icon">🌏</div>
-                <div class="shengdi-info">
-                    <div class="shengdi-title">生地会考倒计时</div>
-                    <div><span class="shengdi-count" id="shengdiDays">--</span> <span class="shengdi-label">天后考试</span></div>
-                </div>
-            </div>
-            <div class="deadline-row">
-                <span>📚</span><span>剩余复习时间</span>
-                <span id="shengdiStudy" style="font-weight:700;color:#4CAF50;font-size:15px;"></span>
-            </div>
-        </div>
-
-        <!-- 中考倒计时卡片 -->
-        <div class="card" id="zhongkaoCard">
-            <div class="zhongkao-card">
-                <div class="zhongkao-icon">🎓</div>
-                <div class="zhongkao-info">
-                    <div class="zhongkao-title">中考倒计时</div>
-                    <div><span class="zhongkao-count" id="zhongkaoDays">--</span> <span class="zhongkao-label">天后考试</span></div>
-                </div>
-            </div>
-            <div class="deadline-row">
-                <span>📚</span><span>建议复习（每天2h）</span>
-                <span id="zhongkaoStudy" style="font-weight:700;color:#7B1FA2;font-size:15px;"></span>
-            </div>
-        </div>
-
+        <!-- 进度 -->
         <div class="card">
             <div class="progress-header">
                 <div class="progress-title">📚 今日进度</div>
-                <div class="progress-count" id="progressCount">0/4</div>
+                <div class="progress-count" id="progressCount">0/5</div>
             </div>
-            <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width:0%"></div>
+            </div>
         </div>
 
         <!-- 积分卡片 -->
-        <div class="points-card">
-            <div class="points-icon">🌿</div>
+        <div class="points-card" id="pointsCard">
+            <div class="points-icon">⭐</div>
             <div class="points-info">
-                <div class="points-label">🌿 羽菡积分</div>
+                <div class="points-label">🐱 羽佳积分</div>
                 <div style="display:flex;align-items:baseline;gap:8px;">
                     <span class="points-value" id="pointsDisplay">0</span>
-                    <span style="font-size:12px;color:#2e7d32;">今日</span>
+                    <span style="font-size:12px;color:#888;">今日</span>
                 </div>
                 <div class="points-sub" id="pointsSub">完成作业赢取积分！</div>
             </div>
             <div style="text-align:center;">
-                <div style="font-size:11px;color:#388e3c;">🏆 累计</div>
-                <div id="totalPointsFixedValue" style="font-size:20px;font-weight:900;color:#1b5e20;line-height:1.2;">0</div>
+                <div style="font-size:11px;color:#a07800;">🏆 累计</div>
+                <div id="totalPointsFixedValue" style="font-size:20px;font-weight:900;color:#e65100;line-height:1.2;">0</div>
             </div>
         </div>
 
@@ -312,11 +856,21 @@
                 <button class="tab-btn" id="tabWeek" onclick="switchTab('week')">📆 本周</button>
                 <button class="tab-btn" id="tabMonth" onclick="switchTab('month')">📊 本月</button>
             </div>
+            <!-- 今日 -->
             <div class="tab-content active" id="contentToday">
                 <div class="stats-row">
-                    <div class="stat-item"><div class="stat-value" id="studyMinutes">0</div><div class="stat-label">学习分钟</div></div>
-                    <div class="stat-item"><div class="stat-value" id="restMinutes">0</div><div class="stat-label">休息分钟</div></div>
-                    <div class="stat-item"><div class="stat-value" id="efficiency">0%</div><div class="stat-label">学习效率</div></div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="studyMinutes">0</div>
+                        <div class="stat-label">学习分钟</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="restMinutes">0</div>
+                        <div class="stat-label">休息分钟</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="efficiency">0%</div>
+                        <div class="stat-label">学习效率</div>
+                    </div>
                 </div>
                 <!-- 超时统计行 -->
                 <div class="stats-row" style="margin-top:8px;">
@@ -330,6 +884,7 @@
                     </div>
                 </div>
             </div>
+            <!-- 本周 -->
             <div class="tab-content" id="contentWeek">
                 <div class="stat-grid">
                     <div class="stat-card"><div class="stat-card-icon">📚</div><div class="stat-card-value" id="weekTotalMin">0</div><div class="stat-card-label">总学习分钟</div></div>
@@ -344,6 +899,7 @@
                 </div>
                 <div class="week-chart" id="weekChart"></div>
             </div>
+            <!-- 本月 -->
             <div class="tab-content" id="contentMonth">
                 <div class="stat-grid">
                     <div class="stat-card"><div class="stat-card-icon">📚</div><div class="stat-card-value" id="monthTotalMin">0</div><div class="stat-card-label">总学习分钟</div></div>
@@ -359,6 +915,7 @@
             </div>
         </div>
 
+        <!-- 预布置作业提示 -->
         <div class="card" id="assignedAlert" style="display:none;">
             <div class="assigned-alert">
                 <div class="assigned-alert-icon">📋</div>
@@ -366,34 +923,49 @@
                     <div class="assigned-alert-title" id="assignedTitle">家长布置了新作业</div>
                     <div class="assigned-alert-desc" id="assignedDesc"></div>
                 </div>
-                <button class="assigned-alert-action" onclick="startAssigned()">开始 ⏱</button>
+                <button class="assigned-alert-action" id="assignedStartBtn" onclick="startAssigned()">开始 ⏱</button>
             </div>
         </div>
 
-        <!-- 孩子版添加作业区 -->
+        <!-- 孩子版 -->
         <div id="childAddSection">
+            <!-- 作业列表 -->
             <div class="section-title">📝 今日作业</div>
             <div id="homeworkList"></div>
+            <!-- 添加作业 -->
             <div class="card">
                 <div class="section-title" style="margin-bottom:12px">✨ 添加额外作业</div>
                 <div class="add-form">
-                    <input type="text" class="add-input" id="newName" placeholder="作业名称，如：物理练习">
+                    <input type="text" class="add-input" id="newName" placeholder="作业名称，如：练字一页">
                     <input type="number" class="time-input" id="newTime" placeholder="分钟" min="1">
                     <button class="add-btn" onclick="addHomework()">+</button>
                 </div>
             </div>
+            <!-- 数据管理 -->
             <div class="card">
-                <button class="report-btn" onclick="sendReport()">📊 发送今日报告给爸爸妈妈</button>
+                <button class="report-btn" onclick="sendReport()">
+                    📊 发送今日报告给爸爸妈妈
+                </button>
             </div>
         </div>
 
-        <!-- 家长版作业管理区 -->
+        <!-- 家长版作业管理 -->
         <div id="parentManageSection" style="display:none;">
             <div class="section-title">📋 作业清单（共 <span id="parentHwCount">0</span> 项）</div>
             <div id="parentHomeworkList"></div>
             <button class="add-homework-btn" onclick="openAddModal()">➕ 添加学校作业</button>
             <div class="card">
-                <button class="report-btn" onclick="sendReport()">📊 发送今日报告给爸爸妈妈</button>
+                <button class="report-btn" onclick="sendReport()">
+                    📊 发送今日报告给爸爸妈妈
+                </button>
+            </div>
+            <div class="card" style="margin-top:15px;">
+                <button class="report-btn" onclick="manualArchive()" style="background:#2196F3;">
+                    📦 手动归档今日数据
+                </button>
+                <div style="font-size:12px;color:#666;margin-top:5px;">
+                    💡 每天自动归档，也可手动归档
+                </div>
             </div>
         </div>
         <br><br>
@@ -401,9 +973,10 @@
 
     <input type="file" id="fileInput" accept=".json" onchange="importData(event)">
 
+    <!-- 计时弹窗 -->
     <div class="modal-overlay" id="timerModal">
         <div class="modal">
-            <div class="modal-icon">🌿</div>
+            <div class="modal-cat">🐱</div>
             <div class="modal-task" id="modalTaskName">语文阅读</div>
             <div class="modal-sub" id="modalSub">专注中...</div>
             <div class="timer-display" id="timerDisplay">00:00</div>
@@ -415,6 +988,7 @@
         </div>
     </div>
 
+    <!-- 完成弹窗 -->
     <div class="modal-overlay" id="completeModal">
         <div class="modal">
             <div class="complete-emoji" id="completeEmoji">🎉</div>
@@ -423,7 +997,7 @@
                 <div class="stat-row"><span class="stat-row-label">总用时</span><span class="stat-row-value" id="completeTotal">25分钟</span></div>
                 <div class="stat-row"><span class="stat-row-label">预计时间</span><span class="stat-row-value" id="completeExpected">20分钟</span></div>
                 <div class="stat-row"><span class="stat-row-label">实际学习</span><span class="stat-row-value" id="completeStudy">23分钟</span></div>
-                <div class="stat-row"><span class="stat-row-label">休息时间</span><span class="stat-row-value" id="completeRest">0分钟</span></div>
+                <div class="stat-row"><span class="stat-row-label">休息时间</span><span class="stat-row-value" id="completeRest">2分钟</span></div>
                 <div class="stat-row"><span class="stat-row-label">学习效率</span><span class="stat-row-value" id="completeEfficiency">92%</span></div>
             </div>
             <div class="complete-feedback" id="completeFeedback">提前完成！效率超高！✨</div>
@@ -431,52 +1005,53 @@
         </div>
     </div>
 
+    <!-- Toast -->
     <div class="toast" id="toast"></div>
 
     <!-- 全部完成彩蛋弹窗 -->
     <div class="egg-overlay" id="eggOverlay">
         <canvas class="egg-fireworks" id="eggCanvas"></canvas>
         <div class="egg-content">
-            <div class="egg-emoji">🌟</div>
+            <div class="egg-emoji">🎉</div>
             <div class="egg-title">全部完成！！！</div>
-            <div class="egg-subtitle">🌿 羽菡今天超级棒！稳步前行！</div>
+            <div class="egg-subtitle">🐱 羽佳今天太厉害了！</div>
             <div class="egg-points" id="eggPointsEarned">+10</div>
-            <div class="egg-points-label">积分入账，冲向中考！</div>
+            <div class="egg-points-label">积分入账，继续加油！</div>
             <button class="egg-close-btn" onclick="closeEgg()">好棒！继续！💪</button>
         </div>
     </div>
 
-    <!-- 积分历史弹窗 -->
-    <div class="points-log-overlay" id="pointsLogOverlay" onclick="closePointsLog()">
-        <div class="points-log-sheet" onclick="event.stopPropagation()">
-            <div class="points-log-title">📊 每日学习详情</div>
-            <div style="display:flex;align-items:center;gap:8px;margin:8px 0 12px;padding:0 4px;">
-                <span style="font-size:13px;color:#888;">📅 查看日期：</span>
-                <input type="date" id="pointsLogDate" style="flex:1;padding:6px 10px;border:1.5px solid #81c784;border-radius:10px;font-size:13px;color:#555;outline:none;" onchange="openPointsLog()">
-            </div>
-            <!-- 累计总积分显示（固定在顶部） -->
-            <div id="totalPointsDisplay" style="background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border-radius:12px;padding:12px;margin-bottom:12px;text-align:center;box-shadow:0 2px 8px rgba(76,175,80,0.2);">
-                <div style="font-size:12px;color:#2e7d32;">累计总积分</div>
-                <div id="totalPointsValue" style="font-size:28px;font-weight:900;color:#2e7d32;line-height:1.2;">0</div>
-            </div>
-            <!-- 当日作业完成情况 -->
-            <div style="margin-bottom:12px;">
-                <div style="font-size:13px;color:#666;margin-bottom:8px;">📝 当日作业</div>
-                <div id="homeworkStatusList" style="font-size:12px;color:#888;text-align:center;padding:10px;">选择日期后自动加载...</div>
-            </div>
-            <!-- 积分明细 -->
-            <div style="margin-bottom:8px;">
-                <div style="font-size:13px;color:#666;margin-bottom:8px;">⭐ 积分明细</div>
-                <div id="pointsLogList"></div>
-            </div>
-            <button class="points-log-close" onclick="closePointsLog()">关闭</button>
-        </div>
-    </div>
+  <!-- 积分历史弹窗 -->
+  <div class="points-log-overlay" id="pointsLogOverlay" onclick="closePointsLog()">
+      <div class="points-log-sheet" onclick="event.stopPropagation()">
+          <div class="points-log-title">📊 每日学习详情</div>
+          <div style="display:flex;align-items:center;gap:8px;margin:8px 0 12px;padding:0 4px;">
+              <span style="font-size:13px;color:#888;">📅 查看日期：</span>
+              <input type="date" id="pointsLogDate" style="flex:1;padding:6px 10px;border:1.5px solid #ffb7c5;border-radius:10px;font-size:13px;color:#555;outline:none;" onchange="openPointsLog()">
+          </div>
+          <!-- 累计总积分显示（固定在顶部） -->
+          <div id="totalPointsDisplay" style="background:linear-gradient(135deg,#fff3cd,#ffe69c);border-radius:12px;padding:12px;margin-bottom:12px;text-align:center;box-shadow:0 2px 8px rgba(255,193,7,0.2);">
+              <div style="font-size:12px;color:#856404;">累计总积分</div>
+              <div id="totalPointsValue" style="font-size:28px;font-weight:900;color:#e67e00;line-height:1.2;">0</div>
+          </div>
+          <!-- 当日作业完成情况 -->
+          <div style="margin-bottom:12px;">
+              <div style="font-size:13px;color:#666;margin-bottom:8px;">📝 当日作业</div>
+              <div id="homeworkStatusList" style="font-size:12px;color:#888;text-align:center;padding:10px;">选择日期后自动加载...</div>
+          </div>
+          <!-- 积分明细 -->
+          <div style="margin-bottom:8px;">
+              <div style="font-size:13px;color:#666;margin-bottom:8px;">⭐ 积分明细</div>
+              <div id="pointsLogList"></div>
+          </div>
+          <button class="points-log-close" onclick="closePointsLog()">关闭</button>
+      </div>
+  </div>
 
     <!-- 家长模式：编辑/添加作业弹窗 -->
     <div class="modal-overlay" id="editModal">
         <div class="modal">
-            <div class="modal-icon" id="editModalIcon">📝</div>
+            <div class="modal-cat" id="editModalIcon">📝</div>
             <div class="modal-task" id="editModalTitle">编辑作业</div>
             <div class="edit-form">
                 <label>作业名称</label>
@@ -495,14 +1070,14 @@
 
     <script>
     const CHILD = 'yuhan';
-    const DEADLINE = '23:00';
-    const ICON = '🌿';
+    const DEADLINE = '22:30';
+    const ICON = '🐱';
     const CHILD_NAME = '羽菡';
-    const CHILD_OPEN_ID = 'ou_bdac81aee0c980d2bd351febe0393eb3';  // 羽菡飞书 open_id
+    const CHILD_OPEN_ID = 'ou_3a8e6123c7769ffc8ba603fdd74c8b1a';  // 羽菡飞书 open_id
     const PARENT_OPEN_ID = 'ou_04d8a814e9b4ce5640739ee9c2221df5'; // 爸爸
     const FEISHU_WEBHOOK = 'https://open.feishu.cn/open-apis/bot/v2/hook/eff6ff06-c0cb-4c63-b032-a2b8776085d2';
-    const SHENGDI_DATE = new Date('2026-06-16');  // 生地会考（考试当天仍显示0）
-    const ZHONGKAO_DATE = new Date('2027-06-30'); // 中考
+    const ICON_OPTIONS = ['📖','📐','🎧','📝','📚','🔢','🌍','🧬','🎨','🎵','⚽','💪','🔬','📕','✏️'];
+    let isParentMode = false, editingHwId = null, selectedEditIcon = '📝';
 
     // GitHub 同步配置
     const _t = ['ghp_4trSqjSev', 'anCogqd3BDiF', 'mH6fWQcwt0sYUHM'];
@@ -522,9 +1097,14 @@
     }
 
     // 推送数据到 GitHub 仓库（跨设备同步核心）
-     async function syncToGitHub(dataToSync) {
+     // 自动归档检查（每天0点执行一次）
+     let lastArchiveCheck = null;
+
+     async function syncToGitHub(dataToSync, options = {}) {
          try {
+             const { noArchive = false } = options; // 是否跳过归档
              const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_DATA_FILE}`;
+             // 先获取当前文件的 SHA（更新必须带 sha）
              const getResp = await fetch(apiUrl, {
                  headers: {
                      'Authorization': `token ${GITHUB_TOKEN}`,
@@ -536,6 +1116,7 @@
                  const fileInfo = await getResp.json();
                  sha = fileInfo.sha;
              }
+             // 写入数据
              const content = btoa(unescape(encodeURIComponent(JSON.stringify(dataToSync, null, 2))));
              const body = {
                  message: `sync: ${CHILD_NAME} 作业数据 ${new Date().toLocaleString('zh-CN')}`,
@@ -553,8 +1134,10 @@
              });
              if (putResp.ok) {
                  console.log('✅ 数据已同步到GitHub');
-                 // 同时写入历史归档（异步，不阻塞）
-                 archiveTodayData(dataToSync).catch(() => {});
+                 // 【改进】只在每天0点自动归档，不再实时归档
+                 if (!noArchive) {
+                     checkDailyArchive(dataToSync);
+                 }
                  return true;
              } else {
                  console.error('❌ GitHub同步失败:', putResp.status);
@@ -566,7 +1149,31 @@
          }
      }
 
-     // 将今日数据归档到 data/yuhan_history_YYYY-MM-DD.json（家长看板历史查询用）
+     // 检查是否需要归档（每天0点执行一次）
+     function checkDailyArchive(dataToSync) {
+         const now = new Date();
+         const todayStr = now.toISOString().split('T')[0];
+         const lastArchiveDate = localStorage.getItem(`lastArchiveDate_${CHILD}`);
+
+         console.log('[归档检查] 今天:', todayStr, '上次归档:', lastArchiveDate);
+
+         // 如果今天还没归档过，则归档
+         if (lastArchiveDate !== todayStr) {
+             console.log('[归档检查] 开始归档今日数据');
+             archiveTodayData(dataToSync).then(success => {
+                 if (success) {
+                     localStorage.setItem(`lastArchiveDate_${CHILD}`, todayStr);
+                     console.log('[归档检查] 归档成功，更新标记:', todayStr);
+                 }
+             }).catch(err => {
+                 console.error('[归档检查] 归档失败:', err);
+             });
+         } else {
+             console.log('[归档检查] 今日已归档，跳过');
+         }
+     }
+
+     // 将今日数据归档到 data/yujia_history_YYYY-MM-DD.json（家长看板历史查询用）
      async function archiveTodayData(dataToSync) {
          const maxRetries = 3;
          for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -574,6 +1181,7 @@
                  const dateStr = dataToSync.date || new Date().toISOString().split('T')[0];
                  const historyFile = `data/${CHILD}_history_${dateStr}.json`;
                  const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${historyFile}`;
+                 // 先检查是否已存在（获取SHA）
                  const getResp = await fetch(apiUrl, {
                      headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' }
                  });
@@ -608,6 +1216,38 @@
          }
          console.warn('历史归档多次失败');
          return false;
+     }
+
+     // 手动归档按钮
+     async function manualArchive() {
+         if (!confirm('确定要归档今日数据吗？\n\n归档后，今日数据将保存到历史记录，供家长查看。')) {
+             return;
+         }
+
+         const btn = event.target;
+         btn.textContent = '📦 归档中...';
+         btn.disabled = true;
+
+         try {
+             const success = await archiveTodayData(await buildSyncData());
+             if (success) {
+                 const today = new Date().toISOString().split('T')[0];
+                 localStorage.setItem(`lastArchiveDate_${CHILD}`, today);
+                 alert('✅ 归档成功！');
+                 btn.textContent = '✅ 已归档';
+             } else {
+                 alert('❌ 归档失败，请稍后重试');
+                 btn.textContent = '📦 手动归档今日数据';
+             }
+         } catch (e) {
+             alert('❌ 归档异常: ' + e.message);
+             btn.textContent = '📦 手动归档今日数据';
+         }
+
+         setTimeout(() => {
+             btn.textContent = '📦 手动归档今日数据';
+             btn.disabled = false;
+         }, 3000);
      }
 
 
@@ -674,6 +1314,7 @@
                     const ghUpdated = new Date(ghParsed.lastUpdated || '0');
 
                     // 【时间戳仲裁】GitHub数据更新时间 > 本地更新时间 → 以GitHub为准
+                    // 同时合并两端的积分日志（去重，取并集）
                     if (ghUpdated > localUpdated) {
                         console.log('[同步] GitHub数据更新(' + ghParsed.lastUpdated + ')，以GitHub积分为准:', ghPoints, '(本地:', localPoints + ')');
                         localPoints = ghPoints;
@@ -704,6 +1345,7 @@
             console.log('[同步] 合并GitHub积分跳过:', e.message);
         }
 
+        // 计算今日积分（从明细累加）
         const todayPoints = pointsLog.reduce((sum, entry) => sum + (entry.amount || 0), 0);
         console.log('[同步数据] 累计积分:', localPoints, '今日积分:', todayPoints, '明细:', pointsLog.length, '条');
         
@@ -715,7 +1357,7 @@
             homework: homework,
             points: localPoints,
             todayPoints: todayPoints,
-            pointsLog: pointsLog.slice(-20),
+            pointsLog: pointsLog.slice(-20), // 保留最近20条（今日明细）
             todayStats: {
                 studyMinutes: timerData.studyMinutes || 0,
                 restMinutes: timerData.restMinutes || 0,
@@ -724,25 +1366,88 @@
             }
         };
     }
-    const DEFAULT_HOMEWORK = [
-        { id:1, name:'语文作业', icon:'📖', time:30, status:'waiting' },
-        { id:2, name:'数学练习', icon:'📐', time:30, status:'waiting' },
-        { id:3, name:'英语听说', icon:'🎧', time:20, status:'waiting' },
-        { id:4, name:'学校作业', icon:'📝', time:0, status:'waiting' }
-    ];
-    const ICON_OPTIONS = ['📖','📐','🎧','📝','📚','🔢','🌍','🧬','🎨','🎵','⚽','💪','🔬','📕','✏️'];
-    let homework = [], currentTask = null, timerInterval = null, startTime = null, pausedTime = 0, isPaused = false, restStartTime = null, assignedTask = null;
-    let isParentMode = false, editingHwId = null, selectedEditIcon = '📝';
-    const praises = ['太棒了！提前完成！🎉','专注力满分！继续加油！🌟','效率超高！💯','稳步前进！🌿','高效完成！👏','提前完成！厉害！🚀'];
-    const encouragements = ['虽然超时了，但坚持完成就是胜利！💪','做完就是好样的！继续努力！🌈','没关系，尽力就好！💖'];
+
+    // 发送作业完成通知卡片给家长
+    function sendTaskCompleteCard(completedTask) {
+        const done = homework.filter(t => t.status === 'done').length;
+        const total = homework.length;
+        const remaining = total - done;
+        const remainingTasks = homework.filter(t => t.status !== 'done');
+        const remainingList = remainingTasks.length > 0 
+            ? remainingTasks.map(t => `${t.icon} ${t.name}`).join('、') 
+            : '无';
+
+        const now = new Date();
+        const timeStr = `${now.getHours()}点${now.getMinutes()}分`;
+        
+        const effText = completedTask.efficiency >= 90 ? '🎉 效率超高！' 
+            : completedTask.efficiency >= 70 ? '👍 表现不错！' 
+            : '💪 继续加油！';
+
+        const card = {
+            msg_type: 'interactive',
+            card: {
+                config: { wide_screen_mode: true },
+                header: {
+                    title: { tag: 'plain_text', content: `✅ 羽佳完成作业通知` },
+                    template: 'orange'
+                },
+                elements: [
+                    {
+                        tag: 'div',
+                        text: {
+                            tag: 'lark_md',
+                            content: `@小龙虾爸爸 @小龙虾妈妈，${effText}\n\n🐱 **${completedTask.name}** 已完成！\n用时 ${completedTask.totalMin} 分钟，效率 ${completedTask.efficiency}%`
+                        }
+                    },
+                    { tag: 'hr' },
+                    {
+                        tag: 'column_set',
+                        flex_mode: 'none',
+                        horizontal_spacing: 'large',
+                        columns: [
+                            { tag: 'column', width: 'auto', elements: [{ tag: 'div', text: { tag: 'lark_md', content: '**✅ 已完成**\n`' + done + '/' + total + '` 项' } }] },
+                            { tag: 'column', width: 'auto', elements: [{ tag: 'div', text: { tag: 'lark_md', content: '**📋 剩余**\n`' + remaining + '` 项' } }] }
+                        ]
+                    },
+                    { tag: 'hr' },
+                    {
+                        tag: 'div',
+                        text: { tag: 'lark_md', content: `**📝 剩余作业**\n${remainingList}` }
+                    },
+                    {
+                        tag: 'note',
+                        elements: [
+                            { tag: 'plain_text', content: `⏰ ${timeStr} · 作业计时器自动通知` }
+                        ]
+                    }
+                ]
+            }
+        };
+        fetch(FEISHU_WEBHOOK, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(card)
+        }).then(r => r.ok ? showToast('已完成通知已发送 📨') : showToast('发送失败 ❌')).catch(() => showToast('发送失败 ❌'));
+    }
+
+    // Web Audio API 声音
     let audioCtx = null;
     function getAudioCtx() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
     function playBeep(freq=880, dur=0.3, vol=0.4) {
-        try { const ctx = getAudioCtx(), osc = ctx.createOscillator(), gain = ctx.createGain(); osc.connect(gain); gain.connect(ctx.destination); osc.frequency.value = freq; gain.gain.value = vol; osc.start(); gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur); osc.stop(ctx.currentTime + dur); } catch(e) {}
+        try {
+            const ctx = getAudioCtx();
+            const osc = ctx.createOscillator(), gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.frequency.value = freq; gain.gain.value = vol;
+            osc.start(); gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+            osc.stop(ctx.currentTime + dur);
+        } catch(e) {}
     }
     function playWarningSound() { playBeep(660, 0.15); setTimeout(() => playBeep(880, 0.15), 200); }
     function playDangerSound() { playBeep(440, 0.3, 0.6); setTimeout(() => playBeep(440, 0.3, 0.6), 400); setTimeout(() => playBeep(660, 0.3, 0.6), 800); }
 
+    // Tab 切换
     function switchTab(tab) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -752,13 +1457,17 @@
         if (tab === 'month') renderMonthStats();
     }
 
+    // 本周统计
     function renderWeekStats() {
-        const days = ['日','一','二','三','四','五','六'], now = new Date(), today = now.getDay();
-        let totalMin = 0, totalRestMin = 0, taskCount = 0, studyDays = 0, maxMin = 0;
-        let totalPlanned = 0, totalStudy = 0, overMin = 0, overCount = 0;
+        const days = ['日','一','二','三','四','五','六'];
+        const now = new Date(), today = now.getDay();
         const weekData = [];
+        let totalMin = 0, totalRestMin = 0, taskCount = 0, studyDays = 0;
+        let totalPlanned = 0, totalStudy = 0, overMin = 0, overCount = 0;
+        let maxMin = 0;
         for (let i = 0; i < 7; i++) {
-            const d = new Date(now); d.setDate(d.getDate() - today + i);
+            const d = new Date(now);
+            d.setDate(d.getDate() - today + i);
             const key = `timer_${CHILD}_${d.toISOString().split('T')[0]}`;
             const data = JSON.parse(localStorage.getItem(key) || '{}');
             const mins = data.studyMinutes || 0;
@@ -777,6 +1486,7 @@
             taskCount += tasks.length;
             if (mins > maxMin) maxMin = mins;
         }
+        // 加权平均效率 = 所有任务的预计时间之和 / 所有任务的实际学习时间之和 * 100%
         const weightedEff = totalStudy > 0 ? Math.min(Math.round((totalPlanned / totalStudy) * 100), 100) : 0;
         document.getElementById('weekTotalMin').textContent = totalMin;
         document.getElementById('weekRestMin').textContent = totalRestMin;
@@ -788,10 +1498,15 @@
         const chart = document.getElementById('weekChart');
         chart.innerHTML = weekData.map(d => {
             const h = maxMin > 0 ? Math.max(4, Math.round(d.mins / maxMin * 70)) : 4;
-            return `<div class="week-bar-wrap"><div class="week-bar" style="height:${h}px;opacity:${d.isToday ? 1 : 0.5}"></div><div class="week-bar-label">${d.label}</div><div class="week-bar-value">${d.mins}m</div></div>`;
+            return `<div class="week-bar-wrap">
+                <div class="week-bar${d.isToday ? '' : ''}" style="height:${h}px;opacity:${d.isToday ? 1 : 0.5}"></div>
+                <div class="week-bar-label">${d.label}</div>
+                <div class="week-bar-value">${d.mins}m</div>
+            </div>`;
         }).join('');
     }
 
+    // 本月统计
     function renderMonthStats() {
         const now = new Date();
         let totalMin = 0, totalRestMin = 0, taskCount = 0;
@@ -814,6 +1529,7 @@
                 }
             });
             taskCount += tasks.length;
+            // 最高效率日：使用加权效率计算
             if (tasks.length > 0) {
                 const dayPlanned = tasks.reduce((sum, t) => sum + (t.time || 0), 0);
                 const dayStudy = tasks.reduce((sum, t) => sum + (t.study || 0), 0);
@@ -821,6 +1537,7 @@
                 if (dayEff > bestEff) { bestEff = dayEff; bestDay = `${now.getMonth()+1}/${d}`; }
             }
         }
+        // 加权平均效率 = 所有任务的预计时间之和 / 所有任务的实际学习时间之和 * 100%
         const weightedEff = totalStudy > 0 ? Math.min(Math.round((totalPlanned / totalStudy) * 100), 100) : 0;
         document.getElementById('monthTotalMin').textContent = totalMin;
         document.getElementById('monthRestMin').textContent = totalRestMin;
@@ -831,7 +1548,8 @@
         document.getElementById('monthOverTasks').textContent = overCount;
     }
 
-    let lastWarningLevel = 0;
+    // 截止时间更新（含警告状态 + 声音）
+    let lastWarningLevel = 0; // 0=normal, 1=warning, 2=danger
     function updateDeadlineWithWarning() {
         const now = new Date();
         const [h, m] = DEADLINE.split(':').map(Number);
@@ -840,24 +1558,30 @@
         deadline.setHours(h, m, 0, 0);
         const diff = deadline - now;
         const el = document.getElementById('deadlineTime'), rem = document.getElementById('deadlineRemaining');
-        const hdr = document.getElementById('headerDeadline'), hdrTime = document.getElementById('headerDeadlineTime');
+        const hdr = document.getElementById('headerDeadline');
+        const hdrTime = document.getElementById('headerDeadlineTime');
+
         const rh = Math.floor(diff/3600000), rm = Math.floor((diff%3600000)/60000);
+
         if (diff < 0) {
             el.textContent = '已超时'; el.classList.add('overdue'); rem.textContent = '已过截止时间';
             hdrTime.textContent = '超时!'; hdr.className = 'header-deadline danger'; rem.style.color = '#e74c3c';
         } else if (diff < 30 * 60000) {
-            el.textContent = DEADLINE; el.classList.remove('overdue'); rem.textContent = `还有 ${rh>0?rh+'小时':''}${rm}分钟`; rem.style.color = '#e74c3c';
+            const text = `还有 ${rh > 0 ? rh + '小时' : '' }${rm}分钟`;
+            el.textContent = DEADLINE; el.classList.remove('overdue'); rem.textContent = text; rem.style.color = '#e74c3c';
             hdrTime.textContent = DEADLINE; hdr.className = 'header-deadline danger';
-            if (lastWarningLevel < 2) playDangerSound();
+            if (lastWarningLevel < 2) { playDangerSound(); }
         } else if (diff < 60 * 60000) {
-            el.textContent = DEADLINE; el.classList.remove('overdue'); rem.textContent = `还有 ${rh>0?rh+'小时':''}${rm}分钟`; rem.style.color = '#e67e22';
+            const text = `还有 ${rh > 0 ? rh + '小时' : '' }${rm}分钟`;
+            el.textContent = DEADLINE; el.classList.remove('overdue'); rem.textContent = text; rem.style.color = '#e67e22';
             hdrTime.textContent = DEADLINE; hdr.className = 'header-deadline warning';
-            if (lastWarningLevel < 1) playWarningSound();
+            if (lastWarningLevel < 1) { playWarningSound(); }
         } else {
-            el.textContent = DEADLINE; el.classList.remove('overdue'); rem.textContent = `还有 ${rh}小时${rm}分钟`; rem.style.color = '#4CAF50';
+            el.textContent = DEADLINE; el.classList.remove('overdue');
+            rem.textContent = `还有 ${rh}小时${rm}分钟`; rem.style.color = '#FF6B9D';
             hdrTime.textContent = DEADLINE; hdr.className = 'header-deadline';
         }
-        lastWarningLevel = diff < 30*60000 ? 2 : diff < 60*60000 ? 1 : 0;
+        lastWarningLevel = diff < 30 * 60000 ? 2 : diff < 60 * 60000 ? 1 : 0;
     }
 
     // 更新本地时间显示
@@ -866,23 +1590,49 @@
         const hours = now.getHours();
         const minutes = now.getMinutes();
         const seconds = now.getSeconds();
-        const timeStr = hours + ':' + String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+        const timeStr = `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         const el = document.getElementById('headerClock');
         if (el) {
-            el.innerHTML = '<img src="https://img.icons8.com/ios-filled/24/4CAF50/clock.png" alt="时间"> ' + timeStr;
+            el.innerHTML = '<img src="https://img.icons8.com/ios-filled/24/FF6B9D/clock.png" alt="时间"> ' + timeStr;
         }
     }
-    
+
+    // 默认作业（从URL参数或localStorage恢复）
+    const DEFAULT_HOMEWORK = [
+        { id:1, name:'橙果APP打卡', icon:'📱', time:15, status:'waiting' },
+        { id:2, name:'英语一起作业', icon:'🎧', time:20, status:'waiting' },
+        { id:3, name:'阅读半小时', icon:'📚', time:30, status:'waiting' },
+        { id:4, name:'口算题一页', icon:'🔢', time:20, status:'waiting' },
+        { id:5, name:'老师作业', icon:'📝', time:0, status:'waiting' }
+    ];
+
+    let homework = [];
+    let currentTask = null;
+    let timerInterval = null;
+    let startTime = null;
+    let pausedTime = 0;
+    let isPaused = false;
+    let restStartTime = null;
+    let assignedTask = null;
+
+    const praises = [
+        '太棒了！提前完成！🎉', '速度超快！继续保持！🌟', '效率满分！✨',
+        '又快又专注！💯', '专注力超强！👏', '提前完成！超厉害！🚀'
+    ];
+    const encouragements = [
+        '虽然超时了，但坚持完成就是胜利！💪', '做完就是好样的！继续加油！🌈', '没关系，尽力就好！💖'
+    ];
+
     // ========== 初始化（本地优先，GitHub同步）==========
-    let githubData = null;
+    let githubData = null; // 缓存GitHub数据
 
     async function init() {
-        updateDate(); updateShengdi(); updateZhongkao();
+        updateDate();
         
         // 【重要】先加载本地数据确保页面能显示
         loadHomework();
         
-        // 再尝试从GitHub拉取最新数据（失败不影响本地显示）
+        // 再尝试从GitHub拉取最新数据
         try {
             githubData = await loadFromGitHub();
             // 【修复】GitHub数据加载后刷新积分和统计显示
@@ -899,6 +1649,7 @@
             const localTime = localStorage.getItem(`${todayKey}_update`);
 
             // 【核心修复】只有GitHub数据是今天的，才同步作业状态
+            // 否则只保留默认作业列表（昨天的"全部完成"不带到今天）
             if (githubData.date === today) {
                 if (!localTime || new Date(githubData.lastUpdated) > new Date(localTime)) {
                     console.log('🔄 同天GitHub数据，同步作业状态');
@@ -910,37 +1661,40 @@
                 console.log('📅 GitHub数据是昨天的（' + githubData.date + '），跳过作业状态同步');
             }
 
-            // 积分数据：总分跨天累积保留；明细只写入对应日期的key
-            if (githubData.points !== undefined) {
-                const localPts = localStorage.getItem(POINTS_KEY);
-                const localPtsNum = parseInt(localPts || '0');
-                // 【关键修复】当GitHub积分与本地不同时，强制同步（家长加分/减分后需要更新）
-                const githubUpdated = new Date(githubData.lastUpdated);
-                const localUpdated = new Date(localStorage.getItem(`${POINTS_KEY}_update`) || 0);
-                
-                if (!localPts || githubData.points !== localPtsNum || githubUpdated > localUpdated) {
-                    console.log('🔄 同步积分:', githubData.points, '(本地:', localPtsNum, ')');
-                    localStorage.setItem(POINTS_KEY, githubData.points);
-                    const dataDate = githubData.date || today;
-                    const targetLogKey = getPointsLogKey(dataDate);
-                    if (githubData.pointsLog && githubData.pointsLog.length > 0) {
-                        localStorage.setItem(targetLogKey, JSON.stringify(githubData.pointsLog));
-                    }
-                    localStorage.setItem(`${POINTS_KEY}_update`, githubData.lastUpdated);
-                }
-            }
-        }
+           // 积分数据：总分跨天累积保留；明细只写入对应日期的key
+           if (githubData.points !== undefined) {
+               const localPts = localStorage.getItem(POINTS_KEY);
+               const localPtsNum = parseInt(localPts || '0');
+               // 【关键修复】当GitHub积分与本地不同时，强制同步（家长加分/减分后需要更新）
+               // 或者当GitHub数据更新时（检查时间戳）
+               const githubUpdated = new Date(githubData.lastUpdated);
+               const localUpdated = new Date(localStorage.getItem(`${POINTS_KEY}_update`) || 0);
+               
+               if (!localPts || githubData.points !== localPtsNum || githubUpdated > localUpdated) {
+                   console.log('🔄 同步积分:', githubData.points, '(本地:', localPtsNum, ')');
+                   localStorage.setItem(POINTS_KEY, githubData.points);
+                   // 积分明细写入对应日期的key（今天的数据写今天，历史数据写历史）
+                   const dataDate = githubData.date || today;
+                   const targetLogKey = getPointsLogKey(dataDate);
+                   if (githubData.pointsLog && githubData.pointsLog.length > 0) {
+                       localStorage.setItem(targetLogKey, JSON.stringify(githubData.pointsLog));
+                   }
+                   localStorage.setItem(`${POINTS_KEY}_update`, githubData.lastUpdated);
+               }
+           }
+       }
         
-        parseURLParams();
+        // 渲染页面
         renderHomeworkList();
         updateLocalTime();
-        updateStats(); updateDeadlineWithWarning();
+        updateDeadlineWithWarning();
+        updateStats();
         updatePointsDisplay();
         initParentMode();
         
-        // 实时时间每秒更新，倒计时/会考/中考每30秒更新
+        // 定时更新
         setInterval(() => { updateLocalTime(); }, 1000);
-        setInterval(() => { updateDeadlineWithWarning(); updateShengdi(); updateZhongkao(); }, 30000);
+        setInterval(() => { updateDeadlineWithWarning(); updateStats(); }, 30000);
         
         // 【修复】定时刷新GitHub数据（每30秒检查一次家长是否有新操作）
         setInterval(async () => {
@@ -973,66 +1727,21 @@
                 console.log('定时刷新跳过:', e.message);
             }
         }, 30000);
-        
-        // 页面打开时自动同步到GitHub（确保最新数据上传）
+
+        // 【新增】定时自动上传到GitHub（每5分钟）
+        setInterval(async () => {
+            console.log('[自动上传] 开始定时上传');
+            await syncToGitHub(await buildSyncData());
+        }, 5 * 60 * 1000);
+
+        // 自动同步到GitHub（处理异步buildSyncData）
         (async () => { syncToGitHub(await buildSyncData()); })();
-    }
-
-    function updateDate() {
-        const now = new Date(), days = ['日','一','二','三','四','五','六'];
-        document.getElementById('dateDisplay').textContent = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 星期${days[now.getDay()]}`;
-    }
-
-    function updateShengdi() {
-        const now = new Date(), diff = SHENGDI_DATE - now, days = Math.ceil(diff / 86400000);
-        const hours = Math.floor(diff / 3600000); // 实际剩余小时
-        const card = document.getElementById('shengdiCard');
-        if (card) {
-            if (days < 0) {
-                card.style.display = 'none';
-            } else {
-                card.style.display = 'block';
-                document.getElementById('shengdiDays').textContent = days;
-                // 显示：实际剩余小时 + 建议复习总小时（按每天2h计算）
-                const suggestedHours = days * 2;
-                document.getElementById('shengdiStudy').textContent = `${hours}小时（建议${suggestedHours}小时）`;
-            }
-        }
-    }
-
-    function updateZhongkao() {
-        const now = new Date(), diff = ZHONGKAO_DATE - now, days = Math.ceil(diff / 86400000);
-        const hours = Math.floor(diff / 3600000); // 实际剩余小时
-        const card = document.getElementById('zhongkaoCard');
-        if (card) {
-            if (days < 0) {
-                card.style.display = 'none';
-            } else {
-                card.style.display = 'block';
-                document.getElementById('zhongkaoDays').textContent = days;
-                // 显示：实际剩余小时 + 建议复习总小时（按每天2h计算）
-                const suggestedHours = days * 2;
-                document.getElementById('zhongkaoStudy').textContent = `${hours}小时（建议${suggestedHours}小时）`;
-            }
-        }
-    }
-
-    function parseURLParams() {
-        const p = new URLSearchParams(window.location.search);
-        const t = p.get('task'), n = p.get('task_name'), s = p.get('suggest');
-        isParentMode = p.get('mode') === 'parent';
-        if (t === 'assigned' && n) {
-            assignedTask = { name: decodeURIComponent(n), time: parseInt(s) || 0 };
-            document.getElementById('assignedDesc').textContent = `${assignedTask.name}${assignedTask.time > 0 ? ' · ' + assignedTask.time + '分钟' : ''}`;
-            document.getElementById('assignedAlert').style.display = 'block';
-            if (!isParentMode) setTimeout(() => sendHomeworkCard(assignedTask), 800);
-        }
     }
 
     function initParentMode() {
         if (isParentMode) {
             document.body.classList.add('parent-mode');
-            document.getElementById('headerName').textContent = '👨‍👧 羽菡作业管理';
+            document.getElementById('headerName').textContent = '👨‍👧 羽佳作业管理';
             document.getElementById('switchLink').style.display = 'none';
             document.getElementById('headerDeadline').style.display = 'none';
             document.getElementById('parentBanner').style.display = 'block';
@@ -1041,42 +1750,6 @@
             renderParentHomeworkList();
         }
     }
-
-    function getTodayKey() {
-        const today = new Date().toISOString().split('T')[0];
-        return `hw_${CHILD}_${today}`;
-    }
-    function loadHomework() {
-        const saved = localStorage.getItem(getTodayKey());
-        if (saved) {
-            homework = JSON.parse(saved);
-        } else {
-            homework = JSON.parse(JSON.stringify(DEFAULT_HOMEWORK));
-            console.log('📅 新的一天，作业列表已重置');
-        }
-    }
-    function saveHomework() { localStorage.setItem(getTodayKey(), JSON.stringify(homework)); }
-
-    function renderHomeworkList() {
-        if (isParentMode) return;
-        const done = homework.filter(t => t.status === 'done').length;
-        const total = homework.length;
-        document.getElementById('progressCount').textContent = `${done}/${total} ${ICON}`;
-        document.getElementById('progressFill').style.width = `${total > 0 ? (done/total*100) : 0}%`;
-        document.getElementById('homeworkList').innerHTML = homework.map(task => `
-            <div class="homework-item">
-                <div class="homework-header">
-                    <div class="homework-info">
-                        <div class="homework-icon">${task.icon}</div>
-                        <div><div class="homework-name">${task.name}</div><div class="homework-time">⏱ ${task.time > 0 ? task.time + ' 分钟' : '待定'}</div></div>
-                    </div>
-                    <div class="homework-status status-${task.status}">${statusText(task.status)}</div>
-                </div>
-                <button class="start-btn" onclick="startTask(${task.id})" ${task.status === 'done' ? 'disabled' : ''}>▶ ${task.status === 'done' ? '已完成' : '开始'}</button>
-            </div>`).join('');
-    }
-
-    function statusText(s) { return { waiting:'⏳ 等待', doing:'🔄 进行中', done:'✅ 完成' }[s] || s; }
 
     // ========== 家长模式函数 ==========
     function renderParentHomeworkList() {
@@ -1101,6 +1774,8 @@
                     </div>
                 </div>`).join('');
     }
+
+    function statusText(s) { return { waiting:'⏳ 等待', doing:'🔄 进行中', done:'✅ 完成' }[s] || s; }
 
     function openAddModal() {
         editingHwId = null;
@@ -1171,6 +1846,83 @@
     }
     // ========== 家长模式函数结束 ==========
 
+    function updateDate() {
+        const now = new Date();
+        const days = ['日','一','二','三','四','五','六'];
+        document.getElementById('dateDisplay').textContent =
+            `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 星期${days[now.getDay()]}`;
+    }
+
+    function parseURLParams() {
+        const params = new URLSearchParams(window.location.search);
+        const task = params.get('task');
+        const tname = params.get('task_name');
+        const sug = params.get('suggest');
+        const deadline = params.get('deadline');
+        isParentMode = params.get('mode') === 'parent';
+
+        if (task === 'assigned' && tname) {
+            assignedTask = {
+                name: decodeURIComponent(tname),
+                time: parseInt(sug) || 0,
+                deadline: deadline || DEADLINE
+            };
+            document.getElementById('assignedTitle').textContent = '📋 家长布置了新作业';
+            document.getElementById('assignedDesc').textContent = `${assignedTask.name} ${assignedTask.time > 0 ? '· ' + assignedTask.time + '分钟' : ''}`;
+            document.getElementById('assignedAlert').style.display = 'block';
+            // 自动发送作业清单到飞书群
+            setTimeout(() => sendHomeworkCard(assignedTask), 800);
+        }
+    }
+
+    function getTodayKey() {
+        const today = new Date().toISOString().split('T')[0];
+        return `hw_${CHILD}_${today}`;
+    }
+
+    function loadHomework() {
+        const todayKey = getTodayKey();
+        const saved = localStorage.getItem(todayKey);
+        if (saved) {
+            homework = JSON.parse(saved);
+        } else {
+            // 新的一天：清理昨天的数据key，重置为默认作业列表
+            homework = JSON.parse(JSON.stringify(DEFAULT_HOMEWORK));
+            console.log('📅 新的一天，作业列表已重置');
+        }
+    }
+
+    function saveHomework() {
+        localStorage.setItem(getTodayKey(), JSON.stringify(homework));
+    }
+
+    function renderHomeworkList() {
+        if (isParentMode) return;
+        const list = document.getElementById('homeworkList');
+        list.innerHTML = homework.map(task => `
+            <div class="homework-item">
+                <div class="homework-header">
+                    <div class="homework-info">
+                        <div class="homework-icon">${task.icon}</div>
+                        <div>
+                            <div class="homework-name">${task.name}</div>
+                            <div class="homework-time">⏱ ${task.time > 0 ? task.time + ' 分钟' : '待定'}</div>
+                        </div>
+                    </div>
+                    <div class="homework-status status-${task.status}">${statusText(task.status)}</div>
+                </div>
+                <button class="start-btn" onclick="startTask(${task.id})" ${task.status === 'done' ? 'disabled' : ''}>
+                    ▶ ${task.status === 'done' ? '已完成' : '开始'}
+                </button>
+            </div>
+        `).join('');
+
+        const done = homework.filter(t => t.status === 'done').length;
+        const total = homework.length;
+        document.getElementById('progressCount').textContent = `${done}/${total} ${ICON}`;
+        document.getElementById('progressFill').style.width = `${total > 0 ? (done/total*100) : 0}%`;
+    }
+
     function updateStats() {
         const today = new Date().toISOString().split('T')[0];
         
@@ -1198,215 +1950,248 @@
     }
 
     function updateDeadline() {
-        const now = new Date(), [h,m] = DEADLINE.split(':').map(Number), deadline = new Date(now.setHours(h,m,0));
+        const now = new Date();
+        const [h, m] = DEADLINE.split(':').map(Number);
+        const deadline = new Date();
+        deadline.setHours(h, m, 0);
         const diff = deadline - now;
-        const el = document.getElementById('deadlineTime'), rem = document.getElementById('deadlineRemaining');
-        if (diff < 0) { el.classList.add('overdue'); rem.textContent = '已过截止时间'; }
-        else { el.classList.remove('overdue'); const rh = Math.floor(diff/3600000), rm = Math.floor((diff%3600000)/60000); rem.textContent = `还有 ${rh}小时${rm}分钟`; }
+        const el = document.getElementById('deadlineTime');
+        const rem = document.getElementById('deadlineRemaining');
+        if (diff < 0) {
+            el.classList.add('overdue');
+            rem.textContent = '已过截止时间';
+        } else {
+            el.classList.remove('overdue');
+            const rh = Math.floor(diff/3600000);
+            const rm = Math.floor((diff%3600000)/60000);
+            rem.textContent = `还有 ${rh}小时${rm}分钟`;
+        }
     }
 
-    function startTask(id) {
-        currentTask = homework.find(t => t.id === id);
-        if (!currentTask || currentTask.status === 'done') return;
-        currentTask.status = 'doing'; saveHomework(); renderHomeworkList();
-        document.getElementById('modalTaskName').textContent = currentTask.name;
-        document.getElementById('modalSub').textContent = currentTask.time > 0 ? `建议 ${currentTask.time} 分钟` : '自主安排';
+    function startTask(taskId) {
+        const task = homework.find(t => t.id === taskId);
+        if (!task || task.status === 'done') return;
+        currentTask = task;
+        task.status = 'doing';
+        saveHomework();
+        renderHomeworkList();
+
+        document.getElementById('modalTaskName').textContent = task.name;
+        document.getElementById('modalSub').textContent = task.time > 0 ? `建议 ${task.time} 分钟` : '自主安排';
         document.getElementById('timerModal').classList.add('active');
-        startTime = Date.now(); pausedTime = 0; isPaused = false;
+
+        startTime = Date.now();
+        pausedTime = 0;
+        isPaused = false;
         document.getElementById('pauseBtn').textContent = '⏸ 暂停';
-        updateTimer(); timerInterval = setInterval(updateTimer, 1000);
+        updateTimer();
+        timerInterval = setInterval(updateTimer, 1000);
     }
 
     function startAssigned() {
         if (!assignedTask) return;
-        homework.push({ id: Date.now(), name: assignedTask.name, icon: '📋', time: assignedTask.time, status: 'waiting' });
-        saveHomework(); renderHomeworkList();
+        const newId = Math.max(...homework.map(t => t.id), 0) + 1;
+        homework.push({ id: newId, name: assignedTask.name, icon: '📋', time: assignedTask.time, status: 'waiting' });
+        saveHomework();
+        renderHomeworkList();
         document.getElementById('assignedAlert').style.display = 'none';
-        startTask(homework[homework.length-1].id);
+        startTask(newId);
     }
 
     function updateTimer() {
         if (isPaused) return;
         const elapsed = Math.floor((Date.now() - startTime - pausedTime) / 1000);
-        document.getElementById('timerDisplay').textContent = `${String(Math.floor(elapsed/60)).padStart(2,'0')}:${String(elapsed%60).padStart(2,'0')}`;
+        const m = String(Math.floor(elapsed/60)).padStart(2,'0');
+        const s = String(elapsed%60).padStart(2,'0');
+        const display = document.getElementById('timerDisplay');
+        display.textContent = `${m}:${s}`;
+
         if (currentTask && currentTask.time > 0) {
-            const remaining = currentTask.time * 60 - elapsed, comp = document.getElementById('timerCompare'), disp = document.getElementById('timerDisplay');
-            if (remaining > 0) { comp.textContent = `预计 ${currentTask.time} 分钟 · 还剩 ${Math.ceil(remaining/60)} 分钟`; comp.className = 'timer-compare'; disp.classList.remove('overtime'); }
-            else { comp.textContent = `预计 ${currentTask.time} 分钟 · 已超时 ${Math.floor(-remaining/60)} 分钟`; comp.className = 'timer-compare late'; disp.classList.add('overtime'); }
+            const remaining = currentTask.time * 60 - elapsed;
+            const compare = document.getElementById('timerCompare');
+            if (remaining > 0) {
+                compare.textContent = `预计 ${currentTask.time} 分钟 · 还剩 ${Math.ceil(remaining/60)} 分钟`;
+                compare.className = 'timer-compare';
+                display.classList.remove('overtime');
+            } else {
+                compare.textContent = `预计 ${currentTask.time} 分钟 · 已超时 ${Math.floor(-remaining/60)} 分钟`;
+                compare.className = 'timer-compare late';
+                display.classList.add('overtime');
+            }
+        } else {
+            document.getElementById('timerCompare').textContent = currentTask && currentTask.time === 0 ? '自主安排时间' : '';
         }
     }
 
     function pauseTimer() {
-        if (isPaused) { pausedTime += Date.now() - restStartTime; isPaused = false; document.getElementById('pauseBtn').textContent = '⏸ 暂停'; document.getElementById('modalSub').textContent = '继续加油！'; }
-        else { restStartTime = Date.now(); isPaused = true; document.getElementById('pauseBtn').textContent = '▶ 继续'; document.getElementById('modalSub').textContent = '休息一下...'; }
+        if (isPaused) {
+            pausedTime += Date.now() - restStartTime;
+            isPaused = false;
+            document.getElementById('pauseBtn').textContent = '⏸ 暂停';
+            document.getElementById('modalSub').textContent = '继续加油！';
+        } else {
+            restStartTime = Date.now();
+            isPaused = true;
+            document.getElementById('pauseBtn').textContent = '▶ 继续';
+            document.getElementById('modalSub').textContent = '休息一下...';
+        }
     }
 
-    function finishTask() {
-        clearInterval(timerInterval); document.getElementById('timerModal').classList.remove('active');
+    async function finishTask() {
+        clearInterval(timerInterval);
+        document.getElementById('timerModal').classList.remove('active');
         if (!currentTask) return;
+
         const elapsed = Math.floor((Date.now() - startTime - pausedTime) / 1000);
         const totalMin = Math.ceil(elapsed / 60);
-        const restMin = Math.ceil(pausedTime / 1000 / 60);
-        const studyMin = totalMin - restMin;
-        const eff = currentTask.time > 0 ? Math.min(Math.round((currentTask.time / studyMin) * 100), 100) : 100;
-        saveTaskData(currentTask, totalMin, studyMin, restMin, eff);
-        const isEarly = currentTask.time > 0 && totalMin < currentTask.time - 3;
-        const isLate = currentTask.time > 0 && totalMin > currentTask.time + 5;
-        document.getElementById('completeEmoji').textContent = isEarly ? '🎉' : isLate ? '💪' : '👍';
-        document.getElementById('completeTitle').textContent = isEarly ? '太棒了！' : isLate ? '坚持完成！' : '完成！';
-        document.getElementById('completeTotal').textContent = totalMin + '分钟';
-        document.getElementById('completeExpected').textContent = currentTask.time > 0 ? currentTask.time + '分钟' : '自主';
-        document.getElementById('completeStudy').textContent = studyMin + '分钟';
-        document.getElementById('completeRest').textContent = (restMin || 0) + '分钟';
-        document.getElementById('completeEfficiency').textContent = eff + '%';
-        document.getElementById('completeFeedback').textContent = isEarly ? praises[Math.floor(Math.random()*praises.length)] : isLate ? encouragements[Math.floor(Math.random()*encouragements.length)] : '准时完成，继续保持！👍';
-        document.getElementById('completeModal').classList.add('active');
-        
+        const restMin = Math.ceil(pausedTime / 1000 / 60); // 暂停时间转为分钟
+        const studyMin = totalMin - restMin; // 实际学习时间 = 总时间 - 暂停时间
+        const efficiency = currentTask.time > 0 ? Math.round((currentTask.time / studyMin) * 100) : 100;
+        const capped = Math.min(efficiency, 100);
+
+        saveTaskData(currentTask, totalMin, studyMin, restMin, capped);
+        showComplete(currentTask, totalMin, studyMin, restMin, capped);
+
         // 保存任务信息用于发送通知
         const completedTaskInfo = {
             name: currentTask.name,
             icon: currentTask.icon,
             totalMin: totalMin,
-            efficiency: eff
+            efficiency: capped
         };
-        
-        currentTask.status = 'done'; saveHomework(); currentTask = null; renderHomeworkList(); updateStats();
-        // 自动发送完成通知给家长
-        sendTaskCompleteCard(completedTaskInfo);
 
+        currentTask.status = 'done';
+        saveHomework();
+        currentTask = null;
+        renderHomeworkList();
+        updateStats();
+        
         // 积分奖励：完成作业 +2，效率≥90% 额外+1
         let pts = 2;
-        if (eff >= 90) pts += 1;
-        addPoints(pts, `✅ 完成「${completedTaskInfo.name}」${eff >= 90 ? '（高效+1）' : ''}`);
+        if (capped >= 90) pts += 1;
+        addPoints(pts, `✅ 完成「${completedTaskInfo.name}」${capped >= 90 ? '（高效+1）' : ''}`);
         showToast(`+${pts} 积分！⭐`);
 
         // 检查是否全部完成，触发彩蛋
         setTimeout(checkAllDone, 800);
 
+        // 自动发送完成通知给家长
+        sendTaskCompleteCard(completedTaskInfo);
+
         // 同步数据到 GitHub（让家长看板能实时看到）
         showToast('正在同步数据...');
-        syncToGitHub(buildSyncData()).then(ok => {
-            if (ok) showToast('✅ 数据已同步，家长可查看');
-            else showToast('⚠️ 同步失败，发送报告后再试');
-        });
+        const syncData = buildSyncData();
+        const ok = await syncToGitHub(syncData);
+        if (ok) showToast('✅ 数据已同步，家长可查看');
+        else showToast('⚠️ 同步失败，发送报告后再试');
     }
 
-    // 发送作业完成通知卡片给家长
-    function sendTaskCompleteCard(completedTask) {
-        const done = homework.filter(t => t.status === 'done').length;
-        const total = homework.length;
-        const remaining = total - done;
-        const remainingTasks = homework.filter(t => t.status !== 'done');
-        const remainingList = remainingTasks.length > 0 
-            ? remainingTasks.map(t => `${t.icon} ${t.name}`).join('、') 
-            : '无';
-
-        const now = new Date();
-        const timeStr = `${now.getHours()}点${now.getMinutes()}分`;
-        
-        const effText = completedTask.efficiency >= 90 ? '🎉 效率超高！' 
-            : completedTask.efficiency >= 70 ? '👍 表现不错！' 
-            : '💪 继续加油！';
-
-        const card = {
-            msg_type: 'interactive',
-            card: {
-                config: { wide_screen_mode: true },
-                header: {
-                    title: { tag: 'plain_text', content: `✅ 羽菡完成作业通知` },
-                    template: 'green'
-                },
-                elements: [
-                    {
-                        tag: 'div',
-                        text: {
-                            tag: 'lark_md',
-                            content: `@小龙虾爸爸 @小龙虾妈妈，${effText}\n\n🌿 **${completedTask.name}** 已完成！\n用时 ${completedTask.totalMin} 分钟，效率 ${completedTask.efficiency}%`
-                        }
-                    },
-                    { tag: 'hr' },
-                    {
-                        tag: 'column_set',
-                        flex_mode: 'none',
-                        horizontal_spacing: 'large',
-                        columns: [
-                            { tag: 'column', width: 'auto', elements: [{ tag: 'div', text: { tag: 'lark_md', content: '**✅ 已完成**\n`' + done + '/' + total + '` 项' } }] },
-                            { tag: 'column', width: 'auto', elements: [{ tag: 'div', text: { tag: 'lark_md', content: '**📋 剩余**\n`' + remaining + '` 项' } }] }
-                        ]
-                    },
-                    { tag: 'hr' },
-                    {
-                        tag: 'div',
-                        text: { tag: 'lark_md', content: `**📝 剩余作业**\n${remainingList}` }
-                    },
-                    {
-                        tag: 'note',
-                        elements: [
-                            { tag: 'plain_text', content: `⏰ ${timeStr} · 作业计时器自动通知` }
-                        ]
-                    }
-                ]
-            }
-        };
-        fetch(FEISHU_WEBHOOK, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(card)
-        }).then(r => r.ok ? showToast('已完成通知已发送 📨') : showToast('发送失败 ❌')).catch(() => showToast('发送失败 ❌'));
-    }
-
-    function saveTaskData(task, total, study, rest, eff) {
-        const today = new Date().toISOString().split('T')[0], key = `timer_${CHILD}_${today}`;
+    function saveTaskData(task, total, study, rest, efficiency) {
+        const today = new Date().toISOString().split('T')[0];
+        const key = `timer_${CHILD}_${today}`;
         const data = JSON.parse(localStorage.getItem(key) || '{}');
+        // 累加学习时间和休息时间
         data.studyMinutes = (data.studyMinutes || 0) + study;
         data.restMinutes = (data.restMinutes || 0) + rest;
-        // 加权平均效率（封顶100%）
+        // 更新平均效率（使用加权平均，封顶100%）
         const prevTasks = data.tasks || [];
-        let totalPlanned = 0, totalStudy = 0;
+        let totalPlanned = 0;
+        let totalStudy = 0;
         prevTasks.forEach(t => {
             totalPlanned += (t.time || 0);
             totalStudy += (t.study || 0);
         });
         totalPlanned += task.time;
         totalStudy += study;
+        // 加权平均效率 = 所有任务的预计时间之和 / 所有任务的实际学习时间之和 * 100%
         const weightedEff = totalStudy > 0 ? Math.round((totalPlanned / totalStudy) * 100) : 100;
         data.efficiency = Math.min(weightedEff, 100);
-        // 记录超时信息
+        // 记录任务详情（含超时信息）
         const overTime = task.time > 0 && total > task.time ? total - task.time : 0;
-        data.tasks = prevTasks.concat({ name: task.name, time: task.time, actual: total, study: study, rest: rest, overTime: overTime, efficiency: Math.min(eff, 100) });
+        data.tasks = prevTasks.concat({
+            name: task.name,
+            time: task.time,
+            actual: total,
+            study: study,
+            rest: rest,
+            overTime: overTime,
+            efficiency: Math.min(efficiency, 100)  // 单个任务效率也封顶100%
+        });
         localStorage.setItem(key, JSON.stringify(data));
     }
 
-    function closeComplete() { document.getElementById('completeModal').classList.remove('active'); }
+    function showComplete(task, total, study, rest, efficiency) {
+        const isEarly = task.time > 0 && total < task.time - 3;
+        const isLate = task.time > 0 && total > task.time + 5;
+
+        document.getElementById('completeEmoji').textContent = isEarly ? '🎉' : isLate ? '💪' : '👍';
+        document.getElementById('completeTitle').textContent = isEarly ? '太棒了！' : isLate ? '坚持完成！' : '完成！';
+        document.getElementById('completeTotal').textContent = total + '分钟';
+        document.getElementById('completeExpected').textContent = task.time > 0 ? task.time + '分钟' : '自主';
+        document.getElementById('completeStudy').textContent = study + '分钟';
+        document.getElementById('completeRest').textContent = (rest || 0) + '分钟';
+        document.getElementById('completeEfficiency').textContent = efficiency + '%';
+        document.getElementById('completeFeedback').textContent = isEarly ? praises[Math.floor(Math.random()*praises.length)] : isLate ? encouragements[Math.floor(Math.random()*encouragements.length)] : '准时完成，继续保持！👍';
+        document.getElementById('completeModal').classList.add('active');
+    }
+
+    function closeComplete() {
+        document.getElementById('completeModal').classList.remove('active');
+    }
 
     function addHomework() {
-        const name = document.getElementById('newName').value.trim(), time = parseInt(document.getElementById('newTime').value);
+        const name = document.getElementById('newName').value.trim();
+        const time = parseInt(document.getElementById('newTime').value);
         if (!name) { showToast('请输入作业名称'); return; }
         if (!time || time < 1) { showToast('请输入有效时间'); return; }
         homework.push({ id: Date.now(), name, icon: '📝', time, status: 'waiting' });
-        saveHomework(); renderHomeworkList();
-        document.getElementById('newName').value = ''; document.getElementById('newTime').value = '';
+        saveHomework();
+        renderHomeworkList();
+        document.getElementById('newName').value = '';
+        document.getElementById('newTime').value = '';
         showToast('作业已添加 ✅');
     }
 
     function exportData() {
-        const keys = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k.startsWith('timer_') || k.startsWith('hw_')) keys[k] = localStorage.getItem(k); }
-        const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(keys, null, 2)], { type: 'application/json' }));
-        a.download = `yuhan_data_${new Date().toISOString().split('T')[0]}.json`; a.click(); showToast('数据已导出 📤');
+        const keys = {};
+        for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k.startsWith('timer_') || k.startsWith('hw_')) keys[k] = localStorage.getItem(k);
+        }
+        const blob = new Blob([JSON.stringify(keys, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `yujia_data_${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        showToast('数据已导出 📤');
     }
 
     function importData(e) {
-        const file = e.target.files[0]; if (!file) return;
+        const file = e.target.files[0];
+        if (!file) return;
         const reader = new FileReader();
-        reader.onload = function(ev) { try { const d = JSON.parse(ev.target.result); Object.entries(d).forEach(([k,v]) => localStorage.setItem(k,v)); showToast('导入成功 ✅'); loadHomework(); renderHomeworkList(); updateStats(); } catch(err) { showToast('导入失败 ❌'); } };
+        reader.onload = function(ev) {
+            try {
+                const data = JSON.parse(ev.target.result);
+                Object.entries(data).forEach(([k,v]) => localStorage.setItem(k, v));
+                showToast('数据导入成功 ✅');
+                loadHomework();
+                renderHomeworkList();
+                updateStats();
+            } catch(err) { showToast('导入失败 ❌'); }
+        };
         reader.readAsText(file);
     }
 
     function resetData() {
         if (!confirm('确定清空今日数据吗？')) return;
         const today = new Date().toISOString().split('T')[0];
-        localStorage.removeItem(`timer_${CHILD}_${today}`); localStorage.removeItem(`hw_${CHILD}`);
-        homework = JSON.parse(JSON.stringify(DEFAULT_HOMEWORK)); renderHomeworkList(); updateStats(); showToast('已重置 🔄');
+        localStorage.removeItem(`timer_${CHILD}_${today}`);
+        localStorage.removeItem(`hw_${CHILD}`);
+        homework = JSON.parse(JSON.stringify(DEFAULT_HOMEWORK));
+        renderHomeworkList();
+        updateStats();
+        showToast('已重置 🔄');
     }
 
     // 发送作业清单卡片到飞书群（自动 @孩子和家长）
@@ -1414,21 +2199,20 @@
         const now = new Date();
         const dateStr = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日`;
         const timeTip = task.time > 0 ? `⏱ 建议完成时间：${task.time} 分钟` : '';
-        const atChild = CHILD_OPEN_ID ? `<at user_id="${CHILD_OPEN_ID}">${CHILD_NAME}</at>` : CHILD_NAME;
         const card = {
             msg_type: 'interactive',
             card: {
                 config: { wide_screen_mode: true },
                 header: {
                     title: { tag: 'plain_text', content: `📋 家长布置作业通知 — ${CHILD_NAME}` },
-                    template: 'green'
+                    template: 'orange'
                 },
                 elements: [
                     {
                         tag: 'div',
                         text: {
                             tag: 'lark_md',
-                            content: `${atChild}，爸爸妈妈给你布置了作业啦！快去看看吧 🌿\n\n收到请回复：「好的！」`
+                            content: `<at user_id="${CHILD_OPEN_ID}">${CHILD_NAME}</at>，爸爸妈妈给你布置了作业啦！快去看看吧 🐱\n\n收到请回复：「好的！」`
                         }
                     },
                     { tag: 'hr' },
@@ -1449,9 +2233,9 @@
                         actions: [
                             {
                                 tag: 'button',
-                                text: { tag: 'plain_text', content: '🌿 前往计时器' },
+                                text: { tag: 'plain_text', content: '🐱 前往计时器' },
                                 type: 'primary',
-                                url: `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/yuhan.html`
+                                url: `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/yujia.html`
                             },
                             {
                                 tag: 'button',
@@ -1464,7 +2248,7 @@
                     {
                         tag: 'note',
                         elements: [
-                            { tag: 'plain_text', content: '💡 打开上方链接即可开始计时，祝学习愉快！生地会考加油 🌿' }
+                            { tag: 'plain_text', content: '💡 打开上方链接即可开始计时，祝学习愉快！' }
                         ]
                     }
                 ]
@@ -1491,12 +2275,12 @@
                 config: { wide_screen_mode: true },
                 header: {
                     title: { tag: 'plain_text', content: `📋 今日作业清单 — ${CHILD_NAME}` },
-                    template: 'green'
+                    template: 'orange'
                 },
                 elements: [
                     {
                         tag: 'div',
-                        text: { tag: 'lark_md', content: `${CHILD_OPEN_ID ? `<at user_id="${CHILD_OPEN_ID}">${CHILD_NAME}</at>` : CHILD_NAME}，爸爸妈妈查了一下，今天有以下作业哦！认真完成吧 🌿\n\n收到请回复：「好的！」` }
+                        text: { tag: 'lark_md', content: `<at user_id="${CHILD_OPEN_ID}">${CHILD_NAME}</at>，爸爸妈妈查了一下，今天有以下作业哦！认真完成吧 🐱\n\n收到请回复：「好的！」` }
                     },
                     { tag: 'hr' },
                     {
@@ -1518,9 +2302,9 @@
                         actions: [
                             {
                                 tag: 'button',
-                                text: { tag: 'plain_text', content: '🌿 前往计时器' },
+                                text: { tag: 'plain_text', content: '🐱 前往计时器' },
                                 type: 'primary',
-                                url: `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/yuhan.html`
+                                url: `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/yujia.html`
                             },
                             {
                                 tag: 'button',
@@ -1532,7 +2316,7 @@
                     },
                     {
                         tag: 'note',
-                        elements: [{ tag: 'plain_text', content: '💡 生地会考加油！🌿' }]
+                        elements: [{ tag: 'plain_text', content: '💡 打开计时器，开始一项项完成吧！' }]
                     }
                 ]
             }
@@ -1545,9 +2329,11 @@
     }
 
     function sendReport() {
-        const today = new Date().toISOString().split('T')[0], data = JSON.parse(localStorage.getItem(`timer_${CHILD}_${today}`) || '{}');
-        const done = homework.filter(t => t.status === 'done').length, total = homework.length;
-        const sd = Math.max(0, Math.ceil((SHENGDI_DATE - new Date()) / 86400000));
+        const today = new Date().toISOString().split('T')[0];
+        const key = `timer_${CHILD}_${today}`;
+        const data = JSON.parse(localStorage.getItem(key) || '{}');
+        const done = homework.filter(t => t.status === 'done').length;
+        const total = homework.length;
         const m = new Date().getMonth()+1, d = new Date().getDate();
         const tasksMd = data.tasks && data.tasks.length > 0 ? data.tasks.map(t => {
             const effLabel = t.efficiency >= 90 ? '🟢' : t.efficiency >= 70 ? '🟡' : '🔴';
@@ -1559,8 +2345,8 @@
             card: {
                 schema: '2023-08-01',
                 header: {
-                    title: { tag: 'plain_text', content: `🌿 羽菡作业日报 · ${m}月${d}日` },
-                    template: 'green'
+                    title: { tag: 'plain_text', content: `🐱 羽佳作业日报 · ${m}月${d}日` },
+                    template: 'orange'
                 },
                 elements: [
                     { tag: 'hr' },
@@ -1575,18 +2361,13 @@
                         ]
                     },
                     { tag: 'hr' },
-                    {
-                        tag: 'div',
-                        text: { tag: 'lark_md', content: '**🌏 生地会考倒计时：** `' + sd + '` 天\n**📚 建议复习：**每天 ≥2小时，重点突破自然地理概念图' }
-                    },
-                    { tag: 'hr' },
                     { tag: 'div', text: { tag: 'lark_md', content: '**✅ 完成详情**' } },
                     ...tasksMd,
                     { tag: 'hr' },
                     {
                         tag: 'note',
                         elements: [
-                            { tag: 'plain_text', content: '🌿 由作业计时器自动生成 · @学习辅导员小龙虾' }
+                            { tag: 'plain_text', content: '🐱 由作业计时器自动生成 · @学习辅导员小龙虾' }
                         ]
                     }
                 ]
@@ -1600,22 +2381,28 @@
                     syncToGitHub(buildSyncData()).then(ok => {
                         if (ok) showToast('✅ 数据已同步到家长看板');
                     });
+                    // 发送完成后自动 @家长 确认
                     fetch(FEISHU_WEBHOOK, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             msg_type: 'text',
-                            content: { text: `🌿 羽菡作业报告已更新！请爸爸妈妈查收～ @小龙虾爸爸 @小龙虾妈妈` }
+                            content: { text: `🐱 羽佳作业报告已更新！请爸爸妈妈查收～ @小龙虾爸爸 @小龙虾妈妈` }
                         })
                     }).catch(() => {});
                 } else {
                     showToast('发送失败，请重试');
                 }
             })
-            .catch(() => { navigator.clipboard.writeText(JSON.stringify(card, null, 2)); showToast('飞书发送失败，已复制卡片JSON'); });
+            .catch(() => { navigator.clipboard.writeText(JSON.stringify(card, null, 2)); showToast('飞书发送失败，已复制JSON'); });
     }
 
-    function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2500);
+    }
 
     // ===== 积分系统 =====
     const POINTS_KEY = `points_${CHILD}`;
@@ -1626,13 +2413,16 @@
     }
     const ALL_DONE_KEY = `all_done_${CHILD}`;
 
+    // 积分规则：每完成一项作业 +2分；效率≥90% 额外+1；全部完成额外+5
     function addPoints(amount, reason) {
-        const pts = getPoints() + amount;
+        const pts = getPoints();
+        const newPts = pts + amount;
         const now = new Date().toISOString();
-        localStorage.setItem(POINTS_KEY, pts);
+        localStorage.setItem(POINTS_KEY, newPts);
+        // 记录日志——按今日key存储
         const todayLogKey = getPointsLogKey();
         const log = JSON.parse(localStorage.getItem(todayLogKey) || '[]');
-        log.unshift({ amount, reason, time: now, total: pts });
+        log.unshift({ amount, reason, time: now, total: newPts });
         if (log.length > 100) log.pop();
         localStorage.setItem(todayLogKey, JSON.stringify(log));
         // 【关键】记录本地更新时间戳，用于多设备时间戳仲裁
@@ -1640,10 +2430,12 @@
         updatePointsDisplay();
         // 自动同步到GitHub
         syncToGitHub(buildSyncData());
-        return pts;
+        return newPts;
     }
 
-    function getPoints() { return parseInt(localStorage.getItem(POINTS_KEY) || '0'); }
+    function getPoints() {
+        return parseInt(localStorage.getItem(POINTS_KEY) || '0');
+    }
 
     function updatePointsDisplay() {
         const today = new Date().toISOString().split('T')[0];
@@ -1672,6 +2464,7 @@
     }
 
     function openPointsLog() {
+        // 设置日期选择器默认为今天
         const todayStr = new Date().toISOString().split('T')[0];
         const dateInput = document.getElementById('pointsLogDate');
         if (!dateInput.value) dateInput.value = todayStr;
@@ -1790,7 +2583,7 @@
     function renderPointsLog(log, dateLabel, isToday) {
         const list = document.getElementById('pointsLogList');
         if (log.length === 0) {
-            list.innerHTML = `<div style="text-align:center;color:#aaa;padding:30px 0">${dateLabel}暂无积分记录${isToday ? '，完成作业来赚积分！🌿' : ''}</div>`;
+            list.innerHTML = `<div style="text-align:center;color:#aaa;padding:30px 0">${dateLabel}暂无积分记录${isToday ? '，完成作业来赚积分！🐱' : ''}</div>`;
         } else {
             list.innerHTML = log.map(item => {
                 const d = new Date(item.time);
@@ -1806,47 +2599,76 @@
         }
     }
 
-    function closePointsLog() { document.getElementById('pointsLogOverlay').classList.remove('active'); }
+    function closePointsLog() {
+        document.getElementById('pointsLogOverlay').classList.remove('active');
+    }
 
     // ===== 彩蛋系统 =====
     function checkAllDone() {
         if (homework.length === 0) return;
         const done = homework.filter(t => t.status === 'done').length;
         if (done < homework.length) return;
+
+        // 防重复触发（当天只弹一次）
         const today = new Date().toISOString().split('T')[0];
         const lastKey = `${ALL_DONE_KEY}_${today}`;
         if (localStorage.getItem(lastKey)) return;
         localStorage.setItem(lastKey, '1');
+
+        // 全部完成：额外奖励 5 分
         const bonusPts = 5;
-        addPoints(bonusPts, '🎉 今日所有作业全部完成！');
+        const total = addPoints(bonusPts, '🎉 今日所有作业全部完成！');
         document.getElementById('eggPointsEarned').textContent = `+${bonusPts} 分`;
         document.getElementById('eggOverlay').classList.add('active');
         launchConfetti();
     }
 
-    function closeEgg() { document.getElementById('eggOverlay').classList.remove('active'); }
+    function closeEgg() {
+        document.getElementById('eggOverlay').classList.remove('active');
+    }
 
     function launchConfetti() {
         const canvas = document.getElementById('eggCanvas');
         const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        const colors = ['#4CAF50','#FFD700','#FF6B9D','#4A90E2','#FF8C00','#00BCD4','#9C27B0','#66BB6A'];
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const colors = ['#FF6B9D','#FFD700','#7ED321','#4A90E2','#FF8C00','#E91E63','#00BCD4','#9C27B0'];
         const pieces = [];
         for (let i = 0; i < 120; i++) {
-            pieces.push({ x: Math.random()*canvas.width, y: -10-Math.random()*200, w: 8+Math.random()*8, h: 4+Math.random()*4, color: colors[Math.floor(Math.random()*colors.length)], speed: 2+Math.random()*4, angle: Math.random()*360, spin: (Math.random()-0.5)*8, wobble: Math.random()*10 });
+            pieces.push({
+                x: Math.random() * canvas.width,
+                y: -10 - Math.random() * 200,
+                w: 8 + Math.random() * 8,
+                h: 4 + Math.random() * 4,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                speed: 2 + Math.random() * 4,
+                angle: Math.random() * 360,
+                spin: (Math.random() - 0.5) * 8,
+                wobble: Math.random() * 10
+            });
         }
         let frame = 0;
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             let alive = false;
             pieces.forEach(p => {
-                p.y += p.speed; p.angle += p.spin; p.x += Math.sin(frame*0.05+p.wobble)*1.5;
-                if (p.y < canvas.height+20) alive = true;
-                ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.angle*Math.PI/180); ctx.fillStyle = p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore();
+                p.y += p.speed;
+                p.angle += p.spin;
+                p.x += Math.sin(frame * 0.05 + p.wobble) * 1.5;
+                if (p.y < canvas.height + 20) alive = true;
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.angle * Math.PI / 180);
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+                ctx.restore();
             });
             frame++;
-            if (alive && document.getElementById('eggOverlay').classList.contains('active')) requestAnimationFrame(draw);
-            else ctx.clearRect(0,0,canvas.width,canvas.height);
+            if (alive && document.getElementById('eggOverlay').classList.contains('active')) {
+                requestAnimationFrame(draw);
+            } else {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
         }
         draw();
     }

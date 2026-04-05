@@ -959,6 +959,14 @@
                     📊 发送今日报告给爸爸妈妈
                 </button>
             </div>
+            <div class="card" style="margin-top:15px;">
+                <button class="report-btn" onclick="manualArchive()" style="background:#2196F3;">
+                    📦 手动归档今日数据
+                </button>
+                <div style="font-size:12px;color:#666;margin-top:5px;">
+                    💡 每天自动归档，也可手动归档
+                </div>
+            </div>
         </div>
         <br><br>
     </div>
@@ -1089,8 +1097,12 @@
     }
 
     // 推送数据到 GitHub 仓库（跨设备同步核心）
-     async function syncToGitHub(dataToSync) {
+     // 自动归档检查（每天0点执行一次）
+     let lastArchiveCheck = null;
+
+     async function syncToGitHub(dataToSync, options = {}) {
          try {
+             const { noArchive = false } = options; // 是否跳过归档
              const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_DATA_FILE}`;
              // 先获取当前文件的 SHA（更新必须带 sha）
              const getResp = await fetch(apiUrl, {
@@ -1122,8 +1134,10 @@
              });
              if (putResp.ok) {
                  console.log('✅ 数据已同步到GitHub');
-                 // 同时写入历史归档（异步，不阻塞）
-                 archiveTodayData(dataToSync).catch(() => {});
+                 // 【改进】只在每天0点自动归档，不再实时归档
+                 if (!noArchive) {
+                     checkDailyArchive(dataToSync);
+                 }
                  return true;
              } else {
                  console.error('❌ GitHub同步失败:', putResp.status);
@@ -1132,6 +1146,30 @@
          } catch (e) {
              console.error('❌ GitHub同步异常:', e);
              return false;
+         }
+     }
+
+     // 检查是否需要归档（每天0点执行一次）
+     function checkDailyArchive(dataToSync) {
+         const now = new Date();
+         const todayStr = now.toISOString().split('T')[0];
+         const lastArchiveDate = localStorage.getItem(`lastArchiveDate_${CHILD}`);
+
+         console.log('[归档检查] 今天:', todayStr, '上次归档:', lastArchiveDate);
+
+         // 如果今天还没归档过，则归档
+         if (lastArchiveDate !== todayStr) {
+             console.log('[归档检查] 开始归档今日数据');
+             archiveTodayData(dataToSync).then(success => {
+                 if (success) {
+                     localStorage.setItem(`lastArchiveDate_${CHILD}`, todayStr);
+                     console.log('[归档检查] 归档成功，更新标记:', todayStr);
+                 }
+             }).catch(err => {
+                 console.error('[归档检查] 归档失败:', err);
+             });
+         } else {
+             console.log('[归档检查] 今日已归档，跳过');
          }
      }
 
@@ -1178,6 +1216,38 @@
          }
          console.warn('历史归档多次失败');
          return false;
+     }
+
+     // 手动归档按钮
+     async function manualArchive() {
+         if (!confirm('确定要归档今日数据吗？\n\n归档后，今日数据将保存到历史记录，供家长查看。')) {
+             return;
+         }
+
+         const btn = event.target;
+         btn.textContent = '📦 归档中...';
+         btn.disabled = true;
+
+         try {
+             const success = await archiveTodayData(await buildSyncData());
+             if (success) {
+                 const today = new Date().toISOString().split('T')[0];
+                 localStorage.setItem(`lastArchiveDate_${CHILD}`, today);
+                 alert('✅ 归档成功！');
+                 btn.textContent = '✅ 已归档';
+             } else {
+                 alert('❌ 归档失败，请稍后重试');
+                 btn.textContent = '📦 手动归档今日数据';
+             }
+         } catch (e) {
+             alert('❌ 归档异常: ' + e.message);
+             btn.textContent = '📦 手动归档今日数据';
+         }
+
+         setTimeout(() => {
+             btn.textContent = '📦 手动归档今日数据';
+             btn.disabled = false;
+         }, 3000);
      }
 
 
@@ -1657,7 +1727,13 @@
                 console.log('定时刷新跳过:', e.message);
             }
         }, 30000);
-        
+
+        // 【新增】定时自动上传到GitHub（每5分钟）
+        setInterval(async () => {
+            console.log('[自动上传] 开始定时上传');
+            await syncToGitHub(await buildSyncData());
+        }, 5 * 60 * 1000);
+
         // 自动同步到GitHub（处理异步buildSyncData）
         (async () => { syncToGitHub(await buildSyncData()); })();
     }

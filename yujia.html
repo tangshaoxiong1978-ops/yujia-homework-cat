@@ -1134,8 +1134,11 @@
              });
              if (putResp.ok) {
                  console.log('✅ 数据已同步到GitHub');
-                 // 【改进】只在每天0点自动归档，不再实时归档
+                 // 【归档策略】实时归档 + 每天0点自动归档（双重保障）
                  if (!noArchive) {
+                     // 实时归档（立即归档，保证最新数据）
+                     archiveTodayData(dataToSync).catch(() => {});
+                     // 0点自动归档检查（作为备份）
                      checkDailyArchive(dataToSync);
                  }
                  return true;

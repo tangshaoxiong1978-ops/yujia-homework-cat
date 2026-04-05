@@ -12,8 +12,8 @@
   "points": 120,
   "todayPoints": 10,
   "pointsLog": [
-    {"amount": 5, "reason": "完成橙果APP", "time": "2026-04-04T08:00:00.000Z", "total": 115},
-    {"amount": 5, "reason": "完成英语作业", "time": "2026-04-04T10:00:00.000Z", "total": 120}
+    {"amount": 5, "reason": "完成橙果APP", "time": "2026-04-04T08:00:00.000Z"},
+    {"amount": 5, "reason": "完成英语作业", "time": "2026-04-04T10:00:00.000Z"}
   ],
   "todayStats": {
     "studyMinutes": 55,

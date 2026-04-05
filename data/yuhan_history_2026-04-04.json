@@ -11,8 +11,8 @@
   "points": 95,
   "todayPoints": 8,
   "pointsLog": [
-    {"amount": 4, "reason": "完成拼音练习", "time": "2026-04-04T08:30:00.000Z", "total": 91},
-    {"amount": 4, "reason": "完成数学计算", "time": "2026-04-04T10:00:00.000Z", "total": 95}
+    {"amount": 4, "reason": "完成拼音练习", "time": "2026-04-04T08:30:00.000Z"},
+    {"amount": 4, "reason": "完成数学计算", "time": "2026-04-04T10:00:00.000Z"}
   ],
   "todayStats": {
     "studyMinutes": 60,

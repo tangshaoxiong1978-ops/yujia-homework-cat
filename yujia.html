@@ -1703,6 +1703,7 @@
         updateStats();
         updatePointsDisplay();
         initParentMode();
+        updateSwitchLink();
         
         // 定时更新
         setInterval(() => { updateLocalTime(); }, 1000);
@@ -1754,12 +1755,21 @@
         if (isParentMode) {
             document.body.classList.add('parent-mode');
             document.getElementById('headerName').textContent = '👨‍👧 羽佳作业管理';
-            document.getElementById('switchLink').style.display = 'none';
             document.getElementById('headerDeadline').style.display = 'none';
             document.getElementById('parentBanner').style.display = 'block';
             document.getElementById('childAddSection').style.display = 'none';
             document.getElementById('parentManageSection').style.display = 'block';
             renderParentHomeworkList();
+        }
+    }
+
+    // ========== 切换链接处理 ==========
+    function updateSwitchLink() {
+        const params = new URLSearchParams(window.location.search);
+        const switchLink = document.getElementById('switchLink');
+        if (switchLink) {
+            // 保留所有URL参数，只更改文件名
+            switchLink.href = 'yuhan.html' + (params.toString() ? '?' + params.toString() : '');
         }
     }
 

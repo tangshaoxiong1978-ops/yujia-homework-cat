@@ -149,7 +149,7 @@
                 <span class="header-deadline-time" id="headerDeadlineTime">--:--</span>
             </div>
         </div>
-        <a href="yujia.html" class="header-switch">🐱 切换羽佳</a>
+        <a href="yujia.html" class="header-switch" id="switchLink">🐱 切换羽佳</a>
     </div>
 
     <div class="main">
@@ -411,7 +411,17 @@
     function init() {
         updateDate(); updateShengdi(); loadHomework(); parseURLParams();
         renderHomeworkList(); updateStats(); updateDeadlineWithWarning(); updateHeaderClock();
+        updateSwitchLink();
         setInterval(() => { updateDeadlineWithWarning(); updateShengdi(); updateHeaderClock(); }, 1000);
+    }
+
+    function updateSwitchLink() {
+        const params = new URLSearchParams(window.location.search);
+        const switchLink = document.querySelector('.header-switch');
+        if (switchLink) {
+            // 保留所有URL参数，只更改文件名
+            switchLink.href = 'yujia.html' + (params.toString() ? '?' + params.toString() : '');
+        }
     }
 
     function updateDate() {

@@ -1263,7 +1263,7 @@
             const logSection = document.getElementById('pointsLogSection');
             const logList = document.getElementById('pointsLogList');
             const pointsLog = rawData && rawData.pointsLog ? rawData.pointsLog : [];
-            console.log('[积分明细] pointsLog:', pointsLog);
+            console.log('[积分明细] rawData.date:', rawData?.date, 'pointsLog:', pointsLog, 'length:', pointsLog.length);
             if (pointsLog && pointsLog.length > 0) {
                 logList.innerHTML = pointsLog.map(log => {
                     // 兼容不同的字段名

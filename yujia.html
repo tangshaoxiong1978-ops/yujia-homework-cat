@@ -1452,6 +1452,13 @@
     }
     function playWarningSound() { playBeep(660, 0.15); setTimeout(() => playBeep(880, 0.15), 200); }
     function playDangerSound() { playBeep(440, 0.3, 0.6); setTimeout(() => playBeep(440, 0.3, 0.6), 400); setTimeout(() => playBeep(660, 0.3, 0.6), 800); }
+    function playCompleteSound() {
+        // 欢快的完成提示音：上升音阶
+        playBeep(523, 0.15, 0.3);  // C5
+        setTimeout(() => playBeep(659, 0.15, 0.3), 150);  // E5
+        setTimeout(() => playBeep(784, 0.15, 0.3), 300);  // G5
+        setTimeout(() => playBeep(1047, 0.25, 0.4), 450);  // C6（高音）
+    }
 
     // Tab 切换
     function switchTab(tab) {
@@ -2083,12 +2090,15 @@
             efficiency: capped
         };
 
+        // 播放完成提示音
+        playCompleteSound();
+
         currentTask.status = 'done';
         saveHomework();
         currentTask = null;
         renderHomeworkList();
         updateStats();
-        
+
         // 积分奖励：完成作业 +2，效率≥90% 额外+1
         let pts = 2;
         if (capped >= 90) pts += 1;

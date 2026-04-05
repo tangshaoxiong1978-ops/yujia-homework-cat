@@ -319,6 +319,13 @@
     }
     function playWarningSound() { playBeep(660, 0.15); setTimeout(() => playBeep(880, 0.15), 200); }
     function playDangerSound() { playBeep(440, 0.3, 0.6); setTimeout(() => playBeep(440, 0.3, 0.6), 400); setTimeout(() => playBeep(660, 0.3, 0.6), 800); }
+    function playCompleteSound() {
+        // 欢快的完成提示音：上升音阶
+        playBeep(523, 0.15, 0.3);  // C5
+        setTimeout(() => playBeep(659, 0.15, 0.3), 150);  // E5
+        setTimeout(() => playBeep(784, 0.15, 0.3), 300);  // G5
+        setTimeout(() => playBeep(1047, 0.25, 0.4), 450);  // C6（高音）
+    }
 
     function switchTab(tab) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -516,6 +523,10 @@
     function finishTask() {
         clearInterval(timerInterval); document.getElementById('timerModal').classList.remove('active');
         if (!currentTask) return;
+
+        // 播放完成提示音
+        playCompleteSound();
+
         const elapsed = Math.floor((Date.now() - startTime - pausedTime) / 1000);
         const totalMin = Math.ceil(elapsed / 60);
         const eff = currentTask.time > 0 ? Math.min(Math.round((currentTask.time / totalMin) * 100), 100) : 100;

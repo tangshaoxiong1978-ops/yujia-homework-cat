@@ -1033,6 +1033,7 @@
         
         // 选择孩子
         function selectChild(child, evt) {
+            console.log('[selectChild] 切换前 currentChild:', currentChild, '切换后:', child);
             currentChild = child;
             document.querySelectorAll('.child-btn').forEach(btn => btn.classList.remove('active'));
             if (evt && evt.target) {
@@ -1040,7 +1041,11 @@
             } else if (window.event && window.event.target) {
                 window.event.target.classList.add('active');
             }
+            console.log('[selectChild] 开始更新仪表板，当前realData:', realData);
+            console.log('[selectChild] yujia数据:', realData.yujia ? 'points='+realData.yujia.points : 'null');
+            console.log('[selectChild] yuhan数据:', realData.yuhan ? 'points='+realData.yuhan.points : 'null');
             updateDashboard();
+            console.log('[selectChild] 仪表板更新完成');
         }
         
         // 手动刷新（绕过缓存）
@@ -1255,7 +1260,7 @@
             // 更新积分卡片
             const currentPts = rawData && rawData.points != null ? rawData.points : 0;
             const todayPts = rawData && rawData.todayPoints != null ? rawData.todayPoints : 0;
-            console.log('[积分卡片] currentPts:', currentPts, 'todayPts:', todayPts, 'element:', document.getElementById('currentPoints') ? '存在' : '不存在');
+            console.log('[积分卡片] currentChild:', currentChild, 'currentPts:', currentPts, 'todayPts:', todayPts, 'element:', document.getElementById('currentPoints') ? '存在' : '不存在');
             document.getElementById('currentPoints').textContent = todayPts;
             document.getElementById('totalPoints').textContent = currentPts;
             

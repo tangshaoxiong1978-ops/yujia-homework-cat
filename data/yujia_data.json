@@ -2,7 +2,7 @@
   "child": "yujia",
   "childName": "羽佳",
   "date": "2026-04-06",
-  "lastUpdated": "2026-04-06T13:23:44.115Z",
+  "lastUpdated": "2026-04-06T14:04:01.862Z",
   "homework": [
     {
       "id": 1,
@@ -60,7 +60,7 @@
       "status": "done"
     }
   ],
-  "points": 139,
+  "points": 140,
   "todayPoints": 12,
   "pointsLog": [
     {
@@ -92,6 +92,12 @@
       "reason": "✅ 完成「橙果APP打卡」",
       "time": "2026-04-06T02:09:39.594Z",
       "total": 132
+    },
+    {
+      "amount": 1,
+      "reason": "测试加分",
+      "time": "2026-04-06T14:04:01.862Z",
+      "total": 140
     }
   ],
   "todayStats": {

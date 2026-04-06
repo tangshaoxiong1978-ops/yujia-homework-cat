@@ -2,7 +2,7 @@
   "child": "yujia",
   "childName": "羽佳",
   "date": "2026-04-06",
-  "lastUpdated": "2026-04-06T10:22:24.115Z",
+  "lastUpdated": "2026-04-06T10:56:25.722Z",
   "homework": [
     {
       "id": 1,
@@ -30,7 +30,17 @@
       "name": "口算题一页",
       "icon": "🔢",
       "time": 20,
-      "status": "waiting"
+      "status": "done",
+      "completedRecords": [
+        {
+          "completedAt": "2026-04-06T10:56:11.718Z",
+          "totalMin": 20,
+          "studyMin": 15,
+          "restMin": 5,
+          "overTime": 0,
+          "efficiency": 100
+        }
+      ]
     },
     {
       "id": 5,
@@ -40,9 +50,15 @@
       "status": "done"
     }
   ],
-  "points": 137,
-  "todayPoints": 7,
+  "points": 140,
+  "todayPoints": 10,
   "pointsLog": [
+    {
+      "amount": 3,
+      "reason": "✅ 完成「口算题一页」（高效+1）",
+      "time": "2026-04-06T10:56:11.729Z",
+      "total": 140
+    },
     {
       "amount": 3,
       "reason": "✅ 完成「老师作业」（高效+1）",
@@ -63,9 +79,9 @@
     }
   ],
   "todayStats": {
-    "studyMinutes": 100,
-    "restMinutes": 0,
-    "efficiency": 35,
+    "studyMinutes": 115,
+    "restMinutes": 5,
+    "efficiency": 48,
     "tasks": [
       {
         "name": "橙果APP打卡",
@@ -91,6 +107,15 @@
         "actual": 34,
         "study": 34,
         "rest": 0,
+        "overTime": 0,
+        "efficiency": 100
+      },
+      {
+        "name": "口算题一页",
+        "time": 20,
+        "actual": 20,
+        "study": 15,
+        "rest": 5,
         "overTime": 0,
         "efficiency": 100
       }

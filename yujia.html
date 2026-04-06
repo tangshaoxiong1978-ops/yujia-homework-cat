@@ -1205,50 +1205,52 @@
          }
      }
 
-     // 将今日数据归档到 data/yujia_history_YYYY-MM-DD.json（家长看板历史查询用）
-     async function archiveTodayData(dataToSync) {
-         const maxRetries = 3;
-         for (let attempt = 1; attempt <= maxRetries; attempt++) {
-             try {
-                 const dateStr = dataToSync.date || new Date().toISOString().split('T')[0];
-                 const historyFile = `data/${CHILD}_history_${dateStr}.json`;
-                 const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${historyFile}`;
-                 // 先检查是否已存在（获取SHA）
-                 const getResp = await fetch(apiUrl, {
-                     headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' }
-                 });
-                 let sha = null;
-                 if (getResp.ok) {
-                     const info = await getResp.json();
-                     sha = info.sha;
-                 }
-                 const content = btoa(unescape(encodeURIComponent(JSON.stringify(dataToSync, null, 2))));
-                 const body = { message: `archive: ${CHILD_NAME} ${dateStr} 历史数据`, content };
-                 if (sha) body.sha = sha;
-                 const putResp = await fetch(apiUrl, {
-                     method: 'PUT',
-                     headers: {
-                         'Authorization': `token ${GITHUB_TOKEN}`,
-                         'Accept': 'application/vnd.github.v3+json',
-                         'Content-Type': 'application/json'
-                     },
-                     body: JSON.stringify(body)
-                 });
-                 if (putResp.ok) {
-                     console.log(`📦 历史数据已归档：${historyFile}`);
-                     return true;
-                 } else {
-                     console.warn(`归档尝试${attempt}失败:`, putResp.status);
-                 }
-             } catch (e) {
-                 console.warn(`归档尝试${attempt}异常:`, e.message);
-             }
-             // 等待后重试
-             if (attempt < maxRetries) await new Promise(r => setTimeout(r, 1000));
-         }
-         console.warn('历史归档多次失败');
-         return false;
-     }
+    // 将今日数据归档到 data/2026/04/yujia_history_YYYY-MM-DD.json（家长看板历史查询用）
+    async function archiveTodayData(dataToSync) {
+        const maxRetries = 3;
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                const dateStr = dataToSync.date || new Date().toISOString().split('T')[0];
+                const [year, month, day] = dateStr.split('-');
+                // 新路径：data/2026/04/yujia_history_2026-04-06.json
+                const historyFile = `data/${year}/${month}/${CHILD}_history_${dateStr}.json`;
+                const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${historyFile}`;
+                // 先检查是否已存在（获取SHA）
+                const getResp = await fetch(apiUrl, {
+                    headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' }
+                });
+                let sha = null;
+                if (getResp.ok) {
+                    const info = await getResp.json();
+                    sha = info.sha;
+                }
+                const content = btoa(unescape(encodeURIComponent(JSON.stringify(dataToSync, null, 2))));
+                const body = { message: `archive: ${CHILD_NAME} ${dateStr} 历史数据`, content };
+                if (sha) body.sha = sha;
+                const putResp = await fetch(apiUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+                if (putResp.ok) {
+                    console.log(`📦 历史数据已归档：${historyFile}`);
+                    return true;
+                } else {
+                    console.warn(`归档尝试${attempt}失败:`, putResp.status);
+                }
+            } catch (e) {
+                console.warn(`归档尝试${attempt}异常:`, e.message);
+            }
+            // 等待后重试
+            if (attempt < maxRetries) await new Promise(r => setTimeout(r, 1000));
+        }
+        console.warn('历史归档多次失败');
+        return false;
+    }
 
      // 手动归档按钮
      async function manualArchive() {
@@ -2042,7 +2044,7 @@
             let timeDisplay = '';
             
             if (task.status === 'done' && task.completedRecords && task.completedRecords.length > 0) {
-                // 已完成作业：显示实际完成用时，而不是建议时间
+                // 已完成作业：同时显示建议时间和实际用时
                 const lastRecord = task.completedRecords[task.completedRecords.length - 1];
                 const overTimeText = lastRecord.overTime > 0 ? ` 🔴 超时 ${lastRecord.overTime} 分钟` : '';
                 const completedTime = new Date(lastRecord.completedAt);
@@ -2056,7 +2058,9 @@
                     <span class="homework-actual-time">✓ 用时 ${lastRecord.totalMin} 分钟</span>${overTimeText}
                     <span class="homework-completed-at">📅 ${completedTimeText}</span>
                 </div>`;
-                timeDisplay = `<div class="homework-time">⏱ 实际用时 ${lastRecord.totalMin} 分钟</div>`;
+                // 显示建议时间 + 实际用时
+                const suggestedTimeText = task.time > 0 ? `${task.time} 分钟` : '待定';
+                timeDisplay = `<div class="homework-time">⏱ 建议 ${suggestedTimeText} | 实际 ${lastRecord.totalMin} 分钟</div>`;
             } else {
                 // 未完成作业：显示建议时间
                 timeDisplay = `<div class="homework-time">⏱ ${task.time > 0 ? task.time + ' 分钟' : '待定'}</div>`;

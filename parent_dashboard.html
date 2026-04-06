@@ -694,13 +694,16 @@
             try { return decodeURIComponent(escape(atob(str))); } catch(e) { return null; }
         }
         
-        // 归档今日数据到历史文件（带重试）
+        // 归档今日数据到历史文件（带重试，支持年月文件夹）
         async function archiveTodayData(data, child, dateStr) {
             const maxRetries = 3;
+            // 解析日期获取年月
+            const [year, month, day] = dateStr.split('-');
+            // 新路径：data/2026/04/yujia_history_2026-04-06.json
+            const historyFile = `data/${year}/${month}/${child}_history_${dateStr}.json`;
+            const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${historyFile}`;
             for (let attempt = 1; attempt <= maxRetries; attempt++) {
                 try {
-                    const historyFile = `data/${child}_history_${dateStr}.json`;
-                    const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${historyFile}`;
                     const getResp = await fetch(apiUrl, {
                         headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' }
                     });
@@ -766,6 +769,11 @@
         let viewDateStr = new Date().toISOString().split('T')[0];
         // 历史数据缓存 { 'yujia_2026-04-04': data, ... }
         let historyCache = {};
+        // 周期统计缓存（避免每次切换都重新计算）
+        let periodStatsCache = {
+            week: { yujia: null, yuhan: null, timestamp: 0 },
+            month: { yujia: null, yuhan: null, timestamp: 0 }
+        };
         
         // 初始化日期选择器
         function initDatePicker() {
@@ -804,21 +812,36 @@
 
         async function loadHistoryData(dateStr) {
             // 尝试从GitHub拉取历史归档数据
+            // 优先尝试新路径：data/2026/04/child_history_2026-04-06.json
+            // 回退到旧路径：data/child_history_2026-04-06.json
+            const [year, month, day] = dateStr.split('-');
             for (const child of ['yujia', 'yuhan']) {
                 const cacheKey = `${child}_${dateStr}`;
                 if (historyCache[cacheKey]) continue; // 已缓存
                 try {
-                    const url = `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/data/${child}_history_${dateStr}.json`;
+                    // 尝试新路径
+                    const newUrl = `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/data/${year}/${month}/${child}_history_${dateStr}.json`;
                     const controller = new AbortController();
                     setTimeout(() => controller.abort(), 4000);
-                    const resp = await fetch(url, { signal: controller.signal });
+                    let resp = await fetch(newUrl, { signal: controller.signal });
+                    let url = newUrl;
+
+                    // 如果新路径不存在，尝试旧路径
+                    if (!resp.ok) {
+                        const oldUrl = `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/data/${child}_history_${dateStr}.json`;
+                        resp = await fetch(oldUrl, { signal: controller.signal });
+                        url = oldUrl;
+                    }
+
                     if (resp.ok) {
                         const data = await resp.json();
                         historyCache[cacheKey] = data;
-                        console.log(`[历史] ${child} ${dateStr} 加载成功`);
+                        console.log(`[历史] ${child} ${dateStr} 加载成功 (${url})`);
                         updateDashboard();
                     }
-                } catch(e) { /* 无历史归档，正常 */ }
+                } catch(e) {
+                    console.log(`[历史] ${child} ${dateStr} 无历史数据`);
+                }
             }
         }
         
@@ -1441,22 +1464,26 @@
                 alert('请选择要查看的日期');
                 return;
             }
-            
+
+            const [year, month, day] = selectedDate.split('-');
             const childName = currentChild === 'yujia' ? '羽佳' : '羽菡';
-            const historyUrl = `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/data/${currentChild}_history_${selectedDate}.json`;
-            
+            // 尝试新路径，回退到旧路径
+            const newUrl = `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/data/${year}/${month}/${currentChild}_history_${selectedDate}.json`;
+            const oldUrl = `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/data/${currentChild}_history_${selectedDate}.json`;
+
             try {
                 document.getElementById('currentPoints').textContent = '⏳ 加载中...';
                 document.getElementById('pointsLogList').innerHTML = '<div style="text-align:center;color:#888;padding:20px 0">📥 正在加载历史积分...</div>';
                 document.getElementById('pointsLogSection').style.display = 'block';
-                
-                const resp = await fetch(historyUrl);
+
+                let resp = await fetch(newUrl);
+                if (!resp.ok) resp = await fetch(oldUrl);
                 if (!resp.ok) throw new Error('无历史数据');
-                
+
                 const data = await resp.json();
                 const points = data.points != null ? data.points : 0;
                 document.getElementById('currentPoints').textContent = points;
-                
+
                 const logList = document.getElementById('pointsLogList');
                 if (data.pointsLog && data.pointsLog.length > 0) {
                     logList.innerHTML = data.pointsLog.map(log => {
@@ -1582,40 +1609,98 @@
             document.querySelectorAll('#tabParentWeek, #tabParentMonth').forEach(b => b.classList.remove('active'));
             document.getElementById('contentParent' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block';
             document.getElementById('tabParent' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
-            if (tab === 'week') renderParentWeekStats();
-            if (tab === 'month') renderParentMonthStats();
+            if (tab === 'week') renderParentWeekStatsWithCache();
+            if (tab === 'month') renderParentMonthStatsWithCache();
         }
 
-        // 家长看板本周统计（从GitHub历史数据计算）
-        async function renderParentWeekStats() {
+        // 带缓存的本周统计
+        async function renderParentWeekStatsWithCache() {
+            const now = Date.now();
+            const child = currentChild === 'yujia' ? 'yujia' : 'yuhan';
+            const cache = periodStatsCache.week[child];
+
+            // 缓存有效期：5分钟
+            if (cache && (now - cache.timestamp < 5 * 60 * 1000)) {
+                console.log('[本周统计] 使用缓存');
+                applyParentWeekStats(cache.data);
+                return;
+            }
+
+            console.log('[本周统计] 重新计算');
+            const data = await calculateParentWeekStats();
+            periodStatsCache.week[child] = { data, timestamp: now };
+            applyParentWeekStats(data);
+        }
+
+        // 带缓存的本月统计
+        async function renderParentMonthStatsWithCache() {
+            const now = Date.now();
+            const child = currentChild === 'yujia' ? 'yujia' : 'yuhan';
+            const cache = periodStatsCache.month[child];
+
+            // 缓存有效期：5分钟
+            if (cache && (now - cache.timestamp < 5 * 60 * 1000)) {
+                console.log('[本月统计] 使用缓存');
+                applyParentMonthStats(cache.data);
+                return;
+            }
+
+            console.log('[本月统计] 重新计算');
+            const data = await calculateParentMonthStats();
+            periodStatsCache.month[child] = { data, timestamp: now };
+            applyParentMonthStats(data);
+        }
+
+        // 应用本周统计数据
+        function applyParentWeekStats(data) {
+            document.getElementById('parentWeekTotalMin').textContent = data.totalMin;
+            document.getElementById('parentWeekRestMin').textContent = data.totalRestMin;
+            document.getElementById('parentWeekAvgEff').textContent = data.weightedEff + '%';
+            document.getElementById('parentWeekOverMin').textContent = data.overMin;
+            document.getElementById('parentWeekTasks').textContent = data.taskCount;
+            document.getElementById('parentWeekDays').textContent = data.studyDays;
+            document.getElementById('parentWeekOverTasks').textContent = data.overCount;
+        }
+
+        // 应用本月统计数据
+        function applyParentMonthStats(data) {
+            document.getElementById('parentMonthTotalMin').textContent = data.totalMin;
+            document.getElementById('parentMonthRestMin').textContent = data.totalRestMin;
+            document.getElementById('parentMonthAvgEff').textContent = data.weightedEff + '%';
+            document.getElementById('parentMonthOverMin').textContent = data.overMin;
+            document.getElementById('parentMonthTasks').textContent = data.taskCount;
+            document.getElementById('parentMonthBest').textContent = data.bestDay;
+            document.getElementById('parentMonthOverTasks').textContent = data.overCount;
+        }
+
+        // 计算本周统计数据（独立函数，供缓存调用）
+        async function calculateParentWeekStats() {
             const days = ['日','一','二','三','四','五','六'];
             const now = new Date(), today = now.getDay();
             let totalMin = 0, totalRestMin = 0, taskCount = 0, studyDays = 0;
-            let totalPlanned = 0, totalStudy = 0, overMin = 0, overCount = 0;
+            let overMin = 0, overCount = 0;
+            const child = currentChild === 'yujia' ? 'yujia' : 'yuhan';
 
             for (let i = 0; i < 7; i++) {
                 const d = new Date(now);
                 d.setDate(d.getDate() - today + i);
                 const dateStr = d.toISOString().split('T')[0];
-                const child = currentChild === 'yujia' ? 'yujia' : 'yuhan';
-                const historyFile = `data/${child}_history_${dateStr}.json`;
+                const [year, month, day] = dateStr.split('-');
+                // 尝试新路径，回退到旧路径
+                const newUrl = `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/data/${year}/${month}/${child}_history_${dateStr}.json`;
+                const oldUrl = `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/data/${child}_history_${dateStr}.json`;
                 try {
-                    const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${historyFile}`;
-                    const resp = await fetch(apiUrl, {
-                        headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' }
-                    });
+                    const controller = new AbortController();
+                    setTimeout(() => controller.abort(), 4000);
+                    let resp = await fetch(newUrl, { signal: controller.signal });
+                    if (!resp.ok) resp = await fetch(oldUrl, { signal: controller.signal });
                     if (resp.ok) {
-                        const info = await resp.json();
-                        const content = atob(info.content);
-                        const data = JSON.parse(decodeURIComponent(escape(content)));
-                        // 修正：使用 todayStats 而不是 timerData
+                        const data = await resp.json();
                         totalMin += (data.todayStats?.studyMinutes || 0);
                         totalRestMin += (data.todayStats?.restMinutes || 0);
                         if (data.todayStats?.studyMinutes > 0) studyDays++;
                         const tasks = data.todayStats?.tasks || [];
                         tasks.forEach(t => {
-                            totalPlanned += (t.time || 0);
-                            totalStudy += (t.actual || 0);
                             if (t.overTime > 0) {
                                 overMin += t.overTime;
                                 overCount++;
@@ -1628,21 +1713,17 @@
                 }
             }
 
-            const weightedEff = totalStudy > 0 ? Math.min(Math.round((totalPlanned / totalStudy) * 100), 100) : 0;
-            document.getElementById('parentWeekTotalMin').textContent = totalMin;
-            document.getElementById('parentWeekRestMin').textContent = totalRestMin;
-            document.getElementById('parentWeekAvgEff').textContent = weightedEff + '%';
-            document.getElementById('parentWeekOverMin').textContent = overMin;
-            document.getElementById('parentWeekTasks').textContent = taskCount;
-            document.getElementById('parentWeekDays').textContent = studyDays;
-            document.getElementById('parentWeekOverTasks').textContent = overCount;
+            // 修正效率计算：学习时间 / (学习时间 + 休息时间) × 100%
+            const totalTime = totalMin + totalRestMin;
+            const weightedEff = totalTime > 0 ? Math.round((totalMin / totalTime) * 100) : 0;
+            return { totalMin, totalRestMin, weightedEff, overMin, taskCount, studyDays, overCount };
         }
 
-        // 家长看板本月统计
-        async function renderParentMonthStats() {
+        // 计算本月统计数据（独立函数，供缓存调用）
+        async function calculateParentMonthStats() {
             const now = new Date();
             let totalMin = 0, totalRestMin = 0, taskCount = 0;
-            let totalPlanned = 0, totalStudy = 0, overMin = 0, overCount = 0;
+            let overMin = 0, overCount = 0;
             let bestDay = '--', bestEff = 0;
             const child = currentChild === 'yujia' ? 'yujia' : 'yuhan';
 
@@ -1650,35 +1731,39 @@
                 const dt = new Date(now.getFullYear(), now.getMonth(), d);
                 if (dt > now) break;
                 const dateStr = dt.toISOString().split('T')[0];
-                const historyFile = `data/${child}_history_${dateStr}.json`;
+                const [year, month, day] = dateStr.split('-');
+                // 尝试新路径，回退到旧路径
+                const newUrl = `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/data/${year}/${month}/${child}_history_${dateStr}.json`;
+                const oldUrl = `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/data/${child}_history_${dateStr}.json`;
                 try {
-                    const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${historyFile}`;
-                    const resp = await fetch(apiUrl, {
-                        headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' }
-                    });
+                    const controller = new AbortController();
+                    setTimeout(() => controller.abort(), 4000);
+                    let resp = await fetch(newUrl, { signal: controller.signal });
+                    if (!resp.ok) resp = await fetch(oldUrl, { signal: controller.signal });
                     if (resp.ok) {
-                        const info = await resp.json();
-                        const content = atob(info.content);
-                        const data = JSON.parse(decodeURIComponent(escape(content)));
-                        // 修正：使用 todayStats 而不是 timerData
-                        totalMin += (data.todayStats?.studyMinutes || 0);
-                        totalRestMin += (data.todayStats?.restMinutes || 0);
+                        const data = await resp.json();
+                        const dayStudy = data.todayStats?.studyMinutes || 0;
+                        const dayRest = data.todayStats?.restMinutes || 0;
+                        totalMin += dayStudy;
+                        totalRestMin += dayRest;
+
                         const tasks = data.todayStats?.tasks || [];
                         tasks.forEach(t => {
-                            totalPlanned += (t.time || 0);
-                            totalStudy += (t.actual || 0);
                             if (t.overTime > 0) {
                                 overMin += t.overTime;
                                 overCount++;
                             }
                         });
                         taskCount += tasks.filter(t => t.status === 'done').length;
-                        // 最高效率日
-                        if (tasks.length > 0) {
-                            const dayPlanned = tasks.reduce((sum, t) => sum + (t.time || 0), 0);
-                            const dayStudy = tasks.reduce((sum, t) => sum + (t.actual || 0), 0);
-                            const dayEff = dayStudy > 0 ? Math.min(Math.round((dayPlanned / dayStudy) * 100), 100) : 0;
-                            if (dayEff > bestEff) { bestEff = dayEff; bestDay = `${now.getMonth()+1}/${d}`; }
+
+                        // 最高效率日（当天学习时间 / (学习时间 + 休息时间)）
+                        if (dayStudy > 0) {
+                            const dayTotal = dayStudy + dayRest;
+                            const dayEff = Math.round((dayStudy / dayTotal) * 100);
+                            if (dayEff > bestEff) {
+                                bestEff = dayEff;
+                                bestDay = `${now.getMonth()+1}/${d}`;
+                            }
                         }
                     }
                 } catch(e) {
@@ -1686,14 +1771,10 @@
                 }
             }
 
-            const weightedEff = totalStudy > 0 ? Math.min(Math.round((totalPlanned / totalStudy) * 100), 100) : 0;
-            document.getElementById('parentMonthTotalMin').textContent = totalMin;
-            document.getElementById('parentMonthRestMin').textContent = totalRestMin;
-            document.getElementById('parentMonthAvgEff').textContent = weightedEff + '%';
-            document.getElementById('parentMonthOverMin').textContent = overMin;
-            document.getElementById('parentMonthTasks').textContent = taskCount;
-            document.getElementById('parentMonthBest').textContent = bestDay;
-            document.getElementById('parentMonthOverTasks').textContent = overCount;
+            // 修正效率计算：学习时间 / (学习时间 + 休息时间) × 100%
+            const totalTime = totalMin + totalRestMin;
+            const weightedEff = totalTime > 0 ? Math.round((totalMin / totalTime) * 100) : 0;
+            return { totalMin, totalRestMin, weightedEff, overMin, taskCount, bestDay, overCount };
         }
 
         // 初始化日期输入框为当月范围

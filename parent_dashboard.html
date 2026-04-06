@@ -477,30 +477,43 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 12px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            margin-bottom: 8px;
+            padding: 12px 14px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border: 1px solid #e9ecef;
             transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
         .points-log-item:hover {
-            background: #e9ecef;
+            background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%);
             transform: translateX(4px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
         }
         .points-log-item .time {
-            color: #888;
+            color: #999;
             font-size: 12px;
             font-weight: 500;
         }
         .points-log-item .plus {
             color: #27ae60;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 18px;
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            padding: 4px 12px;
+            border-radius: 20px;
+            min-width: 50px;
+            text-align: center;
         }
         .points-log-item .minus {
             color: #e74c3c;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 18px;
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            padding: 4px 12px;
+            border-radius: 20px;
+            min-width: 50px;
+            text-align: center;
         }
 
         /* 标签页样式 */
@@ -1428,22 +1441,44 @@
             document.getElementById('currentPoints').textContent = todayPts;
             document.getElementById('totalPoints').textContent = currentPts;
             
-            // 更新积分明细
+            // 更新积分明细 - 使用最新数据
             const logSection = document.getElementById('pointsLogSection');
             const logList = document.getElementById('pointsLogList');
-            const pointsLog = rawData && rawData.pointsLog ? rawData.pointsLog : [];
-            console.log('[积分明细] rawData.date:', rawData?.date, 'pointsLog:', pointsLog, 'length:', pointsLog.length);
+            let pointsLog = [];
+            
+            // 优先从 realData 获取最新明细（包含刚添加的加减分）
+            if (realData[currentChild] && realData[currentChild].pointsLog) {
+                pointsLog = realData[currentChild].pointsLog;
+            } else if (rawData && rawData.pointsLog) {
+                pointsLog = rawData.pointsLog;
+            }
+            
+            console.log('[积分明细] currentChild:', currentChild, 'pointsLog长度:', pointsLog.length);
+            
             if (pointsLog && pointsLog.length > 0) {
-                logList.innerHTML = pointsLog.map(log => {
+                // 按时间倒序排列（最新的在最前面）
+                const sortedLog = [...pointsLog].sort((a, b) => new Date(b.time) - new Date(a.time));
+                
+                logList.innerHTML = sortedLog.map(log => {
                     // 兼容不同的字段名
                     const changeVal = (log.amount !== undefined) ? log.amount : (log.change || 0);
                     const reasonText = (log.reason !== undefined) ? log.reason : (log.desc || '积分变动');
                     if (changeVal === undefined || changeVal === null) return '';
+                    
+                    const timeStr = log.time ? new Date(log.time).toLocaleString('zh-CN', {
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }) : '';
+                    
                     return `
                     <div class="points-log-item">
-                        <span>${reasonText}</span>
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-weight:600;color:#333;margin-bottom:2px;">${reasonText}</div>
+                            <div class="time">${timeStr}</div>
+                        </div>
                         <span class="${changeVal > 0 ? 'plus' : 'minus'}">${changeVal > 0 ? '+' : ''}${changeVal}</span>
-                        <span class="time">${log.time ? new Date(log.time).toLocaleString('zh-CN') : ''}</span>
                     </div>
                 `}).join('');
             } else {
@@ -1482,83 +1517,183 @@
         }
         
         // 积分调整（家长手动加减分）
-        async function adjustPoints(direction) {
-            // 先输入分值
-            const scoreInput = prompt(`${direction > 0 ? '加分' : '减分'}分值（正整数）：`, '1');
-            if (scoreInput === null) return; // 用户点击取消
+        function adjustPoints(direction) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,0,0,0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+                animation: fadeIn 0.2s ease;
+            `;
             
-            const absScore = parseInt(scoreInput);
-            if (isNaN(absScore) || absScore <= 0) {
-                alert('请输入有效的正整数分值');
-                return;
-            }
+            const isAdd = direction > 0;
+            const themeColor = isAdd ? 'linear-gradient(135deg, #84fab0, #8fd3f4)' : 'linear-gradient(135deg, #ff6b6b, #ee5a6f)';
+            const themeText = isAdd ? '➕ 加分' : '➖ 减分';
             
-            // 计算实际变动（加减分）
-            const change = direction > 0 ? absScore : -absScore;
+            modal.innerHTML = `
+                <div style="background: white; border-radius: 20px; padding: 30px; width: 90%; max-width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); animation: slideUp 0.3s ease;">
+                    <h3 style="font-size: 24px; font-weight: bold; color: ${isAdd ? '#27ae60' : '#e74c3c'}; margin-bottom: 20px; text-align: center;">
+                        ${themeText}
+                    </h3>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-size: 14px; font-weight: 600; color: #555; margin-bottom: 8px;">
+                            分值（正整数）
+                        </label>
+                        <input type="number" id="pointsInput" value="1" min="1" style="
+                            width: 100%;
+                            padding: 12px 16px;
+                            border: 2px solid #e0e0e0;
+                            border-radius: 12px;
+                            font-size: 18px;
+                            font-weight: bold;
+                            color: ${isAdd ? '#27ae60' : '#e74c3c'};
+                            text-align: center;
+                            outline: none;
+                            transition: border-color 0.3s;
+                        " onfocus="this.style.borderColor='#3498db'" onblur="this.style.borderColor='#e0e0e0'">
+                    </div>
+                    
+                    <div style="margin-bottom: 24px;">
+                        <label style="display: block; font-size: 14px; font-weight: 600; color: #555; margin-bottom: 8px;">
+                            原因（可选）
+                        </label>
+                        <input type="text" id="reasonInput" placeholder="${isAdd ? '为什么加分？' : '为什么减分？'}" style="
+                            width: 100%;
+                            padding: 12px 16px;
+                            border: 2px solid #e0e0e0;
+                            border-radius: 12px;
+                            font-size: 14px;
+                            color: #333;
+                            outline: none;
+                            transition: border-color 0.3s;
+                        " onfocus="this.style.borderColor='#3498db'" onblur="this.style.borderColor='#e0e0e0'">
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px;">
+                        <button id="cancelBtn" style="flex: 1; padding: 12px; border: 2px solid #e0e0e0; background: white; border-radius: 12px; font-size: 16px; font-weight: 600; color: #666; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">
+                            取消
+                        </button>
+                        <button id="confirmBtn" style="flex: 1; padding: 12px; border: none; background: ${themeColor}; border-radius: 12px; font-size: 16px; font-weight: bold; color: ${isAdd ? '#2c3e50' : 'white'}; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 12px ${isAdd ? 'rgba(132,250,176,0.4)' : 'rgba(255,107,107,0.4)'};" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                            确认${isAdd ? '加分' : '减分'}
+                        </button>
+                    </div>
+                </div>
+                <style>
+                    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+                    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+                </style>
+            `;
             
-            // 再输入原因（可选）
-            const reason = prompt(`${direction > 0 ? '加分' : '减分'}原因（可选，可直接留空）：`, change > 0 ? '家长加分' : '家长减分');
-            if (reason === null) return; // 用户点击取消
+            document.body.appendChild(modal);
             
-            const child = currentChild;
-            const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/data/${child}_data.json`;
+            const pointsInput = modal.querySelector('#pointsInput');
+            const reasonInput = modal.querySelector('#reasonInput');
+            const cancelBtn = modal.querySelector('#cancelBtn');
+            const confirmBtn = modal.querySelector('#confirmBtn');
             
-            // 先获取当前数据
-            try {
-                const getResp = await fetch(apiUrl, {
-                    headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' }
-                });
-                if (!getResp.ok) { alert('获取数据失败'); return; }
-                
-                const fileInfo = await getResp.json();
-                const decoded = base64Decode(fileInfo.content);
-                if (!decoded) { alert('解码失败'); return; }
-                let data = JSON.parse(decoded);
-                
-                // 更新积分
-                data.points = (data.points || 0) + change;
-                data.lastUpdated = new Date().toISOString();
-                
-                // 添加积分记录（格式兼容孩子页面：amount+reason+time+total）
-                if (!data.pointsLog) data.pointsLog = [];
-                data.pointsLog.push({
-                    amount: change,  // 积分变动（正数加分，负数减分）
-                    reason: reason || (change > 0 ? '家长加分' : '家长减分'),
-                    time: new Date().toISOString(),
-                    total: data.points // 变动后的累计积分
-                });
-                data.pointsLog = data.pointsLog.slice(-20); // 保留最近20条
-                
-                // 【新增】同时归档今日历史快照（供历史查询）
-                const todayStr = new Date().toISOString().split('T')[0];
-                await archiveTodayData(data, currentChild, todayStr);
-                
-                // 推送到GitHub
-                const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
-                const body = {
-                    message: `家长手动调整积分：${change > 0 ? '+' : ''}${change}`,
-                    content: content,
-                    sha: fileInfo.sha
-                };
-                const putResp = await fetch(apiUrl, {
-                    method: 'PUT',
-                    headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body)
-                });
-                
-                if (putResp.ok) {
-                    alert(`✅ ${change > 0 ? '加分' : '减分'}成功！当前积分：${data.points}`);
-                    // 【关键修复】立即更新本地缓存并刷新显示
-                    realData[currentChild] = data;
-                    saveToCache(currentChild, data);
-                    updateSyncStatus();
-                    updateDashboard();
-                } else {
-                    alert('❌ 同步失败，请重试');
+            pointsInput.focus();
+            pointsInput.select();
+            
+            cancelBtn.onclick = () => {
+                modal.style.opacity = '0';
+                setTimeout(() => modal.remove(), 200);
+            };
+            
+            const confirmAdjust = async () => {
+                const absScore = parseInt(pointsInput.value);
+                if (isNaN(absScore) || absScore <= 0) {
+                    alert('请输入有效的正整数分值');
+                    return;
                 }
-            } catch (e) {
-                alert('❌ 操作失败：' + e.message);
-            }
+                
+                const change = direction > 0 ? absScore : -absScore;
+                const reason = reasonInput.value.trim() || (change > 0 ? '家长加分' : '家长减分');
+                const child = currentChild;
+                const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/data/${child}_data.json`;
+                
+                modal.querySelector('h3').textContent = '⏳ 处理中...';
+                confirmBtn.disabled = true;
+                cancelBtn.disabled = true;
+                confirmBtn.style.opacity = '0.5';
+                
+                try {
+                    const getResp = await fetch(apiUrl, {
+                        headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' }
+                    });
+                    if (!getResp.ok) { throw new Error('获取数据失败'); }
+                    
+                    const fileInfo = await getResp.json();
+                    const decoded = base64Decode(fileInfo.content);
+                    if (!decoded) { throw new Error('解码失败'); }
+                    let data = JSON.parse(decoded);
+                    
+                    // 更新积分
+                    data.points = (data.points || 0) + change;
+                    data.lastUpdated = new Date().toISOString();
+                    data.todayPoints = (data.todayPoints || 0) + change;
+                    
+                    // 添加积分记录（格式兼容孩子页面：amount+reason+time+total）
+                    if (!data.pointsLog) data.pointsLog = [];
+                    data.pointsLog.push({
+                        amount: change,
+                        reason: reason,
+                        time: new Date().toISOString(),
+                        total: data.points
+                    });
+                    data.pointsLog = data.pointsLog.slice(-20); // 保留最近20条
+                    
+                    // 归档今日历史快照
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    await archiveTodayData(data, currentChild, todayStr);
+                    
+                    // 推送到GitHub
+                    const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+                    const body = {
+                        message: `家长手动调整积分：${change > 0 ? '+' : ''}${change}`,
+                        content: content,
+                        sha: fileInfo.sha
+                    };
+                    const putResp = await fetch(apiUrl, {
+                        method: 'PUT',
+                        headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    
+                    if (putResp.ok) {
+                        // 成功更新
+                        realData[currentChild] = data;
+                        saveToCache(currentChild, data);
+                        updateSyncStatus();
+                        updateDashboard();
+                        
+                        modal.style.opacity = '0';
+                        setTimeout(() => modal.remove(), 200);
+                    } else {
+                        throw new Error('同步失败');
+                    }
+                } catch (e) {
+                    alert('❌ 操作失败：' + e.message);
+                    modal.querySelector('h3').textContent = themeText;
+                    confirmBtn.disabled = false;
+                    cancelBtn.disabled = false;
+                    confirmBtn.style.opacity = '1';
+                }
+            };
+            
+            confirmBtn.onclick = confirmAdjust;
+            
+            // 回车键确认
+            pointsInput.onkeydown = (e) => {
+                if (e.key === 'Enter') reasonInput.focus();
+            };
+            reasonInput.onkeydown = (e) => {
+                if (e.key === 'Enter') confirmAdjust();
+            };
         }
         
         // 显示/隐藏积分明细

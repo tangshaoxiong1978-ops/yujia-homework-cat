@@ -1681,9 +1681,18 @@
             let overMin = 0, overCount = 0;
             const child = currentChild === 'yujia' ? 'yujia' : 'yuhan';
 
+            // 本周从周日开始到周六结束
+            const weekStart = new Date(now);
+            weekStart.setDate(now.getDate() - today);
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 6);
+
+            console.log(`[本周统计] 计算范围: ${weekStart.toISOString().split('T')[0]} 至 ${weekEnd.toISOString().split('T')[0]}`);
+
+            // 遍历本周7天
             for (let i = 0; i < 7; i++) {
-                const d = new Date(now);
-                d.setDate(d.getDate() - today + i);
+                const d = new Date(weekStart);
+                d.setDate(weekStart.getDate() + i);
                 const dateStr = d.toISOString().split('T')[0];
                 const [year, month, day] = dateStr.split('-');
                 // 尝试新路径，回退到旧路径
@@ -1707,11 +1716,14 @@
                             }
                         });
                         taskCount += tasks.filter(t => t.status === 'done').length;
+                        console.log(`[本周统计] ${dateStr}: 学习${data.todayStats?.studyMinutes||0}分, 休息${data.todayStats?.restMinutes||0}分`);
                     }
                 } catch(e) {
                     console.log(`[本周统计] ${dateStr} 无历史数据`);
                 }
             }
+
+            console.log(`[本周统计] 总计: 学习${totalMin}分, 休息${totalRestMin}分`);
 
             // 修正效率计算：学习时间 / (学习时间 + 休息时间) × 100%
             const totalTime = totalMin + totalRestMin;
@@ -1727,7 +1739,14 @@
             let bestDay = '--', bestEff = 0;
             const child = currentChild === 'yujia' ? 'yujia' : 'yuhan';
 
-            for (let d = 1; d <= 31; d++) {
+            // 获取本月第一天和最后一天
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+            console.log(`[本月统计] 计算范围: ${monthStart.toISOString().split('T')[0]} 至 ${monthEnd.toISOString().split('T')[0]}`);
+
+            // 遍历本月所有天数
+            for (let d = 1; d <= monthEnd.getDate(); d++) {
                 const dt = new Date(now.getFullYear(), now.getMonth(), d);
                 if (dt > now) break;
                 const dateStr = dt.toISOString().split('T')[0];
@@ -1756,6 +1775,8 @@
                         });
                         taskCount += tasks.filter(t => t.status === 'done').length;
 
+                        console.log(`[本月统计] ${dateStr}: 学习${dayStudy}分, 休息${dayRest}分`);
+
                         // 最高效率日（当天学习时间 / (学习时间 + 休息时间)）
                         if (dayStudy > 0) {
                             const dayTotal = dayStudy + dayRest;
@@ -1768,8 +1789,11 @@
                     }
                 } catch(e) {
                     // 无历史数据
+                    console.log(`[本月统计] ${dateStr} 无历史数据`);
                 }
             }
+
+            console.log(`[本月统计] 总计: 学习${totalMin}分, 休息${totalRestMin}分`);
 
             // 修正效率计算：学习时间 / (学习时间 + 休息时间) × 100%
             const totalTime = totalMin + totalRestMin;

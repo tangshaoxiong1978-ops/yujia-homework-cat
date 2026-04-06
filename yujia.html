@@ -1720,28 +1720,50 @@
         setInterval(async () => {
             try {
                 const newData = await loadFromGitHub();
-                if (newData && newData.points !== undefined) {
-                    const localUpdatedStr = localStorage.getItem(`${POINTS_KEY}_update`) || '0';
-                    const localUpdated = new Date(localUpdatedStr);
-                    const ghUpdated = new Date(newData.lastUpdated || '0');
+                if (!newData) return;
 
-                    console.log('🔄 刷新检查：GitHub积分=', newData.points, '本地积分=', getPoints(),
-                                'GitHub时间=', newData.lastUpdated, '本地时间=', localUpdatedStr);
+                const today = new Date().toISOString().split('T')[0];
+                const localUpdatedStr = localStorage.getItem(`${POINTS_KEY}_update`) || '0';
+                const localUpdated = new Date(localUpdatedStr);
+                const ghUpdated = new Date(newData.lastUpdated || '0');
 
-                    // 【关键】只有GitHub数据更新时间 > 本地更新时间时，才同步
-                    if (ghUpdated > localUpdated) {
-                        console.log('✅ GitHub数据更新，同步到本地');
+                console.log('🔄 刷新检查：GitHub积分=', newData.points, '本地积分=', getPoints(),
+                            'GitHub时间=', newData.lastUpdated, '本地时间=', localUpdatedStr);
+
+                // 【关键】只有GitHub数据更新时间 > 本地更新时间时，才同步
+                if (ghUpdated > localUpdated) {
+                    console.log('✅ GitHub数据更新，同步到本地');
+
+                    // 同步积分
+                    if (newData.points !== undefined) {
                         localStorage.setItem(POINTS_KEY, newData.points);
                         if (newData.pointsLog && newData.pointsLog.length > 0) {
-                            const dataDate = newData.date || new Date().toISOString().split('T')[0];
+                            const dataDate = newData.date || today;
                             localStorage.setItem(getPointsLogKey(dataDate), JSON.stringify(newData.pointsLog));
                         }
                         localStorage.setItem(`${POINTS_KEY}_update`, newData.lastUpdated);
                         updatePointsDisplay();
                         console.log('✅ 积分已同步更新');
-                    } else {
-                        console.log('ℹ️ 本地数据更新，跳过GitHub同步');
                     }
+
+                    // 【新增】同步作业状态（跨终端数据一致性核心修复）
+                    if (newData.date === today && newData.homework && newData.homework.length > 0) {
+                        const todayKey = getTodayKey();
+                        const localHwTime = localStorage.getItem(`${todayKey}_update`) || '0';
+                        if (ghUpdated > new Date(localHwTime)) {
+                            console.log('✅ 同步作业状态（跨设备）');
+                            homework = newData.homework;
+                            saveHomework();
+                            localStorage.setItem(`${todayKey}_update`, newData.lastUpdated);
+                            renderHomeworkList();
+                            updateStats();
+                        }
+                    }
+
+                    // 更新缓存的 githubData
+                    githubData = newData;
+                } else {
+                    console.log('ℹ️ 本地数据更新，跳过GitHub同步');
                 }
             } catch(e) {
                 console.log('定时刷新跳过:', e.message);
@@ -1777,7 +1799,18 @@
         if (switchLink) {
             // 保留所有URL参数，只更改文件名
             switchLink.href = 'yuhan.html' + (params.toString() ? '?' + params.toString() : '');
+            // 添加切换提示音
+            switchLink.addEventListener('click', (e) => {
+                playSwitchSound();
+            });
         }
+    }
+
+    // 播放切换提示音
+    function playSwitchSound() {
+        // 切换孩子时的提示音（两个短音）
+        playBeep(600, 0.15);
+        setTimeout(() => playBeep(900, 0.15), 150);
     }
 
     // ========== 家长模式函数 ==========
@@ -2113,7 +2146,7 @@
 
         // 同步数据到 GitHub（让家长看板能实时看到）
         showToast('正在同步数据...');
-        const syncData = buildSyncData();
+        const syncData = await buildSyncData();
         const ok = await syncToGitHub(syncData);
         if (ok) showToast('✅ 数据已同步，家长可查看');
         else showToast('⚠️ 同步失败，发送报告后再试');
@@ -2411,7 +2444,7 @@
                 if (r.ok) {
                     showToast('报告已发送飞书 📬');
                     // 同时同步数据到 GitHub
-                    syncToGitHub(buildSyncData()).then(ok => {
+                    buildSyncData().then(syncData => syncToGitHub(syncData)).then(ok => {
                         if (ok) showToast('✅ 数据已同步到家长看板');
                     });
                     // 发送完成后自动 @家长 确认
@@ -2462,7 +2495,7 @@
         localStorage.setItem(`${POINTS_KEY}_update`, now);
         updatePointsDisplay();
         // 自动同步到GitHub
-        syncToGitHub(buildSyncData());
+        buildSyncData().then(syncData => syncToGitHub(syncData));
         return newPts;
     }
 

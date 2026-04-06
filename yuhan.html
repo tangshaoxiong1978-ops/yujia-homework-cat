@@ -800,7 +800,7 @@
         </div>
         <!-- 本地时间 -->
         <div class="header-clock" id="headerClock"><img src="https://img.icons8.com/ios-filled/24/4CAF50/clock.png" alt="时间"> --:--:--</div>
-        <a href="yujia.html" class="header-switch" id="switchLink">羽佳</a>
+        <a href="yujia.html" class="header-switch" id="switchLink">🔄 羽佳</a>
     </div>
 
     <!-- 家长模式 Banner -->
@@ -845,10 +845,6 @@
                     <div style="font-size:14px;font-weight:700;color:#E65100;margin-bottom:2px;">生地会考倒计时</div>
                     <div><span id="shengdiDays" style="font-size:22px;font-weight:800;color:#FF6D00;">--</span> <span style="font-size:12px;color:#888;">天后考试</span></div>
                 </div>
-            </div>
-            <div style="display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;color:#888;margin-bottom:12px;">
-                <span>📚</span><span>剩余复习时间</span>
-                <span id="shengdiStudy" style="font-weight:700;color:#4CAF50;font-size:15px;"></span>
             </div>
             <div class="zhongkao-card" style="background:linear-gradient(135deg,#e3f2fd 0%,#bbdefb 100%);border-radius:16px;padding:14px;margin-bottom:0;border-left:4px solid #1976D2;display:flex;align-items:center;gap:12px;">
                 <div class="zhongkao-icon" style="font-size:32px;">🎓</div>
@@ -2018,8 +2014,6 @@
         const now = new Date(), diff = SHENGDI_DATE - now, days = Math.max(0, Math.ceil(diff / 86400000));
         const el = document.getElementById('shengdiDays');
         if (el) el.textContent = days;
-        const st = document.getElementById('shengdiStudy');
-        if (st) st.textContent = `约 ${Math.floor(days * 2)} 小时`;
 
         // 更新中考倒计时
         const zhongkaoDiff = ZHONGKAO_DATE - now, zhongkaoDays = Math.max(0, Math.ceil(zhongkaoDiff / 86400000));

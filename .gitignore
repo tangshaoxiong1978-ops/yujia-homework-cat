@@ -1,1 +1,3 @@
 .vercel
+.snapshots/
+gen_yuhan.py

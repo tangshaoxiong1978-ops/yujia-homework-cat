@@ -800,7 +800,7 @@
         </div>
         <!-- 本地时间 -->
         <div class="header-clock" id="headerClock"><img src="https://img.icons8.com/ios-filled/24/4CAF50/clock.png" alt="时间"> --:--:--</div>
-        <a href="yujia.html" class="header-switch" id="switchLink">🐱 切换羽佳</a>
+        <a href="yujia.html" class="header-switch" id="switchLink">羽佳</a>
     </div>
 
     <!-- 家长模式 Banner -->
@@ -837,7 +837,7 @@
         </div>
 
 
-        <!-- 生地会考倒计时 -->
+        <!-- 生地会考倒计时 + 中考倒计时 -->
         <div class="card">
             <div class="shengdi-card" style="background:linear-gradient(135deg,#fff8e1 0%,#ffecb3 100%);border-radius:16px;padding:14px;margin-bottom:14px;border-left:4px solid #FFA000;display:flex;align-items:center;gap:12px;">
                 <div class="shengdi-icon" style="font-size:32px;">🌏</div>
@@ -846,9 +846,16 @@
                     <div><span id="shengdiDays" style="font-size:22px;font-weight:800;color:#FF6D00;">--</span> <span style="font-size:12px;color:#888;">天后考试</span></div>
                 </div>
             </div>
-            <div style="display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;color:#888;margin-bottom:0;">
+            <div style="display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;color:#888;margin-bottom:12px;">
                 <span>📚</span><span>剩余复习时间</span>
                 <span id="shengdiStudy" style="font-weight:700;color:#4CAF50;font-size:15px;"></span>
+            </div>
+            <div class="zhongkao-card" style="background:linear-gradient(135deg,#e3f2fd 0%,#bbdefb 100%);border-radius:16px;padding:14px;margin-bottom:0;border-left:4px solid #1976D2;display:flex;align-items:center;gap:12px;">
+                <div class="zhongkao-icon" style="font-size:32px;">🎓</div>
+                <div class="zhongkao-info" style="flex:1;">
+                    <div style="font-size:14px;font-weight:700;color:#0D47A1;margin-bottom:2px;">广州中考倒计时</div>
+                    <div><span id="zhongkaoDays" style="font-size:22px;font-weight:800;color:#1565C0;">--</span> <span style="font-size:12px;color:#888;">天后考试</span></div>
+                </div>
             </div>
         </div>
 
@@ -1115,7 +1122,8 @@
     const GITHUB_TOKEN = _t.join('');
     const GITHUB_REPO = 'tangshaoxiong1978-ops/yujia-homework-cat';
     const GITHUB_DATA_FILE = `data/${CHILD}_data.json`;
-    const SHENGDI_DATE = new Date('2026-06-20T09:00:00+08:00');
+    const SHENGDI_DATE = new Date('2026-06-16T09:00:00+08:00');
+    const ZHONGKAO_DATE = new Date('2027-06-30T09:00:00+08:00');
 
     // Base64 解码兼容函数（处理中文编码）
     function base64Decode(content) {
@@ -2012,6 +2020,11 @@
         if (el) el.textContent = days;
         const st = document.getElementById('shengdiStudy');
         if (st) st.textContent = `约 ${Math.floor(days * 2)} 小时`;
+
+        // 更新中考倒计时
+        const zhongkaoDiff = ZHONGKAO_DATE - now, zhongkaoDays = Math.max(0, Math.ceil(zhongkaoDiff / 86400000));
+        const zkEl = document.getElementById('zhongkaoDays');
+        if (zkEl) zkEl.textContent = zhongkaoDays;
     }
 
     function parseURLParams() {

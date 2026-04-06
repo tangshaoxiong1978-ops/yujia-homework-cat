@@ -359,6 +359,21 @@
             color: #aaa;
         }
 
+        .homework-completed-info {
+            margin-top: 4px;
+            font-size: 12px;
+        }
+
+        .homework-actual-time {
+            color: #4CAF50;
+            font-weight: 500;
+        }
+
+        .homework-completed-info .overtime-text {
+            color: #ff5722;
+            font-weight: 500;
+        }
+
         .homework-status {
             padding: 5px 12px;
             border-radius: 20px;
@@ -1122,12 +1137,17 @@
              const { noArchive = false } = options; // 是否跳过归档
              const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_DATA_FILE}`;
              // 先获取当前文件的 SHA（更新必须带 sha）
+             const controller1 = new AbortController();
+             const timeoutId1 = setTimeout(() => controller1.abort(), 5000);
              const getResp = await fetch(apiUrl, {
                  headers: {
                      'Authorization': `token ${GITHUB_TOKEN}`,
                      'Accept': 'application/vnd.github.v3+json'
-                 }
+                 },
+                 signal: controller1.signal
              });
+             clearTimeout(timeoutId1);
+
              let sha = null;
              if (getResp.ok) {
                  const fileInfo = await getResp.json();
@@ -1140,6 +1160,9 @@
                  content: content
              };
              if (sha) body.sha = sha;
+
+             const controller2 = new AbortController();
+             const timeoutId2 = setTimeout(() => controller2.abort(), 5000);
              const putResp = await fetch(apiUrl, {
                  method: 'PUT',
                  headers: {
@@ -1147,8 +1170,11 @@
                      'Accept': 'application/vnd.github.v3+json',
                      'Content-Type': 'application/json'
                  },
-                 body: JSON.stringify(body)
+                 body: JSON.stringify(body),
+                 signal: controller2.signal
              });
+             clearTimeout(timeoutId2);
+
              if (putResp.ok) {
                  console.log('✅ 数据已同步到GitHub');
                  // 【归档策略】实时归档 + 每天0点自动归档（双重保障）
@@ -1275,25 +1301,24 @@
     // 改用 GitHub API 避免延迟，与家长看板保持一致
     async function loadFromGitHub() {
         try {
-            // 使用 GitHub API（带token），实时读取，避免 Pages 缓存延迟
-            const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_DATA_FILE}`;
-            console.log('📡 使用 GitHub API URL:', url);
+            // 使用 GitHub Pages URL 获取数据，避免 API 访问限制
+            const url = `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/data/${CHILD}_data.json?_t=${Date.now()}`;
+            console.log('📡 使用 GitHub Pages URL:', url);
 
-            const resp = await fetch(url, {
-                headers: {
-                    'Authorization': `token ${GITHUB_TOKEN}`,
-                    'Accept': 'application/vnd.github.v3+json'
-                }
-            });
+            // 添加超时控制
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => {
+                controller.abort();
+                console.log('⏱️ GitHub拉取超时');
+            }, 5000);
+
+            const resp = await fetch(url, { signal: controller.signal });
+            clearTimeout(timeoutId);
 
             if (resp.ok) {
-                const fileInfo = await resp.json();
-                const decoded = base64Decode(fileInfo.content);
-                if (decoded) {
-                    const data = JSON.parse(decoded);
-                    console.log('✅ 从GitHub拉取数据成功, points:', data.points);
-                    return data;
-                }
+                const data = await resp.json();
+                console.log('✅ 从GitHub拉取数据成功, points:', data.points, 'tasks:', data.todayStats?.tasks?.length);
+                return data;
             }
             console.log('ℹ️ GitHub无数据（或首次同步），使用本地数据');
             return null;
@@ -1315,50 +1340,41 @@
         const localUpdatedStr = localStorage.getItem(`${POINTS_KEY}_update`) || '0';
         const localUpdated = new Date(localUpdatedStr);
 
-        // 【修复】从GitHub读取最新数据，用时间戳仲裁，避免本地旧数据覆盖GitHub更新
+        // 【修复】从 GitHub Pages 读取最新数据，用时间戳仲裁，避免本地旧数据覆盖 GitHub 更新
         try {
-            const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/data/${CHILD}_data.json`;
-            const getResp = await fetch(url, {
-                headers: {
-                    'Authorization': `token ${GITHUB_TOKEN}`,
-                    'Accept': 'application/vnd.github.v3+json'
-                }
-            });
+            const url = `https://tangshaoxiong1978-ops.github.io/yujia-homework-cat/data/${CHILD}_data.json?_t=${Date.now()}`;
+            const getResp = await fetch(url);
             if (getResp.ok) {
-                const ghData = await getResp.json();
-                const decoded = base64Decode(ghData.content);
-                if (decoded) {
-                    const ghParsed = JSON.parse(decoded);
-                    const ghPoints = ghParsed.points !== undefined ? ghParsed.points : 0;
-                    const ghPointsLog = ghParsed.pointsLog || [];
-                    const ghUpdated = new Date(ghParsed.lastUpdated || '0');
+                const ghParsed = await getResp.json();
+                const ghPoints = ghParsed.points !== undefined ? ghParsed.points : 0;
+                const ghPointsLog = ghParsed.pointsLog || [];
+                const ghUpdated = new Date(ghParsed.lastUpdated || '0');
 
-                    // 【时间戳仲裁】GitHub数据更新时间 > 本地更新时间 → 以GitHub为准
-                    // 同时合并两端的积分日志（去重，取并集）
-                    if (ghUpdated > localUpdated) {
-                        console.log('[同步] GitHub数据更新(' + ghParsed.lastUpdated + ')，以GitHub积分为准:', ghPoints, '(本地:', localPoints + ')');
-                        localPoints = ghPoints;
-                        // 合并日志：以GitHub日志为基础，追加本地独有条目
-                        const ghLogMap = new Map(ghPointsLog.map(l => [l.time, l]));
-                        pointsLog.forEach(l => {
-                            if (!ghLogMap.has(l.time)) ghPointsLog.push(l);
-                        });
-                        pointsLog = ghPointsLog.sort((a, b) => new Date(b.time) - new Date(a.time));
-                        // 更新本地缓存，避免下次再被旧数据覆盖
-                        localStorage.setItem(POINTS_KEY, localPoints);
-                        localStorage.setItem(getPointsLogKey(), JSON.stringify(pointsLog));
-                        localStorage.setItem(`${POINTS_KEY}_update`, ghParsed.lastUpdated);
-                    } else {
-                        // 本地数据更新 → 本地积分为主，但需合并GitHub独有的日志（如家长加减分）
-                        console.log('[同步] 本地数据更新，合并GitHub独有日志');
-                        const localLogMap = new Map(pointsLog.map(l => [l.time, l]));
-                        ghPointsLog.forEach(l => {
-                            if (!localLogMap.has(l.time)) pointsLog.push(l);
-                        });
-                        pointsLog.sort((a, b) => new Date(b.time) - new Date(a.time));
-                        // 【修复】累计积分保持本地值，不从今日日志重新计算
-                        // 今日日志只影响今天积分，不应该覆盖累计总积分
-                    }
+                // 【时间戳仲裁】GitHub 数据更新时间 > 本地更新时间 → 以 GitHub 为准
+                // 同时合并两端的积分日志（去重，取并集）
+                if (ghUpdated > localUpdated) {
+                    console.log('[同步] GitHub数据更新(' + ghParsed.lastUpdated + ')，以GitHub积分为准:', ghPoints, '(本地:', localPoints + ')');
+                    localPoints = ghPoints;
+                    // 合并日志：以GitHub日志为基础，追加本地独有条目
+                    const ghLogMap = new Map(ghPointsLog.map(l => [l.time, l]));
+                    pointsLog.forEach(l => {
+                        if (!ghLogMap.has(l.time)) ghPointsLog.push(l);
+                    });
+                    pointsLog = ghPointsLog.sort((a, b) => new Date(b.time) - new Date(a.time));
+                    // 更新本地缓存，避免下次再被旧数据覆盖
+                    localStorage.setItem(POINTS_KEY, localPoints);
+                    localStorage.setItem(getPointsLogKey(), JSON.stringify(pointsLog));
+                    localStorage.setItem(`${POINTS_KEY}_update`, ghParsed.lastUpdated);
+                } else {
+                    // 本地数据更新 → 本地积分为主，但需合并 GitHub 独有的日志（如家长加减分）
+                    console.log('[同步] 本地数据更新，合并GitHub独有日志');
+                    const localLogMap = new Map(pointsLog.map(l => [l.time, l]));
+                    ghPointsLog.forEach(l => {
+                        if (!localLogMap.has(l.time)) pointsLog.push(l);
+                    });
+                    pointsLog.sort((a, b) => new Date(b.time) - new Date(a.time));
+                    // 【修复】累计积分保持本地值，不从今日日志重新计算
+                    // 今日日志只影响今天积分，不应该覆盖累计总积分
                 }
             }
         } catch(e) {
@@ -1984,7 +2000,26 @@
     function renderHomeworkList() {
         if (isParentMode) return;
         const list = document.getElementById('homeworkList');
-        list.innerHTML = homework.map(task => `
+        list.innerHTML = homework.map(task => {
+            // 如果已完成且有完成记录,显示最后一次的用时、超时和完成时间信息
+            let timeInfo = '';
+            if (task.status === 'done' && task.completedRecords && task.completedRecords.length > 0) {
+                const lastRecord = task.completedRecords[task.completedRecords.length - 1];
+                const overTimeText = lastRecord.overTime > 0 ? ` 🔴 超时 ${lastRecord.overTime} 分钟` : '';
+                const completedTime = new Date(lastRecord.completedAt);
+                const completedTimeText = completedTime.toLocaleString('zh-CN', {
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                timeInfo = `<div class="homework-completed-info">
+                    <span class="homework-actual-time">✓ 用时 ${lastRecord.totalMin} 分钟</span>${overTimeText}
+                    <span class="homework-completed-at">📅 ${completedTimeText}</span>
+                </div>`;
+            }
+
+            return `
             <div class="homework-item">
                 <div class="homework-header">
                     <div class="homework-info">
@@ -1992,6 +2027,7 @@
                         <div>
                             <div class="homework-name">${task.name}</div>
                             <div class="homework-time">⏱ ${task.time > 0 ? task.time + ' 分钟' : '待定'}</div>
+                            ${timeInfo}
                         </div>
                     </div>
                     <div class="homework-status status-${task.status}">${statusText(task.status)}</div>
@@ -2000,7 +2036,8 @@
                     ▶ ${task.status === 'done' ? '已完成' : '开始'}
                 </button>
             </div>
-        `).join('');
+            `;
+        }).join('');
 
         const done = homework.filter(t => t.status === 'done').length;
         const total = homework.length;
@@ -2149,6 +2186,19 @@
         playCompleteSound();
 
         currentTask.status = 'done';
+        // 【新增】保存每次完成的记录到 homework 对象
+        if (!currentTask.completedRecords) {
+            currentTask.completedRecords = [];
+        }
+        const overTime = currentTask.time > 0 && totalMin > currentTask.time ? totalMin - currentTask.time : 0;
+        currentTask.completedRecords.push({
+            completedAt: new Date().toISOString(),
+            totalMin: totalMin,
+            studyMin: studyMin,
+            restMin: restMin,
+            overTime: overTime,
+            efficiency: capped
+        });
         saveHomework();
         currentTask = null;
         renderHomeworkList();

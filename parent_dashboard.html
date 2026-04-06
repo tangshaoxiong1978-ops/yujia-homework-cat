@@ -735,7 +735,26 @@
         
         // 同步状态显示
         let syncStatus = { yujia: false, yuhan: false };
-        
+
+        // Web Audio API 声音
+        let audioCtx = null;
+        function getAudioCtx() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
+        function playBeep(freq=880, dur=0.3, vol=0.4) {
+            try {
+                const ctx = getAudioCtx();
+                const osc = ctx.createOscillator(), gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.frequency.value = freq; gain.gain.value = vol;
+                osc.start(); gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+                osc.stop(ctx.currentTime + dur);
+            } catch(e) {}
+        }
+        function playSwitchSound() {
+            // 切换孩子时的提示音（两个短音）
+            playBeep(600, 0.15);
+            setTimeout(() => playBeep(900, 0.15), 150);
+        }
+
         let currentChild = 'yujia';
         let notificationSettings = {
             taskComplete: true,
@@ -1035,6 +1054,10 @@
         function selectChild(child, evt) {
             console.log('[selectChild] 切换前 currentChild:', currentChild, '切换后:', child);
             currentChild = child;
+
+            // 播放切换提示音
+            playSwitchSound();
+
             document.querySelectorAll('.child-btn').forEach(btn => btn.classList.remove('active'));
             if (evt && evt.target) {
                 evt.target.classList.add('active');

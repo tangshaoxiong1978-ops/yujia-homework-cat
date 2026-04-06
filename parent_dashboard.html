@@ -68,7 +68,7 @@
             transform: translateY(-2px);
         }
         
-        /* 实时进度卡片 */
+        /* 学习统计卡片 */
         .realtime-card {
             background: white;
             border-radius: 15px;
@@ -343,66 +343,165 @@
             margin-left: 10px;
         }
         .points-card {
-            background: linear-gradient(135deg, #fff8e1 0%, #fff3e0 100%);
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 14px;
-            border-left: 4px solid #FFA000;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
         .points-current {
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 12px;
+            margin-bottom: 20px;
             font-size: 15px;
-            gap: 20px;
+            gap: 40px;
+        }
+        .points-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 20px 30px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #fff8e1 0%, #fff3e0 100%);
+        }
+        .points-label {
+            font-size: 14px;
+            color: #856404;
+            font-weight: 600;
         }
         .points-value {
-            font-size: 24px;
+            font-size: 36px;
             font-weight: 800;
-            color: #FF6D00;
-            margin-left: 8px;
+            background: linear-gradient(135deg, #FF6D00 0%, #FF8F00 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         .points-actions {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             justify-content: center;
+            margin-bottom: 20px;
         }
         .points-btn {
-            padding: 8px 16px;
+            padding: 10px 24px;
             border: none;
-            border-radius: 8px;
+            border-radius: 25px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .points-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .points-btn:active { transform: translateY(0); }
+        .points-btn.plus {
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            color: #2c3e50;
+        }
+        .points-btn.minus {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+        }
+        .points-btn.detail {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        .points-history-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #ecf0f1;
+        }
+        .points-history-section h4 {
+            margin: 0 0 12px 0;
+            font-size: 16px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        .points-history-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .points-history-label {
             font-size: 14px;
+            color: #555;
+            font-weight: 600;
+        }
+        .points-history-input {
+            padding: 8px 12px;
+            border: 1.5px solid #ddd;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #333;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .points-history-input:focus { border-color: #3498db; }
+        .points-history-btn {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
+            transition: all 0.3s ease;
         }
-        .points-btn.plus { background: #4CAF50; color: white; }
-        .points-btn.minus { background: #f44336; color: white; }
-        .points-btn.detail { background: #2196F3; color: white; }
+        .points-history-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
         .points-log-section {
-            margin-top: 14px;
-            padding-top: 14px;
-            border-top: 1px solid #ddd;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #ecf0f1;
         }
         .points-log-section h4 {
-            margin: 0 0 10px 0;
-            font-size: 14px;
-            color: #666;
+            margin: 0 0 12px 0;
+            font-size: 16px;
+            color: #2c3e50;
+            font-weight: bold;
         }
         .points-log-list {
-            max-height: 150px;
+            max-height: 200px;
             overflow-y: auto;
-            font-size: 13px;
+            font-size: 14px;
         }
         .points-log-item {
             display: flex;
             justify-content: space-between;
-            padding: 6px 0;
-            border-bottom: 1px solid #eee;
+            align-items: center;
+            padding: 10px 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: all 0.2s;
         }
-        .points-log-item .time { color: #888; font-size: 12px; }
-        .points-log-item .plus { color: #4CAF50; }
-        .points-log-item .minus { color: #f44336; }
+        .points-log-item:hover {
+            background: #e9ecef;
+            transform: translateX(4px);
+        }
+        .points-log-item .time {
+            color: #888;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .points-log-item .plus {
+            color: #27ae60;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .points-log-item .minus {
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 16px;
+        }
 
         /* 标签页样式 */
         .tab-btn {
@@ -422,9 +521,8 @@
             color: white;
             box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
         }
-        .tab-content {
-            display: block;
-        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
     </style>
 </head>
 <body>
@@ -454,99 +552,66 @@
             <button onclick="setViewDate('today')" style="padding:7px 14px;background:#4CAF50;color:white;border:none;border-radius:10px;font-size:13px;cursor:pointer;white-space:nowrap;">今天</button>
             <button onclick="setViewDate('yesterday')" style="padding:7px 14px;background:#9e9e9e;color:white;border:none;border-radius:10px;font-size:13px;cursor:pointer;white-space:nowrap;">昨天</button>
         </div>
-        
-        <!-- 实时进度 -->
+
+        <!-- 学习统计卡片（今日/本周/本月） -->
         <div class="realtime-card">
             <div class="card-title">
                 <span class="live-indicator"></span>
-                📊 <span id="dashboardDateLabel">今日</span>实时进度
+                📊 学习进度
             </div>
-            
-            <div class="progress-grid">
-                <div class="stat-box green">
-                    <div class="stat-value" id="completedCount">0</div>
-                    <div class="stat-label">已完成作业</div>
-                </div>
-                <div class="stat-box orange">
-                    <div class="stat-value" id="totalTime">0</div>
-                    <div class="stat-label">学习时长（分钟）</div>
-                </div>
-                <div class="stat-box blue">
-                    <div class="stat-value" id="efficiency">0%</div>
-                    <div class="stat-label">学习效率</div>
-                </div>
-                <!-- 超时统计 -->
-                <div class="stat-box red">
-                    <div class="stat-value" id="overTime" style="color:#e64a19;">0</div>
-                    <div class="stat-label">超时分钟</div>
-                </div>
-                <div class="stat-box purple">
-                    <div class="stat-value" id="overCount">0</div>
-                    <div class="stat-label">超时次数</div>
-                </div>
-            </div>
-            
-            <table class="tasks-table">
-                <thead>
-                    <tr>
-                        <th>作业项目</th>
-                        <th>状态</th>
-                        <th>用时</th>
-                    </tr>
-                </thead>
-                <tbody id="tasksTableBody">
-                    <!-- 动态生成 -->
-                </tbody>
-            </table>
-            
-            <div class="last-update">
-                最后更新：<span id="lastUpdate">--</span>
-            </div>
-        </div>
-        
-        <!-- 每日报告 -->
-        <div class="daily-report">
-            <div class="card-title">📋 每日学习报告</div>
-
-            <div class="report-section">
-                <h3>📈 学习统计</h3>
-                <div class="report-item">
-                    <span>总学习时间</span>
-                    <span class="report-value" id="reportTotalTime">0 分钟</span>
-                </div>
-                <div class="report-item">
-                    <span>休息时间</span>
-                    <span class="report-value" id="reportRestTime">0 分钟</span>
-                </div>
-                <div class="report-item">
-                    <span>学习效率</span>
-                    <span class="report-value" id="reportEfficiency">0%</span>
-                </div>
-            </div>
-
-            <div class="report-section">
-                <h3>⭐ 亮点</h3>
-                <div id="reportHighlight">暂无数据</div>
-            </div>
-
-            <div class="report-section">
-                <h3>⚠️ 需要关注</h3>
-                <div id="reportConcern">暂无数据</div>
-            </div>
-        </div>
-
-        <!-- 本周/本月统计 -->
-        <div class="daily-report">
-            <div class="card-title">📊 周期学习统计</div>
 
             <!-- 标签页切换 -->
             <div style="display:flex;gap:10px;margin-bottom:20px;">
-                <button id="tabParentWeek" class="tab-btn" onclick="switchParentTab('week')">📆 本周</button>
-                <button id="tabParentMonth" class="tab-btn" onclick="switchParentTab('month')">📊 本月</button>
+                <button id="tabToday" class="tab-btn active" onclick="switchMainTab('today')">📅 今日</button>
+                <button id="tabWeek" class="tab-btn" onclick="switchMainTab('week')">📆 本周</button>
+                <button id="tabMonth" class="tab-btn" onclick="switchMainTab('month')">📊 本月</button>
             </div>
 
-            <!-- 本周统计 -->
-            <div id="contentParentWeek" class="tab-content">
+            <!-- 今日 -->
+            <div id="contentToday" class="tab-content active">
+                <div class="progress-grid">
+                    <div class="stat-box green">
+                        <div class="stat-value" id="completedCount">0</div>
+                        <div class="stat-label">已完成作业</div>
+                    </div>
+                    <div class="stat-box orange">
+                        <div class="stat-value" id="totalTime">0</div>
+                        <div class="stat-label">学习时长（分钟）</div>
+                    </div>
+                    <div class="stat-box blue">
+                        <div class="stat-value" id="efficiency">0%</div>
+                        <div class="stat-label">学习效率</div>
+                    </div>
+                    <div class="stat-box red">
+                        <div class="stat-value" id="overTime" style="color:#e64a19;">0</div>
+                        <div class="stat-label">超时分钟</div>
+                    </div>
+                    <div class="stat-box purple">
+                        <div class="stat-value" id="overCount">0</div>
+                        <div class="stat-label">超时次数</div>
+                    </div>
+                </div>
+
+                <table class="tasks-table">
+                    <thead>
+                        <tr>
+                            <th>作业项目</th>
+                            <th>状态</th>
+                            <th>用时</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tasksTableBody">
+                        <!-- 动态生成 -->
+                    </tbody>
+                </table>
+
+                <div class="last-update">
+                    最后更新：<span id="lastUpdate">--</span>
+                </div>
+            </div>
+
+            <!-- 本周 -->
+            <div id="contentWeek" class="tab-content">
                 <div class="progress-grid" style="grid-template-columns: repeat(4, 1fr);">
                     <div class="stat-box">
                         <div class="stat-value" id="parentWeekTotalMin">0</div>
@@ -581,8 +646,8 @@
                 </div>
             </div>
 
-            <!-- 本月统计 -->
-            <div id="contentParentMonth" class="tab-content" style="display:none;">
+            <!-- 本月 -->
+            <div id="contentMonth" class="tab-content">
                 <div class="progress-grid" style="grid-template-columns: repeat(4, 1fr);">
                     <div class="stat-box">
                         <div class="stat-value" id="parentMonthTotalMin">0</div>
@@ -618,21 +683,53 @@
             </div>
         </div>
 
+        <!-- 每日报告 -->
+        <div class="daily-report">
+            <div class="card-title">📋 每日学习报告</div>
+
+            <div class="report-section">
+                <h3>📈 学习统计</h3>
+                <div class="report-item">
+                    <span>总学习时间</span>
+                    <span class="report-value" id="reportTotalTime">0 分钟</span>
+                </div>
+                <div class="report-item">
+                    <span>休息时间</span>
+                    <span class="report-value" id="reportRestTime">0 分钟</span>
+                </div>
+                <div class="report-item">
+                    <span>学习效率</span>
+                    <span class="report-value" id="reportEfficiency">0%</span>
+                </div>
+            </div>
+
+            <div class="report-section">
+                <h3>⭐ 亮点</h3>
+                <div id="reportHighlight">暂无数据</div>
+            </div>
+
+            <div class="report-section">
+                <h3>⚠️ 需要关注</h3>
+                <div id="reportConcern">暂无数据</div>
+            </div>
+        </div>
+
+
         <!-- 积分管理卡片 -->
         <div class="points-card">
             <div class="card-title">⭐ 积分管理</div>
-            
+
             <div class="points-current">
-                <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-                    <span style="font-size:13px;color:#856404;">今日积分</span>
+                <div class="points-box">
+                    <span class="points-label">📅 今日积分</span>
                     <span class="points-value" id="currentPoints">0</span>
                 </div>
-                <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding-left:20px;border-left:2px solid #FFB74D;">
-                    <span style="font-size:13px;color:#856404;">累积积分</span>
-                    <span class="points-value" id="totalPoints" style="font-size:20px;color:#FF6D00;">0</span>
+                <div class="points-box" style="background: linear-gradient(135deg, #fff9e6 0%, #fff7e0 100%);">
+                    <span class="points-label">💎 累积积分</span>
+                    <span class="points-value" id="totalPoints">0</span>
                 </div>
             </div>
-            
+
             <div class="points-actions">
                 <button class="points-btn plus" onclick="adjustPoints(1)">➕ 加分</button>
                 <button class="points-btn minus" onclick="adjustPoints(-1)">➖ 减分</button>
@@ -640,26 +737,29 @@
             </div>
 
             <!-- 积分历史查询 -->
-            <div style="margin-top:12px;padding-top:12px;border-top:1px solid #eee;">
-                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                    <span style="font-size:13px;color:#666;">📅 查看历史：</span>
-                    <input type="date" id="pointsHistoryDate" style="padding:6px;border:1px solid #ddd;border-radius:6px;font-size:13px;">
-                    <button class="points-btn" style="background:#2196F3;color:white;padding:6px 12px;font-size:12px;" onclick="loadPointsHistory()">查询</button>
+            <div class="points-history-section">
+                <h4>📅 积分历史查询</h4>
+                <div class="points-history-row">
+                    <span class="points-history-label">查看日期：</span>
+                    <input type="date" id="pointsHistoryDate" class="points-history-input">
+                    <button class="points-history-btn" onclick="loadPointsHistory()">查询</button>
                 </div>
             </div>
 
-            <div class="points-export-section" style="margin-top:12px;padding-top:12px;border-top:1px solid #eee;">
-                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                    <span style="font-size:13px;color:#666;">📅 导出范围：</span>
-                    <input type="date" id="exportStartDate" style="padding:6px;border:1px solid #ddd;border-radius:6px;font-size:13px;">
-                    <span style="color:#999;">至</span>
-                    <input type="date" id="exportEndDate" style="padding:6px;border:1px solid #ddd;border-radius:6px;font-size:13px;">
-                    <button class="points-btn" style="background:#9c27b0;color:white;padding:6px 12px;font-size:12px;" onclick="exportPointsLog()">📥 导出统计表</button>
+            <!-- 积分导出 -->
+            <div class="points-history-section">
+                <h4>📥 导出积分统计表</h4>
+                <div class="points-history-row">
+                    <span class="points-history-label">日期范围：</span>
+                    <input type="date" id="exportStartDate" class="points-history-input">
+                    <span style="color:#999;font-weight:600;">至</span>
+                    <input type="date" id="exportEndDate" class="points-history-input">
+                    <button class="points-history-btn" style="background: linear-gradient(135deg, #a55eea, #8854d0);" onclick="exportPointsLog()">导出</button>
                 </div>
             </div>
-            
+
             <div class="points-log-section" id="pointsLogSection" style="display:none;">
-                <h4>积分明细</h4>
+                <h4>📋 积分明细</h4>
                 <div class="points-log-list" id="pointsLogList"></div>
             </div>
         </div>
@@ -1383,11 +1483,22 @@
         
         // 积分调整（家长手动加减分）
         async function adjustPoints(direction) {
-            const reason = direction > 0 ? prompt('加分原因（可选）') : prompt('减分原因（可选）');
-            if (reason === null) return; // 取消
+            // 先输入分值
+            const scoreInput = prompt(`${direction > 0 ? '加分' : '减分'}分值（正整数）：`, '1');
+            if (scoreInput === null) return; // 用户点击取消
             
-            const change = direction > 0 ? parseInt(prompt('加分/减分分值（正数）：', '1') || '1') : -parseInt(prompt('减分分值（正数）：', '1') || '1');
-            if (isNaN(change) || change === 0) { alert('请输入有效分值'); return; }
+            const absScore = parseInt(scoreInput);
+            if (isNaN(absScore) || absScore <= 0) {
+                alert('请输入有效的正整数分值');
+                return;
+            }
+            
+            // 计算实际变动（加减分）
+            const change = direction > 0 ? absScore : -absScore;
+            
+            // 再输入原因（可选）
+            const reason = prompt(`${direction > 0 ? '加分' : '减分'}原因（可选，可直接留空）：`, change > 0 ? '家长加分' : '家长减分');
+            if (reason === null) return; // 用户点击取消
             
             const child = currentChild;
             const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/data/${child}_data.json`;
@@ -1603,14 +1714,19 @@
             alert(`✅ 已导出 ${stats.items} 条记录到文件`);
         }
 
-        // 家长看板标签页切换
-        function switchParentTab(tab) {
-            document.querySelectorAll('#contentParentWeek, #contentParentMonth').forEach(c => c.style.display = 'none');
-            document.querySelectorAll('#tabParentWeek, #tabParentMonth').forEach(b => b.classList.remove('active'));
-            document.getElementById('contentParent' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block';
-            document.getElementById('tabParent' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+        // 主学习统计标签页切换（今日/本周/本月）
+        function switchMainTab(tab) {
+            document.querySelectorAll('#contentToday, #contentWeek, #contentMonth').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('#tabToday, #tabWeek, #tabMonth').forEach(b => b.classList.remove('active'));
+            document.getElementById('content' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+            document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
             if (tab === 'week') renderParentWeekStatsWithCache();
             if (tab === 'month') renderParentMonthStatsWithCache();
+        }
+
+        // 家长看板标签页切换（已废弃，保留向后兼容）
+        function switchParentTab(tab) {
+            switchMainTab(tab);
         }
 
         // 带缓存的本周统计

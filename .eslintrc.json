@@ -4,21 +4,19 @@
     "es2021": true,
     "node": true
   },
-  "extends": "eslint:recommended",
+  "extends": "standard",
   "parserOptions": {
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
   "rules": {
-    "indent": ["error", 2],
+    "indent": ["error", 4],
     "linebreak-style": ["error", "unix"],
     "quotes": ["error", "single"],
     "semi": ["error", "always"],
-    "no-unused-vars": ["warn"],
-    "no-console": ["warn", { "allow": ["warn", "error"] }],
-    "no-var": ["error"],
-    "prefer-const": ["error"],
-    "eqeqeq": ["error", "always"],
-    "curly": ["error", "all"]
-  }
+    "no-console": "off",
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "no-undef": "warn"
+  },
+  "ignorePatterns": ["node_modules/", "data/", "*.min.js"]
 }

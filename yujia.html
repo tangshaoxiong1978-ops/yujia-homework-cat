@@ -1477,17 +1477,17 @@
     }
 
     // Tab 切换
-    function switchTab(tab) {
+    async function switchTab(tab) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
         document.getElementById('content' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
-        if (tab === 'week') renderWeekStats();
-        if (tab === 'month') renderMonthStats();
+        if (tab === 'week') await renderWeekStats();
+        if (tab === 'month') await renderMonthStats();
     }
 
     // 本周统计
-    function renderWeekStats() {
+    async function renderWeekStats() {
         const days = ['日','一','二','三','四','五','六'];
         const now = new Date(), today = now.getDay();
         const weekData = [];
@@ -1497,8 +1497,37 @@
         for (let i = 0; i < 7; i++) {
             const d = new Date(now);
             d.setDate(d.getDate() - today + i);
-            const key = `timer_${CHILD}_${d.toISOString().split('T')[0]}`;
-            const data = JSON.parse(localStorage.getItem(key) || '{}');
+            const dateStr = d.toISOString().split('T')[0];
+
+            // 【修复】优先从 localStorage 读取（本地有完整的历史数据）
+            // GitHub 只存储当前日期的数据，历史数据需要用 localStorage
+            let data = {};
+            const key = `timer_${CHILD}_${dateStr}`;
+            const localData = localStorage.getItem(key);
+            if (localData) {
+                data = JSON.parse(localData);
+                console.log(`[本周统计] ${dateStr} 使用 localStorage`);
+            } else {
+                // 如果 localStorage 没有，尝试从 GitHub 读取当天的数据文件（而非 history）
+                try {
+                    const dataFile = `data/${CHILD}_${dateStr}.json`;
+                    const ghPagesUrl = `https://tsaiwenjun.github.io/yujia-homework-cat/${dataFile}`;
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 5000);
+                    const resp = await fetch(ghPagesUrl, { signal: controller.signal });
+                    clearTimeout(timeoutId);
+                    if (resp.ok) {
+                        data = await resp.json();
+                        if (data.todayStats) data = data.todayStats;
+                        console.log(`[本周统计] ${dateStr} 从 GitHub Pages 读取成功`);
+                    } else {
+                        console.log(`[本周统计] ${dateStr} GitHub 数据不存在`);
+                    }
+                } catch(e) {
+                    console.log(`[本周统计] ${dateStr} GitHub 读取失败:`, e.message);
+                }
+            }
+
             const mins = data.studyMinutes || 0;
             weekData.push({ label: days[i], mins, isToday: i === today });
             totalMin += mins; if (mins > 0) studyDays++;
@@ -1536,7 +1565,7 @@
     }
 
     // 本月统计
-    function renderMonthStats() {
+    async function renderMonthStats() {
         const now = new Date();
         let totalMin = 0, totalRestMin = 0, taskCount = 0;
         let totalPlanned = 0, totalStudy = 0, overMin = 0, overCount = 0;
@@ -1544,8 +1573,37 @@
         for (let d = 1; d <= 31; d++) {
             const dt = new Date(now.getFullYear(), now.getMonth(), d);
             if (dt > now) break;
-            const key = `timer_${CHILD}_${dt.toISOString().split('T')[0]}`;
-            const data = JSON.parse(localStorage.getItem(key) || '{}');
+            const dateStr = dt.toISOString().split('T')[0];
+
+            // 【修复】优先从 localStorage 读取（本地有完整的历史数据）
+            // GitHub 只存储当前日期的数据，历史数据需要用 localStorage
+            let data = {};
+            const key = `timer_${CHILD}_${dateStr}`;
+            const localData = localStorage.getItem(key);
+            if (localData) {
+                data = JSON.parse(localData);
+                console.log(`[本月统计] ${dateStr} 使用 localStorage`);
+            } else {
+                // 如果 localStorage 没有，尝试从 GitHub 读取当天的数据文件（而非 history）
+                try {
+                    const dataFile = `data/${CHILD}_${dateStr}.json`;
+                    const ghPagesUrl = `https://tsaiwenjun.github.io/yujia-homework-cat/${dataFile}`;
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 5000);
+                    const resp = await fetch(ghPagesUrl, { signal: controller.signal });
+                    clearTimeout(timeoutId);
+                    if (resp.ok) {
+                        data = await resp.json();
+                        if (data.todayStats) data = data.todayStats;
+                        console.log(`[本月统计] ${dateStr} 从 GitHub Pages 读取成功`);
+                    } else {
+                        console.log(`[本月统计] ${dateStr} GitHub 数据不存在`);
+                    }
+                } catch(e) {
+                    console.log(`[本月统计] ${dateStr} GitHub 读取失败:`, e.message);
+                }
+            }
+
             totalMin += data.studyMinutes || 0;
             totalRestMin += (data.restMinutes || 0);
             const tasks = data.tasks || [];

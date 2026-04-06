@@ -2039,7 +2039,10 @@
         list.innerHTML = homework.map(task => {
             // 如果已完成且有完成记录,显示最后一次的用时、超时和完成时间信息
             let timeInfo = '';
+            let timeDisplay = '';
+            
             if (task.status === 'done' && task.completedRecords && task.completedRecords.length > 0) {
+                // 已完成作业：显示实际完成用时，而不是建议时间
                 const lastRecord = task.completedRecords[task.completedRecords.length - 1];
                 const overTimeText = lastRecord.overTime > 0 ? ` 🔴 超时 ${lastRecord.overTime} 分钟` : '';
                 const completedTime = new Date(lastRecord.completedAt);
@@ -2053,6 +2056,10 @@
                     <span class="homework-actual-time">✓ 用时 ${lastRecord.totalMin} 分钟</span>${overTimeText}
                     <span class="homework-completed-at">📅 ${completedTimeText}</span>
                 </div>`;
+                timeDisplay = `<div class="homework-time">⏱ 实际用时 ${lastRecord.totalMin} 分钟</div>`;
+            } else {
+                // 未完成作业：显示建议时间
+                timeDisplay = `<div class="homework-time">⏱ ${task.time > 0 ? task.time + ' 分钟' : '待定'}</div>`;
             }
 
             return `
@@ -2062,7 +2069,7 @@
                         <div class="homework-icon">${task.icon}</div>
                         <div>
                             <div class="homework-name">${task.name}</div>
-                            <div class="homework-time">⏱ ${task.time > 0 ? task.time + ' 分钟' : '待定'}</div>
+                            ${timeDisplay}
                             ${timeInfo}
                         </div>
                     </div>

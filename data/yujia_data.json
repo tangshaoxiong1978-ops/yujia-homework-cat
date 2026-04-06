@@ -2,7 +2,7 @@
   "child": "yujia",
   "childName": "羽佳",
   "date": "2026-04-06",
-  "lastUpdated": "2026-04-06T14:05:48.702Z",
+  "lastUpdated": "2026-04-06T14:07:27.995Z",
   "homework": [
     {
       "id": 1,
@@ -60,7 +60,7 @@
       "status": "done"
     }
   ],
-  "points": 139,
+  "points": 141,
   "todayPoints": 12,
   "pointsLog": [
     {
@@ -104,6 +104,12 @@
       "reason": "测试减分",
       "time": "2026-04-06T14:05:48.702Z",
       "total": 139
+    },
+    {
+      "amount": 2,
+      "reason": "测试2加分",
+      "time": "2026-04-06T14:07:27.995Z",
+      "total": 141
     }
   ],
   "todayStats": {

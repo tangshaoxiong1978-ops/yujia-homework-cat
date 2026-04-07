@@ -2,7 +2,7 @@
   "child": "yujia",
   "childName": "羽佳",
   "date": "2026-04-07",
-  "lastUpdated": "2026-04-07T09:45:54.842Z",
+  "lastUpdated": "2026-04-07T12:40:28.805Z",
   "homework": [
     {
       "id": 1,
@@ -26,7 +26,17 @@
       "name": "英语一起作业",
       "icon": "🎧",
       "time": 20,
-      "status": "waiting"
+      "status": "done",
+      "completedRecords": [
+        {
+          "completedAt": "2026-04-07T12:40:26.090Z",
+          "totalMin": 9,
+          "studyMin": 9,
+          "restMin": 0,
+          "overTime": 0,
+          "efficiency": 100
+        }
+      ]
     },
     {
       "id": 3,
@@ -50,9 +60,15 @@
       "status": "waiting"
     }
   ],
-  "points": 140,
-  "todayPoints": 13,
+  "points": 143,
+  "todayPoints": 16,
   "pointsLog": [
+    {
+      "amount": 3,
+      "reason": "✅ 完成「英语一起作业」（高效+1）",
+      "time": "2026-04-07T12:40:26.113Z",
+      "total": 143
+    },
     {
       "amount": 2,
       "reason": "✅ 完成「橙果APP打卡」",
@@ -115,9 +131,9 @@
     }
   ],
   "todayStats": {
-    "studyMinutes": 25,
+    "studyMinutes": 34,
     "restMinutes": 0,
-    "efficiency": 60,
+    "efficiency": 100,
     "tasks": [
       {
         "name": "橙果APP打卡",
@@ -127,6 +143,15 @@
         "rest": 0,
         "overTime": 10,
         "efficiency": 60
+      },
+      {
+        "name": "英语一起作业",
+        "time": 20,
+        "actual": 9,
+        "study": 9,
+        "rest": 0,
+        "overTime": 0,
+        "efficiency": 100
       }
     ]
   }

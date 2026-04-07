@@ -1,68 +1,72 @@
 {
   "child": "yujia",
   "childName": "羽佳",
-  "date": "2026-04-06",
-  "lastUpdated": "2026-04-06T14:12:33.010Z",
+  "date": "2026-04-07",
+  "lastUpdated": "2026-04-07T07:12:38.001Z",
   "homework": [
     {
       "id": 1,
       "name": "橙果APP打卡",
       "icon": "📱",
       "time": 15,
-      "status": "done"
+      "status": "waiting"
     },
     {
       "id": 2,
       "name": "英语一起作业",
       "icon": "🎧",
       "time": 20,
-      "status": "done"
+      "status": "waiting"
     },
     {
       "id": 3,
       "name": "阅读半小时",
       "icon": "📚",
       "time": 30,
-      "status": "done",
-      "completedRecords": [
-        {
-          "completedAt": "2026-04-06T13:23:42.856Z",
-          "totalMin": 99,
-          "studyMin": 99,
-          "restMin": 0,
-          "overTime": 69,
-          "efficiency": 30
-        }
-      ]
+      "status": "waiting"
     },
     {
       "id": 4,
       "name": "口算题一页",
       "icon": "🔢",
       "time": 20,
-      "status": "done",
-      "completedRecords": [
-        {
-          "completedAt": "2026-04-06T10:56:11.718Z",
-          "totalMin": 20,
-          "studyMin": 15,
-          "restMin": 5,
-          "overTime": 0,
-          "efficiency": 100
-        }
-      ]
+      "status": "waiting"
     },
     {
       "id": 5,
       "name": "老师作业",
       "icon": "📝",
       "time": 0,
-      "status": "done"
+      "status": "waiting"
     }
   ],
   "points": 138,
-  "todayPoints": 12,
+  "todayPoints": 11,
   "pointsLog": [
+    {
+      "amount": -3,
+      "reason": "测试3",
+      "time": "2026-04-06T14:12:33.010Z",
+      "total": 138
+    },
+    {
+      "amount": 2,
+      "reason": "测试2加分",
+      "time": "2026-04-06T14:07:27.995Z",
+      "total": 141
+    },
+    {
+      "amount": -1,
+      "reason": "测试减分",
+      "time": "2026-04-06T14:05:48.702Z",
+      "total": 139
+    },
+    {
+      "amount": 1,
+      "reason": "测试加分",
+      "time": "2026-04-06T14:04:01.862Z",
+      "total": 140
+    },
     {
       "amount": 2,
       "reason": "✅ 完成「阅读半小时」",
@@ -92,82 +96,12 @@
       "reason": "✅ 完成「橙果APP打卡」",
       "time": "2026-04-06T02:09:39.594Z",
       "total": 132
-    },
-    {
-      "amount": 1,
-      "reason": "测试加分",
-      "time": "2026-04-06T14:04:01.862Z",
-      "total": 140
-    },
-    {
-      "amount": -1,
-      "reason": "测试减分",
-      "time": "2026-04-06T14:05:48.702Z",
-      "total": 139
-    },
-    {
-      "amount": 2,
-      "reason": "测试2加分",
-      "time": "2026-04-06T14:07:27.995Z",
-      "total": 141
-    },
-    {
-      "amount": -3,
-      "reason": "测试3",
-      "time": "2026-04-06T14:12:33.010Z",
-      "total": 138
     }
   ],
   "todayStats": {
-    "studyMinutes": 214,
-    "restMinutes": 5,
-    "efficiency": 40,
-    "tasks": [
-      {
-        "name": "橙果APP打卡",
-        "time": 15,
-        "actual": 22,
-        "study": 22,
-        "rest": 0,
-        "overTime": 7,
-        "efficiency": 68
-      },
-      {
-        "name": "英语一起作业",
-        "time": 20,
-        "actual": 44,
-        "study": 44,
-        "rest": 0,
-        "overTime": 24,
-        "efficiency": 45
-      },
-      {
-        "name": "老师作业",
-        "time": 0,
-        "actual": 34,
-        "study": 34,
-        "rest": 0,
-        "overTime": 0,
-        "efficiency": 100
-      },
-      {
-        "name": "口算题一页",
-        "time": 20,
-        "actual": 20,
-        "study": 15,
-        "rest": 5,
-        "overTime": 0,
-        "efficiency": 100
-      },
-      {
-        "name": "阅读半小时",
-        "time": 30,
-        "actual": 99,
-        "study": 99,
-        "rest": 0,
-        "overTime": 69,
-        "efficiency": 30
-      }
-    ]
+    "studyMinutes": 0,
+    "restMinutes": 0,
+    "efficiency": 0,
+    "tasks": []
   }
 }

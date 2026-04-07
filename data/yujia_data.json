@@ -2,7 +2,7 @@
   "child": "yujia",
   "childName": "羽佳",
   "date": "2026-04-07",
-  "lastUpdated": "2026-04-07T14:41:00.510Z",
+  "lastUpdated": "2026-04-07T14:41:03.346Z",
   "homework": [
     {
       "id": 1,
@@ -80,21 +80,9 @@
       ]
     }
   ],
-  "points": 157,
-  "todayPoints": 30,
+  "points": 149,
+  "todayPoints": 22,
   "pointsLog": [
-    {
-      "amount": 5,
-      "reason": "🎉 今日所有作业全部完成！",
-      "time": "2026-04-07T14:40:24.949Z",
-      "total": 157
-    },
-    {
-      "amount": 3,
-      "reason": "✅ 完成「阅读半小时」（高效+1）",
-      "time": "2026-04-07T14:40:24.136Z",
-      "total": 152
-    },
     {
       "amount": 3,
       "reason": "✅ 完成「口算题一页」（高效+1）",

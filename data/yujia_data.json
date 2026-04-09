@@ -1,8 +1,8 @@
 {
   "child": "yujia",
   "childName": "羽佳",
-  "date": "2026-04-08",
-  "lastUpdated": "2026-04-08T12:29:10.255Z",
+  "date": "2026-04-09",
+  "lastUpdated": "2026-04-09T09:27:26.961Z",
   "homework": [
     {
       "id": 1,
@@ -12,12 +12,12 @@
       "status": "done",
       "completedRecords": [
         {
-          "completedAt": "2026-04-08T11:58:36.540Z",
-          "totalMin": 40,
-          "studyMin": 40,
+          "completedAt": "2026-04-09T09:27:24.723Z",
+          "totalMin": 22,
+          "studyMin": 22,
           "restMin": 0,
-          "overTime": 25,
-          "efficiency": 38
+          "overTime": 7,
+          "efficiency": 68
         }
       ]
     },
@@ -26,17 +26,7 @@
       "name": "英语一起作业",
       "icon": "🎧",
       "time": 20,
-      "status": "done",
-      "completedRecords": [
-        {
-          "completedAt": "2026-04-08T12:28:55.579Z",
-          "totalMin": 30,
-          "studyMin": 30,
-          "restMin": 0,
-          "overTime": 10,
-          "efficiency": 67
-        }
-      ]
+      "status": "waiting"
     },
     {
       "id": 3,
@@ -60,9 +50,15 @@
       "status": "waiting"
     }
   ],
-  "points": 153,
-  "todayPoints": 26,
+  "points": 155,
+  "todayPoints": 28,
   "pointsLog": [
+    {
+      "amount": 2,
+      "reason": "✅ 完成「橙果APP打卡」",
+      "time": "2026-04-09T09:27:24.874Z",
+      "total": 155
+    },
     {
       "amount": 2,
       "reason": "✅ 完成「英语一起作业」",
@@ -155,27 +151,18 @@
     }
   ],
   "todayStats": {
-    "studyMinutes": 70,
+    "studyMinutes": 22,
     "restMinutes": 0,
-    "efficiency": 50,
+    "efficiency": 68,
     "tasks": [
       {
         "name": "橙果APP打卡",
         "time": 15,
-        "actual": 40,
-        "study": 40,
+        "actual": 22,
+        "study": 22,
         "rest": 0,
-        "overTime": 25,
-        "efficiency": 38
-      },
-      {
-        "name": "英语一起作业",
-        "time": 20,
-        "actual": 30,
-        "study": 30,
-        "rest": 0,
-        "overTime": 10,
-        "efficiency": 67
+        "overTime": 7,
+        "efficiency": 68
       }
     ]
   }

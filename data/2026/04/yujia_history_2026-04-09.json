@@ -2,7 +2,7 @@
   "child": "yujia",
   "childName": "羽佳",
   "date": "2026-04-09",
-  "lastUpdated": "2026-04-09T09:53:48.780Z",
+  "lastUpdated": "2026-04-09T13:00:27.540Z",
   "homework": [
     {
       "id": 1,
@@ -43,7 +43,17 @@
       "name": "阅读半小时",
       "icon": "📚",
       "time": 30,
-      "status": "waiting"
+      "status": "done",
+      "completedRecords": [
+        {
+          "completedAt": "2026-04-09T13:00:25.832Z",
+          "totalMin": 30,
+          "studyMin": 29,
+          "restMin": 1,
+          "overTime": 0,
+          "efficiency": 100
+        }
+      ]
     },
     {
       "id": 4,
@@ -60,9 +70,15 @@
       "status": "waiting"
     }
   ],
-  "points": 158,
-  "todayPoints": 31,
+  "points": 161,
+  "todayPoints": 34,
   "pointsLog": [
+    {
+      "amount": 3,
+      "reason": "✅ 完成「阅读半小时」（高效+1）",
+      "time": "2026-04-09T13:00:25.850Z",
+      "total": 161
+    },
     {
       "amount": 3,
       "reason": "✅ 完成「英语一起作业」（高效+1）",
@@ -167,9 +183,9 @@
     }
   ],
   "todayStats": {
-    "studyMinutes": 36,
-    "restMinutes": 0,
-    "efficiency": 97,
+    "studyMinutes": 65,
+    "restMinutes": 1,
+    "efficiency": 100,
     "tasks": [
       {
         "name": "橙果APP打卡",
@@ -186,6 +202,15 @@
         "actual": 14,
         "study": 14,
         "rest": 0,
+        "overTime": 0,
+        "efficiency": 100
+      },
+      {
+        "name": "阅读半小时",
+        "time": 30,
+        "actual": 30,
+        "study": 29,
+        "rest": 1,
         "overTime": 0,
         "efficiency": 100
       }

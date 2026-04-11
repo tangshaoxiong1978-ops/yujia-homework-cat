@@ -2,7 +2,7 @@
   "child": "yujia",
   "childName": "羽佳",
   "date": "2026-04-11",
-  "lastUpdated": "2026-04-11T16:13:32.805Z",
+  "lastUpdated": "2026-04-11T16:13:43.035Z",
   "homework": [
     {
       "id": 1,
@@ -77,11 +77,21 @@
       "name": "老师作业",
       "icon": "📝",
       "time": 0,
-      "status": "waiting"
+      "status": "done",
+      "completedRecords": [
+        {
+          "completedAt": "2026-04-11T16:13:39.744Z",
+          "totalMin": 1,
+          "studyMin": 1,
+          "restMin": 0,
+          "overTime": 0,
+          "efficiency": 100
+        }
+      ]
     }
   ],
-  "points": 173,
-  "todayPoints": 44,
+  "points": 176,
+  "todayPoints": 47,
   "pointsLog": [
     {
       "amount": 2,
@@ -205,7 +215,7 @@
     }
   ],
   "todayStats": {
-    "studyMinutes": -587,
+    "studyMinutes": -586,
     "restMinutes": 693,
     "efficiency": 100,
     "tasks": [
@@ -257,6 +267,15 @@
       {
         "name": "口算题一页",
         "time": 20,
+        "actual": 1,
+        "study": 1,
+        "rest": 0,
+        "overTime": 0,
+        "efficiency": 100
+      },
+      {
+        "name": "老师作业",
+        "time": 0,
         "actual": 1,
         "study": 1,
         "rest": 0,

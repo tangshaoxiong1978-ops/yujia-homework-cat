@@ -1,97 +1,47 @@
 {
   "child": "yujia",
   "childName": "羽佳",
-  "date": "2026-04-11",
-  "lastUpdated": "2026-04-11T16:13:56.697Z",
+  "date": "2026-04-12",
+  "lastUpdated": "2026-04-12T02:39:14.991Z",
   "homework": [
     {
       "id": 1,
       "name": "橙果APP打卡",
       "icon": "📱",
       "time": 15,
-      "status": "done",
-      "completedRecords": [
-        {
-          "completedAt": "2026-04-11T03:14:09.312Z",
-          "totalMin": 24,
-          "studyMin": 24,
-          "restMin": 0,
-          "overTime": 9,
-          "efficiency": 63
-        }
-      ]
+      "status": "waiting"
     },
     {
       "id": 2,
       "name": "英语一起作业",
       "icon": "🎧",
       "time": 20,
-      "status": "done",
-      "completedRecords": [
-        {
-          "completedAt": "2026-04-11T04:39:58.541Z",
-          "totalMin": 78,
-          "studyMin": 78,
-          "restMin": 0,
-          "overTime": 58,
-          "efficiency": 26
-        }
-      ]
+      "status": "waiting"
     },
     {
       "id": 3,
       "name": "阅读半小时",
       "icon": "📚",
       "time": 30,
-      "status": "done",
-      "completedRecords": [
-        {
-          "completedAt": "2026-04-11T16:13:23.293Z",
-          "totalMin": 1,
-          "studyMin": 1,
-          "restMin": 0,
-          "overTime": 0,
-          "efficiency": 100
-        }
-      ]
+      "status": "waiting"
     },
     {
       "id": 4,
       "name": "口算题一页",
       "icon": "🔢",
       "time": 20,
-      "status": "done",
-      "completedRecords": [
-        {
-          "completedAt": "2026-04-11T16:13:31.647Z",
-          "totalMin": 1,
-          "studyMin": 1,
-          "restMin": 0,
-          "overTime": 0,
-          "efficiency": 100
-        }
-      ]
+      "status": "waiting"
     },
     {
       "id": 5,
       "name": "老师作业",
       "icon": "📝",
       "time": 0,
-      "status": "done",
-      "completedRecords": [
-        {
-          "completedAt": "2026-04-11T16:13:39.744Z",
-          "totalMin": 1,
-          "studyMin": 1,
-          "restMin": 0,
-          "overTime": 0,
-          "efficiency": 100
-        }
-      ]
+      "status": "waiting"
     }
   ],
   "points": 181,
-  "todayPoints": 52,
+  "todayPoints": 38,
   "pointsLog": [
     {
       "amount": 2,
@@ -215,73 +165,9 @@
     }
   ],
   "todayStats": {
-    "studyMinutes": -586,
-    "restMinutes": 693,
-    "efficiency": 100,
-    "tasks": [
-      {
-        "name": "橙果APP打卡",
-        "time": 15,
-        "actual": 24,
-        "study": 24,
-        "rest": 0,
-        "overTime": 9,
-        "efficiency": 63
-      },
-      {
-        "name": "英语一起作业",
-        "time": 20,
-        "actual": 78,
-        "study": 78,
-        "rest": 0,
-        "overTime": 58,
-        "efficiency": 26
-      },
-      {
-        "name": "阅读半小时",
-        "time": 30,
-        "actual": 1,
-        "study": -692,
-        "rest": 693,
-        "overTime": 0,
-        "efficiency": -4
-      },
-      {
-        "name": "口算题一页",
-        "time": 20,
-        "actual": 1,
-        "study": 1,
-        "rest": 0,
-        "overTime": 0,
-        "efficiency": 100
-      },
-      {
-        "name": "阅读半小时",
-        "time": 30,
-        "actual": 1,
-        "study": 1,
-        "rest": 0,
-        "overTime": 0,
-        "efficiency": 100
-      },
-      {
-        "name": "口算题一页",
-        "time": 20,
-        "actual": 1,
-        "study": 1,
-        "rest": 0,
-        "overTime": 0,
-        "efficiency": 100
-      },
-      {
-        "name": "老师作业",
-        "time": 0,
-        "actual": 1,
-        "study": 1,
-        "rest": 0,
-        "overTime": 0,
-        "efficiency": 100
-      }
-    ]
+    "studyMinutes": 0,
+    "restMinutes": 0,
+    "efficiency": 0,
+    "tasks": []
   }
 }

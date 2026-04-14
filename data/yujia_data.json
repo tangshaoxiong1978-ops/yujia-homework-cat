@@ -1,8 +1,8 @@
 {
   "child": "yujia",
   "childName": "羽佳",
-  "date": "2026-04-13",
-  "lastUpdated": "2026-04-13T09:55:43.768Z",
+  "date": "2026-04-14",
+  "lastUpdated": "2026-04-14T14:36:29.436Z",
   "homework": [
     {
       "id": 1,
@@ -12,12 +12,12 @@
       "status": "done",
       "completedRecords": [
         {
-          "completedAt": "2026-04-13T09:55:42.488Z",
-          "totalMin": 32,
-          "studyMin": 32,
+          "completedAt": "2026-04-14T14:36:29.312Z",
+          "totalMin": 1,
+          "studyMin": 1,
           "restMin": 0,
-          "overTime": 17,
-          "efficiency": 47
+          "overTime": 0,
+          "efficiency": 100
         }
       ]
     },
@@ -50,8 +50,8 @@
       "status": "waiting"
     }
   ],
-  "points": 186,
-  "todayPoints": 40,
+  "points": 189,
+  "todayPoints": 41,
   "pointsLog": [
     {
       "amount": 2,
@@ -175,18 +175,18 @@
     }
   ],
   "todayStats": {
-    "studyMinutes": 32,
+    "studyMinutes": 1,
     "restMinutes": 0,
-    "efficiency": 47,
+    "efficiency": 100,
     "tasks": [
       {
         "name": "橙果APP打卡",
         "time": 15,
-        "actual": 32,
-        "study": 32,
+        "actual": 1,
+        "study": 1,
         "rest": 0,
-        "overTime": 17,
-        "efficiency": 47
+        "overTime": 0,
+        "efficiency": 100
       }
     ]
   }

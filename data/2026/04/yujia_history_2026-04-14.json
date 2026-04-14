@@ -2,7 +2,7 @@
   "child": "yujia",
   "childName": "羽佳",
   "date": "2026-04-14",
-  "lastUpdated": "2026-04-14T14:36:36.697Z",
+  "lastUpdated": "2026-04-14T14:36:38.451Z",
   "homework": [
     {
       "id": 1,
@@ -90,8 +90,8 @@
       ]
     }
   ],
-  "points": 198,
-  "todayPoints": 50,
+  "points": 201,
+  "todayPoints": 53,
   "pointsLog": [
     {
       "amount": 2,
@@ -249,6 +249,15 @@
       {
         "name": "口算题一页",
         "time": 20,
+        "actual": 0,
+        "study": 0,
+        "rest": 0,
+        "overTime": 0,
+        "efficiency": 100
+      },
+      {
+        "name": "老师作业",
+        "time": 0,
         "actual": 0,
         "study": 0,
         "rest": 0,

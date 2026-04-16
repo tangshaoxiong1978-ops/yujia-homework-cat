@@ -1,8 +1,8 @@
 {
   "child": "yujia",
   "childName": "羽佳",
-  "date": "2026-04-14",
-  "lastUpdated": "2026-04-14T14:36:38.451Z",
+  "date": "2026-04-16",
+  "lastUpdated": "2026-04-16T09:19:53.775Z",
   "homework": [
     {
       "id": 1,
@@ -12,7 +12,7 @@
       "status": "done",
       "completedRecords": [
         {
-          "completedAt": "2026-04-14T14:36:29.312Z",
+          "completedAt": "2026-04-16T09:19:53.333Z",
           "totalMin": 1,
           "studyMin": 1,
           "restMin": 0,
@@ -26,72 +26,32 @@
       "name": "英语一起作业",
       "icon": "🎧",
       "time": 20,
-      "status": "done",
-      "completedRecords": [
-        {
-          "completedAt": "2026-04-14T14:36:31.922Z",
-          "totalMin": 0,
-          "studyMin": 0,
-          "restMin": 0,
-          "overTime": 0,
-          "efficiency": 100
-        }
-      ]
+      "status": "waiting"
     },
     {
       "id": 3,
       "name": "阅读半小时",
       "icon": "📚",
       "time": 30,
-      "status": "done",
-      "completedRecords": [
-        {
-          "completedAt": "2026-04-14T14:36:33.895Z",
-          "totalMin": 0,
-          "studyMin": 0,
-          "restMin": 0,
-          "overTime": 0,
-          "efficiency": 100
-        }
-      ]
+      "status": "waiting"
     },
     {
       "id": 4,
       "name": "口算题一页",
       "icon": "🔢",
       "time": 20,
-      "status": "done",
-      "completedRecords": [
-        {
-          "completedAt": "2026-04-14T14:36:36.600Z",
-          "totalMin": 0,
-          "studyMin": 0,
-          "restMin": 0,
-          "overTime": 0,
-          "efficiency": 100
-        }
-      ]
+      "status": "waiting"
     },
     {
       "id": 5,
       "name": "老师作业",
       "icon": "📝",
       "time": 0,
-      "status": "done",
-      "completedRecords": [
-        {
-          "completedAt": "2026-04-14T14:36:38.359Z",
-          "totalMin": 0,
-          "studyMin": 0,
-          "restMin": 0,
-          "overTime": 0,
-          "efficiency": 100
-        }
-      ]
+      "status": "waiting"
     }
   ],
-  "points": 201,
-  "todayPoints": 53,
+  "points": 204,
+  "todayPoints": 41,
   "pointsLog": [
     {
       "amount": 2,
@@ -224,42 +184,6 @@
         "time": 15,
         "actual": 1,
         "study": 1,
-        "rest": 0,
-        "overTime": 0,
-        "efficiency": 100
-      },
-      {
-        "name": "英语一起作业",
-        "time": 20,
-        "actual": 0,
-        "study": 0,
-        "rest": 0,
-        "overTime": 0,
-        "efficiency": 100
-      },
-      {
-        "name": "阅读半小时",
-        "time": 30,
-        "actual": 0,
-        "study": 0,
-        "rest": 0,
-        "overTime": 0,
-        "efficiency": 100
-      },
-      {
-        "name": "口算题一页",
-        "time": 20,
-        "actual": 0,
-        "study": 0,
-        "rest": 0,
-        "overTime": 0,
-        "efficiency": 100
-      },
-      {
-        "name": "老师作业",
-        "time": 0,
-        "actual": 0,
-        "study": 0,
         "rest": 0,
         "overTime": 0,
         "efficiency": 100

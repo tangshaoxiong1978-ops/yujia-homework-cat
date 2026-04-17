@@ -1,8 +1,8 @@
 {
   "child": "yujia",
   "childName": "羽佳",
-  "date": "2026-04-16",
-  "lastUpdated": "2026-04-16T09:19:53.775Z",
+  "date": "2026-04-17",
+  "lastUpdated": "2026-04-17T09:25:03.062Z",
   "homework": [
     {
       "id": 1,
@@ -12,7 +12,7 @@
       "status": "done",
       "completedRecords": [
         {
-          "completedAt": "2026-04-16T09:19:53.333Z",
+          "completedAt": "2026-04-17T09:25:02.822Z",
           "totalMin": 1,
           "studyMin": 1,
           "restMin": 0,
@@ -50,7 +50,7 @@
       "status": "waiting"
     }
   ],
-  "points": 204,
+  "points": 207,
   "todayPoints": 41,
   "pointsLog": [
     {

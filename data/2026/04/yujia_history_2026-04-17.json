@@ -2,7 +2,7 @@
   "child": "yujia",
   "childName": "羽佳",
   "date": "2026-04-17",
-  "lastUpdated": "2026-04-17T14:19:19.686Z",
+  "lastUpdated": "2026-04-17T14:20:55.270Z",
   "homework": [
     {
       "id": 1,
@@ -78,10 +78,27 @@
           "efficiency": 100
         }
       ]
+    },
+    {
+      "id": 1776435644452,
+      "name": "睡觉",
+      "icon": "📝",
+      "time": 600,
+      "status": "done",
+      "completedRecords": [
+        {
+          "completedAt": "2026-04-17T14:20:54.257Z",
+          "totalMin": 1,
+          "studyMin": 1,
+          "restMin": 0,
+          "overTime": 0,
+          "efficiency": 100
+        }
+      ]
     }
   ],
-  "points": 216,
-  "todayPoints": 41,
+  "points": 219,
+  "todayPoints": 44,
   "pointsLog": [
     {
       "amount": 2,
@@ -205,7 +222,7 @@
     }
   ],
   "todayStats": {
-    "studyMinutes": 33,
+    "studyMinutes": 34,
     "restMinutes": 0,
     "efficiency": 100,
     "tasks": [
@@ -239,6 +256,15 @@
       {
         "name": "老师作业",
         "time": 0,
+        "actual": 1,
+        "study": 1,
+        "rest": 0,
+        "overTime": 0,
+        "efficiency": 100
+      },
+      {
+        "name": "睡觉",
+        "time": 600,
         "actual": 1,
         "study": 1,
         "rest": 0,
